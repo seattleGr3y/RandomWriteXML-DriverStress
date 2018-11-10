@@ -1,0 +1,10 @@
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\RandomWriteXML.exe.config
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\RandomWriteXML.exe
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\RandomWriteXML.pdb
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CoreCompileInputs.cache
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\Debug\RandomWriteXML.exe
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\Debug\RandomWriteXML.pdb
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\Utilities.dll
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\Utilities.pdb
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\Utilities.xml
+C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CopyComplete
