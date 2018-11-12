@@ -162,7 +162,8 @@ namespace RandomWriteXML
         }
 
         /// <summary>
-        /// read the XML to find the number of times it will need to loop through the list
+        /// read the XML to find the remaining indexes for remaining INFs to install to create a list to check what is 
+        /// left so we choose existing paths from the XML to attempt to install if anything else goes wrong
         /// </summary>
         /// <param name="InputTestFilePath"></param>
         /// <returns></returns>

@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace RandomWriteXML
 {
@@ -31,13 +33,13 @@ namespace RandomWriteXML
         /// <param name="startChoice"></param>
         internal static void StartStress(string InputTestFilePath, string installer, string dirName, string startChoice, string rollbackLine, int infListCount = 0)
         {
-            string stressAppPath = dirName + @"\DriverStress-2.exe";
+            string stressAppPath = dirName + @"\RandomWriteXML.exe";
             int? driverPathListCount = 0;
-            //Process devMgr = new Process();
-            //devMgr.StartInfo.FileName = @"C:\Windows\System32\mmc.exe";
-            //devMgr.StartInfo.Arguments = "devmgmt.msc";
-            //devMgr.Start();
-            //Thread.Sleep(100);
+            Process devMgr = new Process();
+            devMgr.StartInfo.FileName = @"C:\Windows\System32\mmc.exe";
+            devMgr.StartInfo.Arguments = "devmgmt.msc";
+            devMgr.Start();
+            Thread.Sleep(100);
 
             string stressLog = @"DriverStressLog.txt";
             Logger.AppendToFile = true;
@@ -52,7 +54,7 @@ namespace RandomWriteXML
             Logger.LogAll();
             Logger.FunctionEnter();
 
-            if (!File.Exists(Program.dirName + @"debugEnabled.txt"))
+            if (!File.Exists(Program.dirName + @"\debugEnabled.txt"))
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
                 //string stressAppPath = dirName + @"DriverStress-2.exe";
@@ -78,18 +80,35 @@ namespace RandomWriteXML
 
             CheckWhatInstalled.CheckInstalledCSV();
 
-            string InputTestFilePathBAK = dirName + @"StressTestXML.xml.BAK";
+            string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
             List<string> DriverPathList = new List<string>();
             DriverPathList = XMLReader.GetDriversPath(InputTestFilePath);
             driverPathListCount = DriverPathList.Count;
             infListCount = DriverPathList.Count;
-            Directory.CreateDirectory(Program.dirName + @"RESULTS");
+            Directory.CreateDirectory(Program.dirName + @"\RESULTS");
             int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
             if (driverPathListCount == 0)
             {
+                executionCount--;
                 Logger.Comment("executionCount after going thru all the loops : " + executionCount);
                 File.Delete(InputTestFilePath);
+
+                string StartSeed = string.Empty;
+                string currentSeed = string.Empty;
+                // remove existing data in startSeed and currentSeed from .BAK file before copy
+                XMLWriter.SaveSeed(InputTestFilePathBAK, StartSeed, currentSeed);
+
+                XDocument xdoc = XDocument.Load(InputTestFilePath);
+                string infIndexListString = xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
+                xdoc.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCount.ToString();
+                xdoc.Save(InputTestFilePath);
+
+                var numbers = new List<int>(Enumerable.Range(1, infListCount));
+                numbers.Shuffle(infListCount);
+                string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
+                File.WriteAllText(Program.seedFilePath, infIndexList);
+
                 XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
                 Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
                 Logger.Comment("re-add the reg key to start post reboot...");

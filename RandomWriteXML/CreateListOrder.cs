@@ -16,7 +16,7 @@ namespace RandomWriteXML
             //Console.ReadKey();
 
             string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
-            int driverPathListCount = Directory.GetDirectories(supportFolderLOC).Count();
+            //int driverPathListCount = Directory.GetDirectories(supportFolderLOC).Count();
             int infListCount = Directory.GetDirectories(supportFolderLOC).Count();
             switch (randomize)
             {
@@ -59,7 +59,7 @@ namespace RandomWriteXML
                     break;
             }
 
-            ExecuteFromList.ExecuteTheList(randomize, executionCount, RandomWriteXML.Program.desktopPath, InputTestFilePath, supportFolderLOC, seedFilePath);
+            ExecuteFromList.ExecuteTheList(randomize, executionCount, RandomWriteXML.Program.dirName, InputTestFilePath, supportFolderLOC, seedFilePath, startChoice);
         }
 
         internal static void Shuffle<T>(this IList<T> list, int infListCount)

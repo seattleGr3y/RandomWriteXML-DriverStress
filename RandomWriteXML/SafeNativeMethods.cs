@@ -236,6 +236,7 @@ namespace RandomWriteXML
             string installArgs;
             try
             {
+                RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired.Equals(true));
                 string rbInfName = Path.GetFileNameWithoutExtension(line);
                 string rollbackINFnameDIR = @"\" + rbInfName;
                 string rollBackDIR = rollbackLine + rollbackINFnameDIR;
@@ -246,7 +247,6 @@ namespace RandomWriteXML
                 Thread.Sleep(5000);
                 installArgs = " /C /A /Q /SE /F /PATH " + rollBackDIR;
                 Logger.Comment("start rollback...");
-                RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired.Equals(true));
                 Thread.Sleep(5000);
                 Install_Inf(line, installer, installArgs);
                 Thread.Sleep(5000);

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -11,7 +12,7 @@ namespace RandomWriteXML
 {
     class ExecuteFromList
     {
-        internal static void ExecuteTheList(bool randomize, int executionCount, string desktopPath, string InputTestFilePath, string supportFolderLOC, string seedFilePath)
+        internal static void ExecuteTheList(bool randomize, int executionCount, string dirName, string InputTestFilePath, string supportFolderLOC, string seedFilePath, string startChoice)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("am i getting to here... ExecuteTheList...?");
@@ -22,16 +23,16 @@ namespace RandomWriteXML
             if (executionCount < 1)
             {
                 Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dirName + @"RESULTS\DPINST.LOG");
-                Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.dirName + @"RESULTS\DriverStressLog.txt");
+                Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dirName + @"\RESULTS\DPINST.LOG");
+                Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.dirName + @"\RESULTS\DriverStressLog.txt");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("-----------------------------------------");
                 Console.WriteLine("at this point...I think I am done...am I?");
                 Console.WriteLine("-----------------------------------------");
                 Console.ForegroundColor = ConsoleColor.White;
-                File.Create(Program.dirName + "DONE.TXT");
+                File.Create(Program.dirName + @"\DONE.TXT");
                 CheckWhatInstalled.CheckInstalledCSV();
-                Console.ReadKey();
+                //Console.ReadKey();
                 Logger.FunctionLeave();
             }
 
@@ -40,13 +41,14 @@ namespace RandomWriteXML
                 executionCount--;
                 XDocument xdoc = XDocument.Load(InputTestFilePath);
                 string infIndexListString = xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
-                xdoc.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCount.ToString();
-                xdoc.Save(InputTestFilePath);
+                //xdoc.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCount.ToString();
+                //xdoc.Save(InputTestFilePath);
                 if (string.IsNullOrEmpty(infIndexListString))
                 {
-                    //var infList = xdoc.XPathSelectElements("/Tests/InfDirectories/InfDir");
-                    int infListCount = supportFolderLOC.Count();
+                    var infList = xdoc.XPathSelectElements("/Tests/InfDirectories/InfDir");
+                    int infListCount = infList.Count();
                     Console.WriteLine("infListCount = " + infListCount);
+                    Console.ReadKey();
                     if (randomize == true)
                     {
                         var numbers = new List<int>(Enumerable.Range(1, infListCount));
@@ -61,8 +63,61 @@ namespace RandomWriteXML
                 }
                 Console.WriteLine("infIndexListString = " + infIndexListString);
                 Array list = infIndexListString.Split(',').Select(Int32.Parse).ToArray<int>();
-                xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = infIndexListString;
-                xdoc.Save(InputTestFilePath);
+                XMLWriter.SaveCurrentSeed(InputTestFilePath, Program.InputTestFilePathBAK, infIndexListString);
+                //xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = infIndexListString;
+                //xdoc.Save(InputTestFilePath);
+
+
+                foreach (int seedIndex in list)
+                {
+                    string index = Convert.ToString(seedIndex);
+                    int indexLen = index.Length;
+                    string stringList = infIndexListString.Remove(0, indexLen).TrimStart(',');
+                    Thread.Sleep(100);
+                    string indexString = Convert.ToString(index);
+                    if (index.Equals(null)) { continue; }
+                    string InputTestFilePathBAK = Program.dirName + @"\StressTestXML.xml.BAK";
+                    XMLWriter.SaveCurrentSeed(InputTestFilePath, InputTestFilePathBAK, stringList);
+                    List<string> DriverPathList = new List<string>(); 
+                    DriverPathList = XMLReader.GetDriversPath(InputTestFilePath);
+                    int driverPathListCount = DriverPathList.Count;
+                    int infListCount = DriverPathList.Count;
+                    string testIsStartChoice = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
+                    string testInfName = Path.GetFileNameWithoutExtension(testIsStartChoice);
+                    string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
+                    string infName = Path.GetFileName(line);
+                    bool isCapsule = GetData.CheckDriverIsFirmware(line);
+                    if (Regex.Match(testInfName, startChoice, RegexOptions.IgnoreCase).Success)
+                    {
+                        if (isCapsule)
+                        {
+                            Logger.Comment("re-add the reg key to start post reboot...");
+                            string stressAppPath = Program.dirName + @"\RandomWriteXML.exe";
+                            //RebootAndContinue.SetStartUpRegistry(stressAppPath);
+                            Thread.Sleep(3000);
+                            CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                        }
+                        else
+                        {
+                            CapsuleOrNotInstallCalls.IsNotCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                        }
+                    }
+
+                    else if (!Regex.Match(testInfName, startChoice, RegexOptions.IgnoreCase).Success)
+                    {
+                        if (isCapsule)
+                        {
+                            Logger.Comment("re-add the reg key to start post reboot...");
+                            string stressAppPath = Program.dirName + @"\RandomWriteXML.exe";
+                            //RebootAndContinue.SetStartUpRegistry(stressAppPath);
+                            Thread.Sleep(3000);
+                            CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                        }
+                    }
+
+                    else { continue; }
+                }
+
                 foreach (int seedIndex in list)
                 {
                     string index = Convert.ToString(seedIndex);
@@ -72,12 +127,12 @@ namespace RandomWriteXML
                     string indexString = Convert.ToString(index);
                     if (index.Equals(null)) { continue; }
 
-                    string InputTestFilePathBAK = Program.dirName + @"StressTestXML.xml.BAK";
+                    string InputTestFilePathBAK = Program.dirName + @"\StressTestXML.xml.BAK";
                     List<string> DriverPathList = new List<string>();
                     DriverPathList = XMLReader.GetDriversPath(InputTestFilePath);
                     int driverPathListCount = DriverPathList.Count;
                     int infListCount = DriverPathList.Count;
-                    Directory.CreateDirectory(Program.dirName + @"RESULTS");
+                    Directory.CreateDirectory(Program.dirName + @"\RESULTS");
                     executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
                     File.WriteAllText(seedFilePath, stringList);
@@ -100,7 +155,7 @@ namespace RandomWriteXML
                     if (isCapsule)
                     {
                         Logger.Comment("re-add the reg key to start post reboot...");
-                        string stressAppPath = Program.dirName + @"\DriverStress-2.exe";
+                        string stressAppPath = Program.dirName + @"\RandomWriteXML.exe";
                         //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                         Thread.Sleep(3000);
                         CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
@@ -110,7 +165,6 @@ namespace RandomWriteXML
                     {
                         CapsuleOrNotInstallCalls.IsNotCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
                     }
-
                 }
             }
         }

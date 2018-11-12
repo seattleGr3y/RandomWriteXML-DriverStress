@@ -8,3 +8,14 @@ C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\Utilities
 C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\Utilities.pdb
 C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\bin\Debug\Utilities.xml
 C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CopyComplete
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\RandomWriteXML.exe.config
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\RandomWriteXML.exe
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\RandomWriteXML.pdb
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Utilities.dll
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Utilities.pdb
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Utilities.xml
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csprojAssemblyReference.cache
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CoreCompileInputs.cache
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CopyComplete
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.exe
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.pdb

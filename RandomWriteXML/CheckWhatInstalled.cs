@@ -110,10 +110,20 @@ namespace RandomWriteXML
 
                 foreach (ManagementObject WmiObject in s2.Get())
                 {
-                    if (string.IsNullOrEmpty(infName = WmiObject["InfName"].ToString())) { continue; }
-                    if (string.IsNullOrEmpty(installedDriverVersion = WmiObject["DriverVersion"].ToString())) { continue; }
-                    if (string.IsNullOrEmpty(installedDeviceName = WmiObject["DeviceName"].ToString())) { continue; }
-                    if (string.IsNullOrEmpty(driverDate = WmiObject["DriverDate"].ToString())) { continue; }
+                    if (WmiObject["InfName"] == null) { continue; }
+                        else { infName = WmiObject["InfName"].ToString(); }
+                    if (WmiObject["DriverVersion"] == null) { continue; }
+                        else { installedDriverVersion = WmiObject["DriverVersion"].ToString(); }
+                    if (WmiObject["DeviceName"] == null) { continue; }
+                        else { installedDeviceName = WmiObject["DeviceName"].ToString(); }
+                    if (WmiObject["DriverDate"] == null) { continue; }
+                        else { driverDate = WmiObject["DriverDate"].ToString(); }
+
+                    //if (string.IsNullOrEmpty(infName = WmiObject["InfName"].ToString())) { continue; }
+                    //if (string.IsNullOrEmpty(installedDriverVersion = WmiObject["DriverVersion"].ToString())) { continue; }
+                    //if (string.IsNullOrEmpty(installedDeviceName = WmiObject["DeviceName"].ToString())) { continue; }
+                    //if (string.IsNullOrEmpty(driverDate = WmiObject["DriverDate"].ToString())) { continue; }
+
                     try
                     {
                         // there are zeros in driver versions in inf files that are not in the devMgr

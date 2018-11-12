@@ -8,3 +8,18 @@ C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\x64\Debug\Rando
 C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\x64\Debug\RandomWriteXML.csproj.CopyComplete
 C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\x64\Debug\RandomWriteXML.exe
 C:\Users\v-semagi\source\repos\RandomWriteXML\RandomWriteXML\obj\x64\Debug\RandomWriteXML.pdb
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\RandomWriteXML.exe.config
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\RandomWriteXML.exe
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\RandomWriteXML.pdb
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\Utilities.dll
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\Utilities.pdb
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\Utilities.xml
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.csproj.CoreCompileInputs.cache
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.csproj.CopyComplete
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.exe
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.pdb
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\Plossum CommandLine.dll
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\System.Console.dll
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\System.Reflection.TypeExtensions.dll
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\CommandLine.exe
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\x64\Debug\CommandLine.pdb

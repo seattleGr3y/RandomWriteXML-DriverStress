@@ -28,7 +28,7 @@ namespace RandomWriteXML
                                                         PropagationFlags.None,
                                                         AccessControlType.Allow));
 
-                RegistryKey regkey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", true);
+                RegistryKey regkey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", true);
                 regkey.SetAccessControl(rs);
                 regkey.SetValue("DriverStressRebootKey", stressAppPath, RegistryValueKind.String);
                 Logger.FunctionLeave();
@@ -45,19 +45,18 @@ namespace RandomWriteXML
             try
             {
                 Logger.FunctionEnter();
-                Logger.Comment("re-add the reg key to start post reboot...");
-                string stressAppPath = Program.dirName + @"\DriverStress-2.exe";
-                SetStartUpRegistry(stressAppPath);
+                Logger.Comment("re-add the reg key to start post reboot...");;
+                SetStartUpRegistry(Program.stressAppPath);
                 Logger.Comment("I should reboot next...");
                 Thread.Sleep(3000);
                 Logger.FunctionLeave();
-                Utilities.Reboot(true);
+                StartShutDown("-f -r -t 5");
+                // Utilities.Reboot(true);
             }
             catch (Exception)
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
-                string stressAppPath = Program.dirName + @"\DriverStress-2.exe";
-                SetStartUpRegistry(stressAppPath);
+                //SetStartUpRegistry(Program.stressAppPath);
                 Thread.Sleep(3000);
                 StartShutDown("-f -r -t 5");
             }
