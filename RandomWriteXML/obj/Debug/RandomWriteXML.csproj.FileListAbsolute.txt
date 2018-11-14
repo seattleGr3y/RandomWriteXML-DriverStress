@@ -19,3 +19,18 @@ C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomW
 C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CopyComplete
 C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.exe
 C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.pdb
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\RandomWriteXML.exe.config
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\RandomWriteXML.exe
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\RandomWriteXML.pdb
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\CommandLine.exe
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Plossum CommandLine.dll
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\System.Console.dll
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\System.Reflection.TypeExtensions.dll
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Utilities.dll
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Utilities.pdb
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\bin\Debug\Utilities.xml
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csprojAssemblyReference.cache
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CoreCompileInputs.cache
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.csproj.CopyComplete
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.exe
+C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\Debug\RandomWriteXML.pdb

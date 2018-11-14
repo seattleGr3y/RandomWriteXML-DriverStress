@@ -10,7 +10,7 @@ namespace RandomWriteXML
 {
     class XMLWriter
     {
-        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, string capStressChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
+        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
         {
             XmlWriter xmlWriter = XmlWriter.Create(InputTestFilePath);
             int infIndex = 0;
@@ -58,11 +58,6 @@ namespace RandomWriteXML
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
-            xmlWriter.WriteStartElement("CapStressChoice");
-            xmlWriter.WriteString(capStressChoice);
-            xmlWriter.WriteEndElement();
-            xmlWriter.WriteWhitespace("\n");
-
             xmlWriter.WriteStartElement("ExecutionCount");
             xmlWriter.WriteString(executionCount.ToString());
             xmlWriter.WriteEndElement();
@@ -83,6 +78,11 @@ namespace RandomWriteXML
 
             xmlWriter.WriteEndDocument();
             xmlWriter.Close();
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("check the XML...");
+            Console.ForegroundColor = ConsoleColor.White;
+            //Console.ReadKey();
         }
 
         /// <summary>
@@ -121,9 +121,10 @@ namespace RandomWriteXML
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
                 testInputData.Save(InputTestFilePathBAK);
-                //Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
-                //List<string> listSeed = new List<string>();
-                // listSeed = testInputData.XPathSelectElement("/DriverTests/Test/Seed").Value.ToList<string>;
+                var testInputData2 = XDocument.Load(InputTestFilePath);
+                testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
+                testInputData.Save(InputTestFilePath);
+
                 Logger.Comment("randomized list to save for re-use if need be : " + currentSeed);
                 Logger.FunctionLeave();
                 //return seed;
@@ -148,16 +149,17 @@ namespace RandomWriteXML
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
-                int testRunLoop = int.Parse(testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value);
-                testRunLoop--;
-
-                testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = testRunLoop.ToString();
-                Logger.Comment("changing testRunLoop : " + testRunLoop + " to testRunLoop - 1 ");
+                //int testRunLoop = int.Parse(testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value);
+                //testRunLoop--;
+                string executionCountSTR = Convert.ToString(executionCount);
+                testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCountSTR;
+                Logger.Comment("changing testRunLoop : " + executionCountSTR + " to testRunLoop - 1 ");
                 Logger.Comment("=====================================");
-                Logger.Comment("this is what the loop count is now : " + testRunLoop);
+                Logger.Comment("this is what the loop count is now : " + executionCountSTR);
                 Logger.Comment("CHECK THE XML... ");
                 Logger.Comment("=====================================");
                 testInputData.Save(InputTestFilePathBAK);
+                //Console.ReadKey();
                 Logger.FunctionLeave();
                 return executionCount;
             }
@@ -177,7 +179,7 @@ namespace RandomWriteXML
         /// <param name="infName"></param>
         internal static void RemoveXMLElemnt(string InputTestFilePath, string infName)
         {
-            try
+            try 
             {
                 var testInputData = XDocument.Load(InputTestFilePath);
                 var driversPathList = testInputData.Descendants("InfDirectories");

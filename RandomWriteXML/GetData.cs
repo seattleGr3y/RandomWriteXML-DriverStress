@@ -290,7 +290,7 @@ namespace RandomWriteXML
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePath);
-                string testFirst = testInputData.XPathSelectElement("/DriverTests/Test/TestFirst").Value;
+                string testFirst = testInputData.XPathSelectElement("/Tests/TestChoices/StartChoice").Value;
                 string startChoice = testFirst;
                 Logger.Comment("testing this first each loop around : " + startChoice);
                 Logger.FunctionLeave();
@@ -315,7 +315,7 @@ namespace RandomWriteXML
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePath);
-                string randomizeChoice = testInputData.XPathSelectElement("/DriverTests/Test/Randomize").Value;
+                string randomizeChoice = testInputData.XPathSelectElement("/Tests/TestChoices/randomizeList").Value;
                 Logger.Comment("entered for randomize or not choice : " + randomizeChoice);
                 Logger.FunctionLeave();
                 if (randomizeChoice.Equals(null)) { randomizeChoice = "fail"; }

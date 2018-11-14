@@ -41,17 +41,6 @@ namespace RandomWriteXML
             devMgr.Start();
             Thread.Sleep(100);
 
-            string stressLog = @"DriverStressLog.txt";
-            Logger.AppendToFile = true;
-            Logger.LogFileName = stressLog;
-            Logger.LogDirName = dirName;
-
-            if (!File.Exists(stressLog))
-            {
-                Logger.AddLogFile(stressLog);
-            }
-
-            Logger.LogAll();
             Logger.FunctionEnter();
 
             if (!File.Exists(Program.dirName + @"\debugEnabled.txt"))
@@ -88,9 +77,22 @@ namespace RandomWriteXML
             Directory.CreateDirectory(Program.dirName + @"\RESULTS");
             int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
+            string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
+            if (infIndexListString.Equals(null))
+            {
+                executionCount--;
+                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
+            }
+
+            if (!File.Exists(InputTestFilePathBAK))
+            {
+                Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
+            }
+
             if (driverPathListCount == 0)
             {
                 executionCount--;
+                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
                 Logger.Comment("executionCount after going thru all the loops : " + executionCount);
                 File.Delete(InputTestFilePath);
 
@@ -99,17 +101,11 @@ namespace RandomWriteXML
                 // remove existing data in startSeed and currentSeed from .BAK file before copy
                 XMLWriter.SaveSeed(InputTestFilePathBAK, StartSeed, currentSeed);
 
-                XDocument xdoc = XDocument.Load(InputTestFilePath);
-                string infIndexListString = xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
-                xdoc.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCount.ToString();
-                xdoc.Save(InputTestFilePath);
-
                 var numbers = new List<int>(Enumerable.Range(1, infListCount));
                 numbers.Shuffle(infListCount);
                 string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
                 File.WriteAllText(Program.seedFilePath, infIndexList);
 
-                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
                 Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
                 Logger.Comment("re-add the reg key to start post reboot...");
                 //string stressAppPath = dirName + @"DriverStress-2.exe";
@@ -117,10 +113,29 @@ namespace RandomWriteXML
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }
-
-            if (!File.Exists(InputTestFilePathBAK))
+            else if (DriverPathList.Equals(null))
             {
-                Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
+                executionCount--;
+                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
+                Logger.Comment("executionCount after going thru all the loops : " + executionCount);
+                File.Delete(InputTestFilePath);
+
+                string StartSeed = string.Empty;
+                string currentSeed = string.Empty;
+                // remove existing data in startSeed and currentSeed from .BAK file before copy
+                XMLWriter.SaveSeed(InputTestFilePathBAK, StartSeed, currentSeed);
+
+                var numbers = new List<int>(Enumerable.Range(1, infListCount));
+                numbers.Shuffle(infListCount);
+                string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
+                File.WriteAllText(Program.seedFilePath, infIndexList);
+
+                Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
+                Logger.Comment("re-add the reg key to start post reboot...");
+                //string stressAppPath = dirName + @"DriverStress-2.exe";
+                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
+                Thread.Sleep(3000);
+                RebootAndContinue.RebootCmd(true);
             }
 
             #region THIS WAS KICKING OFF THE EXECUTION MOVED ELSEWHERE NOW

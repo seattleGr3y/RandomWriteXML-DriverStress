@@ -14,7 +14,7 @@ namespace RandomWriteXML
     class RebootAndContinue
     {
         #region SETTING REGISTRY KEY TO RESTART STRESS POST REBOOT
-        internal static void SetStartUpRegistry(string stressAppPath)
+        internal static void SetStartUpRegistry(string reStartBAT)
         {
             try
             {
@@ -28,9 +28,9 @@ namespace RandomWriteXML
                                                         PropagationFlags.None,
                                                         AccessControlType.Allow));
 
-                RegistryKey regkey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", true);
+                RegistryKey regkey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", true);
                 regkey.SetAccessControl(rs);
-                regkey.SetValue("DriverStressRebootKey", stressAppPath, RegistryValueKind.String);
+                regkey.SetValue("DriverStressRebootKey", reStartBAT, RegistryValueKind.String);
                 Logger.FunctionLeave();
             }
             catch (Exception ex)
@@ -46,11 +46,13 @@ namespace RandomWriteXML
             {
                 Logger.FunctionEnter();
                 Logger.Comment("re-add the reg key to start post reboot...");;
-                SetStartUpRegistry(Program.stressAppPath);
+                SetStartUpRegistry(Program.reStartBAT);
                 Logger.Comment("I should reboot next...");
                 Thread.Sleep(3000);
                 Logger.FunctionLeave();
                 StartShutDown("-f -r -t 5");
+                Thread.Sleep(5000);
+
                 // Utilities.Reboot(true);
             }
             catch (Exception)
