@@ -8,32 +8,27 @@ namespace RandomWriteXML
 {
     internal static class CreateListOrder
     {
-        internal static void RandomizeList(string dirName, string seedFilePath, bool randomize, string infIndexList, string startChoice, string capStressChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
+        internal static void RandomizeList(string dirName, string seedFilePath, bool randomize, string infIndexList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("am i getting to here RandomizeList starting...?");
             Console.ForegroundColor = ConsoleColor.White;
             //Console.ReadKey();
 
-            var infDirList = Directory.GetDirectories(supportFolderLOC);
-            int infListCount = infDirList.Length;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("infListCount : " + infListCount);
-            Console.ForegroundColor = ConsoleColor.White;
             string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
+            //int driverPathListCount = Directory.GetDirectories(supportFolderLOC).Count();
+            int infListCount = Directory.GetDirectories(supportFolderLOC).Count();
             switch (randomize)
-            { 
+            {
                 case true:
-                  //  if (driverPathListCount.Equals(0))
-                  //  {
-                        var numbers = new List<int>(Enumerable.Range(0, infListCount));
+                    if (infIndexList.Length.Equals(0))
+                    {
+                        Console.WriteLine("infListCount : " + infListCount);
+                        List<int> numbers = new List<int>(Enumerable.Range(1, infListCount));
                         numbers.Shuffle(infListCount);
-                    string infIndexListSTR = string.Join(",", numbers.GetRange(0, infListCount));
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("infIndexList : " + infIndexListSTR);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    File.WriteAllText(seedFilePath, infIndexList);
-                        Array list = infIndexListSTR.Split(',').Select(Int32.Parse).ToArray<int>();
+                        infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
+                        File.WriteAllText(seedFilePath, infIndexList);
+                        Array list = infIndexList.Split(',').Select(Int32.Parse).ToArray<int>();
 
                         foreach (int index in list)
                         {
@@ -42,7 +37,7 @@ namespace RandomWriteXML
                             Console.WriteLine("index per INF : " + index);
                             Console.ForegroundColor = ConsoleColor.White;
                         }
-                        XMLWriter.CreateXML(dirName, randomize, infIndexList, infIndexList, startChoice, capStressChoice, executionCount, supportFolderLOC, InputTestFilePath);
+                        XMLWriter.CreateXML(dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, supportFolderLOC, InputTestFilePath);
                         File.Copy(InputTestFilePath, InputTestFilePathBAK);
                         Thread.Sleep(5000);
                         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -50,11 +45,11 @@ namespace RandomWriteXML
                         Console.ForegroundColor = ConsoleColor.White;
                         //Console.ReadKey();
                         DriverStressInit.StartStress(InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
-                  //  }
+                    }
                     break;
                 case false:
                     Console.WriteLine("we'll just continue as normal and NOT randomize the list");
-                    XMLWriter.CreateXML(dirName, randomize, infIndexList, infIndexList, startChoice, capStressChoice, executionCount, supportFolderLOC, InputTestFilePath);
+                    XMLWriter.CreateXML(dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, supportFolderLOC, InputTestFilePath);
                     File.Copy(InputTestFilePath, InputTestFilePathBAK);
                     Thread.Sleep(5000);
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -65,13 +60,13 @@ namespace RandomWriteXML
                     break;
             }
 
-            ExecuteFromList.ExecuteTheList(randomize, executionCount, RandomWriteXML.Program.dirName, InputTestFilePath, supportFolderLOC, seedFilePath, startChoice);
+            ExecuteFromList.ExecuteTheList(randomize, executionCount, Program.dirName, InputTestFilePath, supportFolderLOC, seedFilePath, startChoice);
         }
 
         internal static void Shuffle<T>(this IList<T> list, int infListCount)
         {
             int n = list.Count;
-            int Seed = 8;
+            int Seed = infListCount - 3;
             Random rnd = new Random();
 
             while (n > 1)

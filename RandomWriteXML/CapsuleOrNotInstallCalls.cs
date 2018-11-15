@@ -73,6 +73,11 @@ namespace RandomWriteXML
 
             if (isInstalled)
             {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("----------------------------------------------------");
+                Console.WriteLine("THIS VERSION IS CURRENTLY INSTALLED ROLLBACK NOW....");
+                Console.WriteLine("----------------------------------------------------");
+                Console.ForegroundColor = ConsoleColor.White;
                 GetData.IfWillNeedRollBack(line, needRollBack, infName, rollbackLine);
                 driverPathListCount--;
                 Logger.Comment("this will now begin to ROLLBACK : " + infName);
@@ -80,6 +85,12 @@ namespace RandomWriteXML
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("----------------------------------------------------");
+                Console.WriteLine("THIS VERSION WAS NOT INSTALLED YET INSTALLING NOW...");
+                Console.WriteLine("----------------------------------------------------");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 hardwareID = GetData.FirmwareInstallGetHID(line);
                 string installArgs = " /C /A /Q /SE /F /PATH " + infDir;
                 Logger.Comment("IfIsCapsule installArgsChoice  is FALSE installArgs " + installArgs);
@@ -89,7 +100,7 @@ namespace RandomWriteXML
                 SafeNativeMethods.Install_Inf(line, installer, installArgs);
                 RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
                 Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
-                XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                 RebootAndContinue.RebootCmd(true);
             }
             Logger.FunctionLeave();

@@ -156,7 +156,7 @@ namespace RandomWriteXML
                 {
                     Thread.Sleep(1000);
                     Logger.Comment("rebootRequired is showing as : " + rebootRequired);
-                    XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                    //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                     installArgs = " /C /U " + line + " /Q /D";
                     Install_Inf(line, installer, installArgs);
                     Logger.Comment("Operation should be complete: " + line);
@@ -171,7 +171,7 @@ namespace RandomWriteXML
                 {
                     Thread.Sleep(1000);
                     Logger.Comment("rebootRequired is showing as : " + rebootRequired);
-                    XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                    //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                     installArgs = " /C /A /Q /SE /F /PATH " + infPath;
                     Install_Inf(line, installer, installArgs);
                     Logger.Comment("Operation should be complete: " + line);
@@ -240,7 +240,7 @@ namespace RandomWriteXML
                 string rbInfName = Path.GetFileNameWithoutExtension(line);
                 string rollbackINFnameDIR = @"\" + rbInfName;
                 string rollBackDIR = rollbackLine + rollbackINFnameDIR;
-                XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                 installArgs = " /C /U " + line + " /Q /D";
                 Install_Inf(line, installer, installArgs);
                 Logger.Comment("Uninstall Operation should be complete: " + line);
