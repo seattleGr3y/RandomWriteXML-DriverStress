@@ -46,23 +46,18 @@ namespace RandomWriteXML
             if (!File.Exists(Program.dirName + @"\debugEnabled.txt"))
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.EnableWinDebugMode();
             }
             if (RegCheck.IsRebootPending())
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }
             if (GetData.CheckCrashDumpOccurred())
             {
                 Logger.Comment("Looks like we found a crashdump check it out...");
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }
@@ -77,99 +72,44 @@ namespace RandomWriteXML
             Directory.CreateDirectory(Program.dirName + @"\RESULTS");
             int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
-            string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
-            if (infIndexListString.Equals(null))
-            {
-                executionCount--;
-                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
-            }
-
             if (!File.Exists(InputTestFilePathBAK))
             {
                 Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
             }
 
-            if (driverPathListCount == 0)
+            string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
+            if (infIndexListString.Equals(null))
             {
-                executionCount--;
-                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
-                Logger.Comment("executionCount after going thru all the loops : " + executionCount);
-                File.Delete(InputTestFilePath);
+                SetupToContinue();
+            }
 
-                string StartSeed = string.Empty;
-                string currentSeed = string.Empty;
-                // remove existing data in startSeed and currentSeed from .BAK file before copy
-                XMLWriter.SaveSeed(InputTestFilePathBAK, StartSeed, currentSeed);
-
-                var numbers = new List<int>(Enumerable.Range(1, infListCount));
-                numbers.Shuffle(infListCount);
-                string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                File.WriteAllText(Program.seedFilePath, infIndexList);
-
-                Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
-                Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
-                Thread.Sleep(3000);
-                RebootAndContinue.RebootCmd(true);
+            else if (driverPathListCount == 0)
+            {
+                SetupToContinue();
             }
             else if (DriverPathList.Equals(null))
             {
-                executionCount--;
-                XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
-                Logger.Comment("executionCount after going thru all the loops : " + executionCount);
-                File.Delete(InputTestFilePath);
-
-                string StartSeed = string.Empty;
-                string currentSeed = string.Empty;
-                // remove existing data in startSeed and currentSeed from .BAK file before copy
-                XMLWriter.SaveSeed(InputTestFilePathBAK, StartSeed, currentSeed);
-
-                var numbers = new List<int>(Enumerable.Range(1, infListCount));
-                numbers.Shuffle(infListCount);
-                string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                File.WriteAllText(Program.seedFilePath, infIndexList);
-
-                Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
-                Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
-                Thread.Sleep(3000);
-                RebootAndContinue.RebootCmd(true);
+                SetupToContinue();
             }
-
-            #region THIS WAS KICKING OFF THE EXECUTION MOVED ELSEWHERE NOW
-            //DriverPathList = XMLReader.GetDriversPath(InputTestFilePath);
-            //try
-            //{
-            //    if (driverPathListCount == 0)
-            //    {
-            //        Logger.Comment("executionCount after going thru all the loops : " + executionCount);
-            //        File.Delete(InputTestFilePath);
-            //        XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
-            //        Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
-            //        Thread.Sleep(3000);
-            //        RebootContinue.RebootCmd(true);
-            //    }
-
-            //    randomize = Convert.ToBoolean(GetData.GetRandomChoice(InputTestFilePath));
-            //    switch (randomize)
-            //    {
-            //        case true:
-            //            ExecutionOrder.RandomizeExecution(infListCount, InputTestFilePath, InputTestFilePathBAK);
-            //            break;
-            //        case false:
-            //            ExecutionOrder.NotRandomizedExecution(driverPathListCount, InputTestFilePath, InputTestFilePathBAK, infName, DriverPathList, installer, executionCount, dirName, startChoice, rollbackLine);
-            //            break;
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    GetData.GetExceptionMessage(ex);
-            //}
-            #endregion
-
             Logger.FunctionLeave();
+        }
+
+        internal static void SetupToContinue() 
+        {
+            executionCount--;
+            XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
+            string StartSeed = string.Empty;
+            string currentSeed = string.Empty;
+            // remove existing data in startSeed and currentSeed from .BAK file before copy
+            XMLWriter.SaveSeed(InputTestFilePathBAK, StartSeed, currentSeed);
+
+            var numbers = new List<int>(Enumerable.Range(1, infListCount));
+            numbers.Shuffle(infListCount);
+            string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
+            File.WriteAllText(Program.seedFilePath, infIndexList);
+
+            Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
+            Thread.Sleep(3000);
         }
     }
 }
