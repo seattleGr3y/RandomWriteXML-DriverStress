@@ -15,19 +15,25 @@ namespace RandomWriteXML
             Console.ForegroundColor = ConsoleColor.White;
             //Console.ReadKey();
 
+            var infDirList = Directory.GetDirectories(supportFolderLOC);
+            int infListCount = infDirList.Length;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("infListCount : " + infListCount);
+            Console.ForegroundColor = ConsoleColor.White;
             string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
-            //int driverPathListCount = Directory.GetDirectories(supportFolderLOC).Count();
-            int infListCount = Directory.GetDirectories(supportFolderLOC).Count();
             switch (randomize)
-            {
+            { 
                 case true:
-                    if (infIndexList.Length.Equals(0))
-                    {
-                        var numbers = new List<int>(Enumerable.Range(1, infListCount));
+                  //  if (driverPathListCount.Equals(0))
+                  //  {
+                        var numbers = new List<int>(Enumerable.Range(0, infListCount));
                         numbers.Shuffle(infListCount);
-                        infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                        File.WriteAllText(seedFilePath, infIndexList);
-                        Array list = infIndexList.Split(',').Select(Int32.Parse).ToArray<int>();
+                    string infIndexListSTR = string.Join(",", numbers.GetRange(0, infListCount));
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("infIndexList : " + infIndexListSTR);
+                    Console.ForegroundColor = ConsoleColor.White;
+                    File.WriteAllText(seedFilePath, infIndexList);
+                        Array list = infIndexListSTR.Split(',').Select(Int32.Parse).ToArray<int>();
 
                         foreach (int index in list)
                         {
@@ -44,7 +50,7 @@ namespace RandomWriteXML
                         Console.ForegroundColor = ConsoleColor.White;
                         //Console.ReadKey();
                         DriverStressInit.StartStress(InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
-                    }
+                  //  }
                     break;
                 case false:
                     Console.WriteLine("we'll just continue as normal and NOT randomize the list");

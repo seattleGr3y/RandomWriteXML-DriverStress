@@ -20,7 +20,7 @@ namespace RandomWriteXML
         internal static string stringList = "";
         internal static string startChoice = string.Empty;
         internal static string capStressChoice = string.Empty;
-        internal static string supportFolderLOC = string.Empty;
+        internal static string supportFolderLOC = Environment.CurrentDirectory;
         internal static int executionCount;
         internal static bool randomize = false;
         internal static string installer = dirName + @"\dpinst.exe";
@@ -86,7 +86,7 @@ namespace RandomWriteXML
                         randomize = Convert.ToBoolean(randomizeList);
 
                         //Console.WriteLine("Enter directory choice : ");
-                        supportFolderLOC = dirName;
+                        //supportFolderLOC = dirName;
 
                         // Console.WriteLine("Enter executionCount choice : ");
                         string itCount = args[1];
