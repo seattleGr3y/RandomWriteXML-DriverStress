@@ -85,6 +85,33 @@ namespace RandomWriteXML
             //Console.ReadKey();
         }
 
+        #region TESTING THIS METHOD 10/17/2018
+        /// <summary>
+        /// if no choice is set and there is firmware set highest pri firmware to install first
+        /// for now this will default to UEFI
+        /// </summary>
+        /// <param name="InputTestFilePath"></param>
+        /// <param name="infName"></param>
+        /// <returns></returns>
+        internal static void SetTestFirst(string InputTestFilePathBAK, string InputTestFilePath, string infName)
+        {
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePath);
+                Logger.Comment("setting this to test first as there was no choice made : " + infName);
+                testInputData.XPathSelectElement("/DriverTests/Test/TestFirst").Value = infName;
+                testInputData.Save(InputTestFilePath);
+                Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
+                Logger.FunctionLeave();
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+        }
+        #endregion
+
         /// <summary>
         /// read the XML to find the number of times it will need to loop through the list
         /// </summary>

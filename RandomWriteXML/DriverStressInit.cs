@@ -80,21 +80,20 @@ namespace RandomWriteXML
             string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
             if (infIndexListString.Equals(null))
             {
-                SetupToContinue();
+                SetupToContinue(InputTestFilePathBAK, executionCount, infListCount, InputTestFilePath);
             }
-
             else if (driverPathListCount == 0)
             {
-                SetupToContinue();
+                SetupToContinue(InputTestFilePathBAK, executionCount, infListCount, InputTestFilePath);
             }
             else if (DriverPathList.Equals(null))
             {
-                SetupToContinue();
+                SetupToContinue(InputTestFilePathBAK, executionCount, infListCount, InputTestFilePath);
             }
             Logger.FunctionLeave();
         }
 
-        internal static void SetupToContinue() 
+        internal static void SetupToContinue(string InputTestFilePathBAK, int executionCount, int infListCount, string InputTestFilePath) 
         {
             executionCount--;
             XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);

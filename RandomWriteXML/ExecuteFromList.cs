@@ -42,7 +42,7 @@ namespace RandomWriteXML
 
             while (executionCount > 0)
             {
-                executionCount--;
+                // executionCount--;
                 string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                 //string infIndexListString = xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
 
@@ -70,10 +70,24 @@ namespace RandomWriteXML
 
                 Console.WriteLine("infIndexListString = " + infIndexListString);
                 Array list = infIndexListString.Split(',').Select(Int32.Parse).ToArray<int>();
-                //XMLWriter.SaveCurrentSeed(InputTestFilePath, Program.InputTestFilePathBAK, infIndexListString);
-                //xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = infIndexListString;
-                //xdoc.Save(InputTestFilePath);
 
+                foreach (int seedIndex in list)
+                {
+                    string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
+                    string infName = Path.GetFileName(line);
+                    if (startChoice.Equals("none"))
+                    {
+                        if (infName.Contains("uefi"))
+                        {
+                            XMLWriter.SetTestFirst(Program.InputTestFilePathBAK, InputTestFilePath, infName);
+                        }
+                    }
+                    bool isCapsule = GetData.CheckDriverIsFirmware(line);
+                    if (isCapsule)
+                    {
+                        capList.Add(infName);
+                    }
+                }
 
                 foreach (int seedIndex in list)
                 {
@@ -97,10 +111,7 @@ namespace RandomWriteXML
                     Console.WriteLine("testInfName : " + testInfName);
                     Console.ForegroundColor = ConsoleColor.White;
                     Thread.Sleep(2000);
-                    //string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
-                    //string infName = Path.GetFileName(line);
-                    //bool isCapsule = GetData.CheckDriverIsFirmware(line);
-
+                    
                     if (randomize == true)
                     {
                         index = Convert.ToString(seedIndex);
@@ -117,14 +128,8 @@ namespace RandomWriteXML
                         infListCount = DriverPathList.Count;
                         Directory.CreateDirectory(Program.dirName + @"\RESULTS");
                         executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
-
                         File.WriteAllText(seedFilePath, stringList);
-
                         infIndexListString = File.ReadAllText(seedFilePath);
-
-                        //XDocument xdoc = XDocument.Load(InputTestFilePath);
-                        //xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = stringList;
-                        //xdoc.Save(InputTestFilePath);
                         XMLWriter.SaveCurrentSeed(InputTestFilePath, InputTestFilePathBAK, currentSeed);
 
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -133,31 +138,35 @@ namespace RandomWriteXML
                         Console.WriteLine("...this is where we execute testing...");
                         Console.WriteLine("...... well...I think so anyway.......");
                         Console.ForegroundColor = ConsoleColor.White;
+                        //bool isCapsule = GetData.CheckDriverIsFirmware(line);
 
                         string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
                         string infName = Path.GetFileName(line);
-                        bool isCapsule = GetData.CheckDriverIsFirmware(line);
-                        if (isCapsule)
+                        foreach (string name in capList)
                         {
-                            XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
-                            Logger.Comment("re-add the reg key to start post reboot...");
-                            Thread.Sleep(3000);
-                            CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
-
+                            if (capList.Contains(infName))
+                            {
+                                XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                                Logger.Comment("re-add the reg key to start post reboot...");
+                                Thread.Sleep(3000);
+                                CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
-                        else
-                        {
-                            XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
-                            CapsuleOrNotInstallCalls.IsNotCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
-                        }
+                        XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                        CapsuleOrNotInstallCalls.IsNotCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
                     }
 
                     else if (randomize == false)
                     {
+                        string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
+                        string infName = Path.GetFileName(line);
+
                         if (testInfName.Contains(startChoice.ToLower()))
                         {
-                            string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
-                            string infName = Path.GetFileName(line);
                             bool isCapsule = GetData.CheckDriverIsFirmware(line);
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine("i matched the INF to the startChoice");
@@ -179,7 +188,22 @@ namespace RandomWriteXML
                                 continue;
                             }
                         }
-                        else { continue; }
+
+                        foreach (string name in capList)
+                        {
+                            if (capList.Contains(infName))
+                            {
+                                XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                                Logger.Comment("re-add the reg key to start post reboot...");
+                                Thread.Sleep(3000);
+                                CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        RebootAndContinue.RebootCmd(true);
                     }
                 }
 
@@ -216,18 +240,32 @@ namespace RandomWriteXML
                         string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
                         string infName = Path.GetFileName(line);
                         XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
-                        bool isCapsule = GetData.CheckDriverIsFirmware(line);
-                        if (isCapsule)
+                        foreach (string name in capList)
                         {
-                            Logger.Comment("re-add the reg key to start post reboot...");
-                            Thread.Sleep(3000);
-                            CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                            if (capList.Contains(infName))
+                            {
+                                XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                                Logger.Comment("re-add the reg key to start post reboot...");
+                                Thread.Sleep(3000);
+                                CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
-                        else
-                        {
+                        //bool isCapsule = GetData.CheckDriverIsFirmware(line);
+                        //if (isCapsule)
+                        //{
+                        //    Logger.Comment("re-add the reg key to start post reboot...");
+                        //    Thread.Sleep(3000);
+                        //    CapsuleOrNotInstallCalls.IfIsCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
+                       // }
+                       // else
+                        //{
                             //continue;
                             CapsuleOrNotInstallCalls.IsNotCapsule(driverPathListCount, infName, DriverPathList, line, InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
-                        }
+                        //}
                     }
                 }
             }

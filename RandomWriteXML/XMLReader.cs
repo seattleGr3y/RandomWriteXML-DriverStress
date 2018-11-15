@@ -248,5 +248,55 @@ namespace RandomWriteXML
             }
             return result;
         }
+
+        /// <summary>
+        /// determine what from the list is to be installed first
+        /// </summary>
+        /// <param name="InputTestFilePath"></param>
+        /// <returns></returns>
+        internal static string GetTestFirst(string InputTestFilePath)
+        {
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePath);
+                string testFirst = testInputData.XPathSelectElement("/Tests/TestChoices/StartChoice").Value;
+                string startChoice = testFirst;
+                Logger.Comment("testing this first each loop around : " + startChoice);
+                Logger.FunctionLeave();
+                return startChoice;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// determine what from the list is to be installed first
+        /// </summary>
+        /// <param name="InputTestFilePath"></param>
+        /// <returns></returns>
+        internal static string GetRandomChoice(string InputTestFilePath)
+        {
+            string result = string.Empty;
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePath);
+                string randomizeChoice = testInputData.XPathSelectElement("/Tests/TestChoices/randomizeList").Value;
+                Logger.Comment("entered for randomize or not choice : " + randomizeChoice);
+                Logger.FunctionLeave();
+                if (randomizeChoice.Equals(null)) { randomizeChoice = "fail"; }
+                result = randomizeChoice;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+            return result;
+        }
+
     }
 }

@@ -38,3 +38,4 @@ C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWri
 C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.exe
 C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.pdb
 C:\Users\v-semagi\source\repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.csprojAssemblyReference.cache
+C:\Users\d4rkl0rd-2\Source\Repos\seattleGr3y\RandomWriteXML-DriverStress\RandomWriteXML\obj\x64\Debug\RandomWriteXML.csprojAssemblyReference.cache
