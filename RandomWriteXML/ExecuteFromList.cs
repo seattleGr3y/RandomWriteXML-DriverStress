@@ -42,7 +42,7 @@ namespace RandomWriteXML
 
             while (executionCount > 0)
             {
-                executionCount--;
+                //executionCount--;
                 string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                 //string infIndexListString = xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
 
@@ -70,22 +70,19 @@ namespace RandomWriteXML
 
                 Console.WriteLine("infIndexListString = " + infIndexListString);
                 Array list = infIndexListString.Split(',').Select(Int32.Parse).ToArray<int>();
-                //XMLWriter.SaveCurrentSeed(InputTestFilePath, Program.InputTestFilePathBAK, infIndexListString);
-                //xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = infIndexListString;
-                //xdoc.Save(InputTestFilePath);
-
 
                 foreach (int seedIndex in list)
                 {
                     string index = Convert.ToString(seedIndex);
                     int indexLen = index.Length;
-                    string stringList = infIndexListString.Remove(0, indexLen).TrimStart(',');
+                    string currentSeed = infIndexListString.Remove(0, indexLen).TrimStart(',');
                     Thread.Sleep(100);
                     string indexString = Convert.ToString(index);
                     if (index.Equals(null)) { continue; }
                     string InputTestFilePathBAK = Program.dirName + @"\StressTestXML.xml.BAK";
 
-                    XMLWriter.SaveCurrentSeed(InputTestFilePath, InputTestFilePathBAK, stringList);
+                    string StartSeed = XMLReader.GetStartSeed(InputTestFilePathBAK);
+                    XMLWriter.SaveCurrentSeed(StartSeed, InputTestFilePathBAK, currentSeed);
 
                     DriverPathList = new List<string>();
                     DriverPathList = XMLReader.GetDriversPath(InputTestFilePath);
@@ -97,15 +94,12 @@ namespace RandomWriteXML
                     Console.WriteLine("testInfName : " + testInfName);
                     Console.ForegroundColor = ConsoleColor.White;
                     Thread.Sleep(2000);
-                    //string line = XMLReader.FromINFIndex(InputTestFilePath, seedIndex);
-                    //string infName = Path.GetFileName(line);
-                    //bool isCapsule = GetData.CheckDriverIsFirmware(line);
 
                     if (randomize == true)
                     {
                         index = Convert.ToString(seedIndex);
                         indexLen = index.Length;
-                        string currentSeed = infIndexListString.Remove(0, indexLen).TrimStart(',');
+                        currentSeed = infIndexListString.Remove(0, indexLen).TrimStart(',');
                         Thread.Sleep(100);
                         indexString = Convert.ToString(index);
                         if (index.Equals(null)) { continue; }
@@ -118,14 +112,12 @@ namespace RandomWriteXML
                         Directory.CreateDirectory(Program.dirName + @"\RESULTS");
                         executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
-                        File.WriteAllText(seedFilePath, stringList);
+                        File.WriteAllText(seedFilePath, currentSeed);
 
                         infIndexListString = File.ReadAllText(seedFilePath);
 
-                        //XDocument xdoc = XDocument.Load(InputTestFilePath);
-                        //xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = stringList;
-                        //xdoc.Save(InputTestFilePath);
-                        XMLWriter.SaveCurrentSeed(InputTestFilePath, InputTestFilePathBAK, currentSeed);
+                        StartSeed = XMLReader.GetStartSeed(InputTestFilePathBAK);
+                        XMLWriter.SaveCurrentSeed(StartSeed, InputTestFilePathBAK, currentSeed);
 
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("indexString : " + indexString);
@@ -205,8 +197,9 @@ namespace RandomWriteXML
                         File.WriteAllText(seedFilePath, stringList);
 
                         infIndexListString = File.ReadAllText(seedFilePath);
-
-                        XMLWriter.SaveCurrentSeed(InputTestFilePath, InputTestFilePathBAK, stringList);
+                        
+                        string StartSeed = XMLReader.GetStartSeed(InputTestFilePathBAK);
+                        XMLWriter.SaveCurrentSeed(StartSeed, InputTestFilePathBAK, stringList);
 
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("indexString : " + indexString);

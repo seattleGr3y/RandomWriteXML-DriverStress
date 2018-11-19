@@ -53,7 +53,7 @@ namespace RandomWriteXML
                 Logger.AddLogFile(stressLog);
             }
 
-            Logger.LogAll();
+            //Logger.LogAll();
 
             if (!Directory.Exists(dirName)) { Directory.CreateDirectory(dirName); }
             if (!File.Exists(InputTestFilePath))
@@ -97,12 +97,10 @@ namespace RandomWriteXML
             {
                 XDocument xdoc = XDocument.Load(InputTestFilePath);
                 string infIndexListString = XMLReader.GetSeed(InputTestFilePathBAK);
-                //string infIndexListString = xdoc.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
-                string executionCountStr = xdoc.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value.ToString();
+                int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
                 string randomizeSTR = xdoc.XPathSelectElement("/Tests/TestChoices/randomizeList").Value.ToString();
                 supportFolderLOC = xdoc.XPathSelectElement("/Tests/TestChoices/SupportFolder").Value.ToString();
                 Array infListFromXML = xdoc.XPathSelectElements("/Tests/InfDirectories/InfDir").ToArray();
-                int executionCount = Convert.ToInt32(executionCountStr);
                 randomize = Convert.ToBoolean(randomizeSTR);
                 ExecuteFromList.ExecuteTheList(randomize, executionCount, dirName, InputTestFilePath, supportFolderLOC, seedFilePath, startChoice);
             }

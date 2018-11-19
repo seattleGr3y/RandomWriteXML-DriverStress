@@ -46,23 +46,18 @@ namespace RandomWriteXML
             if (!File.Exists(Program.dirName + @"\debugEnabled.txt"))
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.EnableWinDebugMode();
             }
             if (RegCheck.IsRebootPending())
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }
             if (GetData.CheckCrashDumpOccurred())
             {
                 Logger.Comment("Looks like we found a crashdump check it out...");
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }
@@ -76,6 +71,11 @@ namespace RandomWriteXML
             infListCount = DriverPathList.Count;
             Directory.CreateDirectory(Program.dirName + @"\RESULTS");
             int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
+            
+            if (!File.Exists(InputTestFilePathBAK))
+            {
+                Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
+            }
 
             string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
             if (infIndexListString.Equals(null))
@@ -84,12 +84,7 @@ namespace RandomWriteXML
                 XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
             }
 
-            if (!File.Exists(InputTestFilePathBAK))
-            {
-                Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
-            }
-
-            if (driverPathListCount == 0)
+            else if (driverPathListCount == 0)
             {
                 executionCount--;
                 XMLWriter.DecrementExecutionCount(InputTestFilePathBAK, executionCount);
@@ -108,8 +103,6 @@ namespace RandomWriteXML
 
                 Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }
@@ -132,8 +125,6 @@ namespace RandomWriteXML
 
                 Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //string stressAppPath = dirName + @"DriverStress-2.exe";
-                //RebootAndContinue.SetStartUpRegistry(stressAppPath);
                 Thread.Sleep(3000);
                 RebootAndContinue.RebootCmd(true);
             }

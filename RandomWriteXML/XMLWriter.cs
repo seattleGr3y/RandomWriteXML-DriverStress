@@ -25,12 +25,10 @@ namespace RandomWriteXML
             
             foreach (string infDir in GetData.GetInfPathsList(supportFolderLOC))
             {
-                //GetData.GetInfPathsList(supportFolderLOC);
                 string infName = Path.GetFileName(infDir);
-                //string infName = Directory.GetFiles(infDir, ".inf").ToString();
                 infIndex++;
                 xmlWriter.WriteStartElement("InfDir");
-                xmlWriter.WriteAttributeString("InfName", infName); // infDir.Split('\\')[5]);
+                xmlWriter.WriteAttributeString("InfName", infName);
                 xmlWriter.WriteAttributeString("InfPath", infDir);
                 xmlWriter.WriteAttributeString("InfIndex", infIndex.ToString());
                 xmlWriter.WriteEndElement();
@@ -99,9 +97,6 @@ namespace RandomWriteXML
                 testInputData.XPathSelectElement("/Tests/TestChoices/StartSeed").Value = StartSeed;
                 testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
                 testInputData.Save(InputTestFilePathBAK);
-                //Utilities.CopyFile(InputTestFilePathBAK, InputTestFilePath);
-                //List<string> listSeed = new List<string>();
-                // listSeed = testInputData.XPathSelectElement("/DriverTests/Test/Seed").Value.ToList<string>;
                 Logger.Comment("randomized list to save for re-use if need be : " + StartSeed);
                 Logger.FunctionLeave();
                 //return seed;
@@ -113,7 +108,7 @@ namespace RandomWriteXML
             }
         }
 
-        internal static void SaveCurrentSeed(string InputTestFilePath, string InputTestFilePathBAK, string currentSeed)
+        internal static void SaveCurrentSeed(string StartSeed, string InputTestFilePathBAK, string currentSeed)
         {
             try
             {
@@ -121,11 +116,9 @@ namespace RandomWriteXML
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
                 testInputData.Save(InputTestFilePathBAK);
-                var testInputData2 = XDocument.Load(InputTestFilePath);
-                testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
-                testInputData.Save(InputTestFilePath);
 
-                Logger.Comment("randomized list to save for re-use if need be : " + currentSeed);
+                Logger.Comment("Starting list was this  : " + StartSeed);
+                Logger.Comment("Current list to execute : " + currentSeed);
                 Logger.FunctionLeave();
                 //return seed;
             }

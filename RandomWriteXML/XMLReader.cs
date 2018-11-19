@@ -248,5 +248,31 @@ namespace RandomWriteXML
             }
             return result;
         }
+
+        /// <summary>
+        /// read the XML to find the number of times it will need to loop through the list
+        /// </summary>
+        /// <param name="InputTestFilePath"></param>
+        /// <returns></returns>
+        internal static string GetStartSeed(string InputTestFilePathBAK)
+        {
+            string result = string.Empty;
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePathBAK);
+                string varIndexList = testInputData.XPathSelectElement("/Tests/TestChoices/StartSeed").Value.ToString();
+                //List<string> listSeed = new List<string>();
+                // listSeed = testInputData.XPathSelectElement("/DriverTests/Test/Seed").Value.ToList<string>;
+                Logger.Comment("randomized list to save for re-use if need be : " + varIndexList);
+                Logger.FunctionLeave();
+                result = varIndexList;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+            return result;
+        }
     }
 }

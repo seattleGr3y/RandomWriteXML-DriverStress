@@ -308,17 +308,18 @@ namespace RandomWriteXML
         /// </summary>
         /// <param name="InputTestFilePath"></param>
         /// <returns></returns>
-        internal static string GetRandomChoice(string InputTestFilePath)
+        internal static bool GetRandomChoice(string InputTestFilePath)
         {
-            string result = string.Empty;
+            bool result = false;
             try
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePath);
-                string randomizeChoice = testInputData.XPathSelectElement("/Tests/TestChoices/randomizeList").Value;
-                Logger.Comment("entered for randomize or not choice : " + randomizeChoice);
+                string randomizeChoiceSTR = testInputData.XPathSelectElement("/Tests/TestChoices/randomizeList").Value;
+                bool randomizeChoice = Convert.ToBoolean(randomizeChoiceSTR);
+                Logger.Comment("entered for randomize or not choice : " + randomizeChoiceSTR);
                 Logger.FunctionLeave();
-                if (randomizeChoice.Equals(null)) { randomizeChoice = "fail"; }
+                if (randomizeChoice.Equals(null)) { randomizeChoice = false; }
                 result = randomizeChoice;
             }
             catch (Exception ex)
