@@ -101,7 +101,7 @@ namespace RandomWriteXML
                 RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
                 Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
                 //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
-                RebootAndContinue.RebootCmd(true);
+                //RebootAndContinue.RebootCmd(true);
             }
             Logger.FunctionLeave();
         }

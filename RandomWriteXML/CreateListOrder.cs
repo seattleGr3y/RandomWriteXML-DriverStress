@@ -13,11 +13,11 @@ namespace RandomWriteXML
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("am i getting to here RandomizeList starting...?");
             Console.ForegroundColor = ConsoleColor.White;
-            //Console.ReadKey();
-
+            
             string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
             //int driverPathListCount = Directory.GetDirectories(supportFolderLOC).Count();
             int infListCount = Directory.GetDirectories(supportFolderLOC).Count();
+
             switch (randomize)
             {
                 case true:
@@ -43,7 +43,7 @@ namespace RandomWriteXML
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("am i getting to here ...going to StartStress from TRUE next...?");
                         Console.ForegroundColor = ConsoleColor.White;
-                        //Console.ReadKey();
+
                         DriverStressInit.StartStress(InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
                     }
                     break;
