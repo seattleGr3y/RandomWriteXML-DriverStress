@@ -109,13 +109,16 @@ namespace DriverCapsuleStressTool
             DateTime expDriverDate;
             string driverDate = string.Empty;
             bool result = false;
+            string classGUID = GetData.GetClassGUID(line);
+            string infNameFromReg = GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
             using (ManagementObjectSearcher s2 =
                     new ManagementObjectSearcher(
                     "root\\CIMV2",
                     "SELECT * FROM Win32_PnPSignedDriver"))
 
 
-                foreach (ManagementObject WmiObject in s2.Get())
+
+            foreach (ManagementObject WmiObject in s2.Get())
                 {
                     if (WmiObject["InfName"] == null) { continue; }
                         else { infName = WmiObject["InfName"].ToString(); }
@@ -130,16 +133,18 @@ namespace DriverCapsuleStressTool
                     {
                         // there are zeros in driver versions in inf files that are not in the devMgr
                         // and viceVersa will have to remove\replace all zeros with ""
-                        if (expectedDriverVersion.Contains("0"))
+                        if (expectedDriverVersion.EndsWith("0"))
                         {
-                            expectedDriverVersion = expectedDriverVersion.Replace("0", "");
+                            expectedDriverVersion = expectedDriverVersion.TrimEnd('0');
                             expectedDriverVersion = expectedDriverVersion.TrimEnd('.');
+                            expectedDriverVersion = expectedDriverVersion.TrimEnd('0');
                         }
 
-                        if (installedDriverVersion.Contains("0"))
+                        if (installedDriverVersion.EndsWith("0"))
                         {
-                            installedDriverVersion = installedDriverVersion.Replace("0", "");
+                            installedDriverVersion = installedDriverVersion.TrimEnd('0');
                             installedDriverVersion = installedDriverVersion.TrimEnd('.');
+                            installedDriverVersion = installedDriverVersion.TrimEnd('0');
                         }
 
                         if (installedDeviceName.Contains(" ")) { installedDeviceName = installedDeviceName.Replace(" ", ""); }
@@ -148,16 +153,22 @@ namespace DriverCapsuleStressTool
                         if (friendlyDriverName.Contains(" ")) { friendlyDriverName = friendlyDriverName.Replace(" ", ""); }
                         infNameToTest = infNameToTest.Split('.')[0];
                         if (infNameToTest.Equals("SurfaceEC")) { infNameToTest = "SurfaceEmbeddedControllerFirmware"; }
-                        if (infNameToTest.Contains("UEFI")) { infNameToTest = "uefi"; }
-
-                        string classGUID = GetData.GetClassGUID(line);
-                        string infNameFromReg = GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
-
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.WriteLine("infNameFromReg : " + infNameFromReg);
-                        Console.WriteLine("infNameToTest : " + infNameToTest);
-                        Console.WriteLine("infName : " + infName);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        
+                        if (infName.Equals(infNameFromReg))
+                        {
+                            Console.WriteLine(expectedDriverVersion);
+                            Console.WriteLine(installedDriverVersion);
+                            Console.ReadKey();
+                            if (expectedDriverVersion.Equals(installedDriverVersion))
+                            {
+                                Logger.Comment(infNameToTest);
+                                result = true;
+                                Logger.Comment("result from checkInstalled TRUE name/version : ");
+                                Thread.Sleep(1000);
+                                //break;
+                            }
+                            else { continue; }
+                        }
 
                         string currentDriverDate = driverDate.Split('.')[0].Insert(4, "/").Insert(7, "/").TrimEnd('0');
                         try

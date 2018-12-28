@@ -120,8 +120,8 @@ namespace DriverCapsuleStressTool
         internal static string GetDriverVersion(string line)
         {
             Logger.FunctionEnter();
-            string getVersion = "DriverVer=";
-            string getVersion2 = "DriverVer = ";
+            string getVersion = "DriverVer";
+            //string getVersion2 = "DriverVer = ";
             string[] textInput;
             string expectedDriverVersion = string.Empty;
             string result = string.Empty;
@@ -136,13 +136,13 @@ namespace DriverCapsuleStressTool
                     Logger.Comment(expectedDriverVersion);
                     result = expectedDriverVersion;
                 }
-                if (Regex.IsMatch(textLine, getVersion2).Equals(true))
-                {
-                    expectedDriverVersion = textLine.Split(',')[1];
-                    Logger.Comment("the following should be the driver version");
-                    Logger.Comment(expectedDriverVersion);
-                    result = expectedDriverVersion;
-                }
+                //if (Regex.IsMatch(textLine, getVersion2).Equals(true))
+                //{
+                //    expectedDriverVersion = textLine.Split(',')[1];
+                //    Logger.Comment("the following should be the driver version");
+                //    Logger.Comment(expectedDriverVersion);
+                //    result = expectedDriverVersion;
+                //}
             }
             Logger.FunctionLeave();
             return result;
@@ -181,9 +181,6 @@ namespace DriverCapsuleStressTool
                     result = classGUID;
                 }
             }
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("this should be the classGUID : " + classGUID);
-            Console.ForegroundColor = ConsoleColor.White;
             Logger.FunctionLeave();
             return result;
         }

@@ -118,7 +118,6 @@ namespace DriverCapsuleStressTool
                                     {
                                         infNameFromReg = SUBregkey2.GetValue("InfPath").ToString();
                                         result = infNameFromReg;
-                                        Console.WriteLine("found the infNameFromReg : " + infNameFromReg);
                                     }
                                 }
                             }
