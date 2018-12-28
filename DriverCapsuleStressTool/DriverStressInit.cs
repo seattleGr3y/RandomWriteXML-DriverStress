@@ -78,17 +78,16 @@ namespace DriverCapsuleStressTool
                 //executionCount--;
                 RewriteXMLContinue(executionCount, infListCount);
             }
-
-            //else if (infListCount == 0)
-            //{
-            //    //executionCount--;
-            //    RewriteXMLContinue(executionCount, infListCount);
-            //}
-            //else if (DriverPathList.Equals(null))
-            //{
-            //    //executionCount--;
-            //    RewriteXMLContinue(executionCount, infListCount);
-            //}
+            else if (infListCount == 0)
+            {
+                //executionCount--;
+                RewriteXMLContinue(executionCount, infListCount);
+            }
+            else if (DriverPathList.Equals(null))
+            {
+                //executionCount--;
+                RewriteXMLContinue(executionCount, infListCount);
+            }
             Logger.FunctionLeave();
         }
 

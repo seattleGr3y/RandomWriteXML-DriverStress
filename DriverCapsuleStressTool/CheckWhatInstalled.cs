@@ -158,7 +158,7 @@ namespace DriverCapsuleStressTool
                         {
                             Console.WriteLine(expectedDriverVersion);
                             Console.WriteLine(installedDriverVersion);
-                            Console.ReadKey();
+                            //Console.ReadKey();
                             if (expectedDriverVersion.Equals(installedDriverVersion))
                             {
                                 Logger.Comment(infNameToTest);
@@ -227,7 +227,7 @@ namespace DriverCapsuleStressTool
                         {
                             Console.WriteLine(expectedDriverVersion);
                             Console.WriteLine(installedDriverVersion);
-                            Console.ReadKey();
+                            //Console.ReadKey();
                             if (expectedDriverVersion.Equals(installedDriverVersion))
                             {
                                 Logger.Comment(infNameToTest);
