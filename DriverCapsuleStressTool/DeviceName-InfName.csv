@@ -1,0 +1,116 @@
+DeviceName,InfName
+Intel(R)Serial IO GPIO Driver,iaLPSS2_GPIO2_SKL.inf
+Intel(R)Serial IO UART Driver,iaLPSS2_UART2_SKL.inf
+Intel(R)Imaging Signal Processor 2500,iaisp64.inf
+Intel(R) Audio SST OED,IntcOED.inf
+Intel(R) AVStream Camera 2500,iacamera64.inf
+Intel(R) CIO2 Host Controller,CSI2HostControllerDriver.inf
+Intel(R) Control Logic ,iactrllogic64.inf
+Intel(R) Display Audio Driver,IntcDAud.inf
+Intel(R) Display Graphics Adapter Driver ,64jp6136.inf
+Intel(R) Display Graphics Adapter Driver ,64kb6027.inf
+Intel(R) Display Graphics Adapter Driver ,64zh6136.inf
+Intel(R) Dynamic Platform and Thermal Framework (DPTF) ,dptf_cpu.inf
+Intel(R) Dynamic Platform and Thermal Framework (DPTF) ,esif_manager.inf
+Intel(R) Dynamic Platform Thermal Framework (DPTF) ,dptf_acpi.inf
+Intel(R) Graphics Display Driver ,64gh6136.inf
+Intel(R) Imaging Signal Processor 2500 ,iaisp64.inf
+Intel(R) Management Engine Interface,heci.inf
+Intel(R) Microsoft Camera Front ,ov5693.inf
+Intel(R) Microsoft Camera IR,ov7251.inf
+Intel(R) Microsoft Camera Rear,ov8865.inf
+Intel(R) Precise Touch ,iaPreciseTouch.inf
+Intel(R) Serial IO 12C Host Controller Driver (LPSS) ,iaLPSS2_I2C_SKL.inf
+Intel(R) Serial IO GPIO Driver ,iaLPSS2_GPIO2_SKL.inf
+Intel(R) Serial IO GPIO Host Controller ,iaLPSS2_GPIO2_SKL.inf
+Intel(R) Serial IO I2C Host Controller ,iaLPSS2_I2C_SKL.inf
+Intel(R) Serial IO UART Driver ,iaLPSS2_UART2_SKL.inf
+Intel(R) Smart Sound Technology (SST) Audio Bus ,IntcAudioBus.inf
+Intel(R) Smart Sound Technology (SST) OED,IntcOED.inf
+Intel(R) SST Audio Bus,IntcAudioBus.inf
+Intel(R) SST Audio Bus ,IntcAudioBus.inf
+Intel(R) SST Audio OED ,IntcOED.inf
+Realtek High Definition Audio Driver,HDXSSTM.inf
+SAR - Surface Radio Monitor,SarProxy.inf
+Surface Accessory Device Service,SurfaceAccessoryDevice.inf
+Surface ACPI Notify Driver ,SurfaceAcpiNotifyDriver.inf
+Surface ACPI-Compliant Control Method Battery ,SurfaceACPIBattery.inf
+Surface Display Color Calibration ,SurfaceDisplayColor.inf
+Surface Integration Service Null Driver [SIS],SurfaceServiceNullDriver.inf
+Surface PTP Filter Driver,SurfacePTPFilter.inf
+Surface Serial Hub Driver,SurfaceSerialHubDriver.inf
+Surface Storage FW Update Driver,SurfaceStorageFwUpdate.inf
+System (Gemalto eSIM Firmware Update) ,GtoPatchDrvUMDF.inf
+Surface Dial Detection,SurfaceDialDetection.inf
+Surface Dial Filter,SurfaceDialFilter.inf
+Surface Digitizer Integration,SurfaceDigitizerIntegration.inf
+Surface Pen Pairing,SurfacePenPairing.inf
+Surface Pen Settings,SurfacePenDriver.inf
+Surface Digitizer Integration Driver,SurfaceDigitizerIntegration.inf
+Surface Dial Filter Driver,SurfaceDialFilter.inf
+Surface Dial Detection ,SurfaceDialDetection.inf
+Surface SAM,SurfaceSam.inf
+Surface UEFI,SurfaceUEFI.inf
+Surface Touch,SurfaceTouch.inf
+Surface Touch Servicing ML,SurfaceTouchServicingML.inf
+OEMAP_UEFI,OEMAP_UEFI.inf
+Surface Integration Driver,SurfaceIntegrationDriver.inf
+Surface Embedded Controller,SurfaceEC.inf
+Marvell AVASTAR Wireless-AC Network Controller,mrvlpcie8897.inf
+Marvell AVASTAR Bluetooth Radio Adapter,mbtr8897w81x64.inf
+Intel(R) HD Graphics 620,64jp4840.inf
+Intel(R) HD Graphics 620,64zh4840.inf
+Accessory Bluetooth Pairing,accessorybluetoothpairing.inf
+Intel(R) CSI2 Host Controller,csi2hostcontrollerdriver.inf
+Surface1832DigitizerIntegration Device,digitizerintegration.inf
+Intel(R) Dynamic Platform and Thermal Framework Processor Participant,dptf_acpi.inf
+Intel(R) Dynamic Platform and Thermal Framework Processor Participant,dptf_cpu.inf
+Intel(R) Dynamic Platform and Thermal Framework Manager,esif_manager.inf
+Realtek High Definition Audio(SST),hdxsstm.inf
+HID PCI Minidriver for ISS,hid_pci.inf
+Intel(R) Control Logic,iactrllogic64.inf
+Intel(R) Imaging Signal Processor 2500,iaisp64.inf
+Intel(R) Serial IO GPIO Host Controller - INT344B,ialpss2_gpio2_skl.inf
+Intel(R) Serial IO I2C Host Controller - 9D64,ialpss2_i2c_skl.inf
+Intel(R) Serial IO UART Host Controller - 9D27,ialpss2_uart2_skl.inf
+Intel(R) Precise Touch Device,iaprecisetouch.inf
+Intel(R) Smart Sound Technology (Intel(R) SST) Audio Controller,intcaudiobus.inf
+Intel(R) Display Audio,intcdaud.inf
+Intel(R) Smart Sound Technology (Intel(R) SST) OED,intcoed.inf
+Intel(R) Integrated Sensor Solution,ish.inf
+ISS Dynamic Bus Enumerator,ish_busdriver.inf
+Intel(R) Xeon(R) E3 - 1200 v6/7th Gen Intel(R) Core(TM) Host Bridge/DRAM Registers - 5900,kabylakesystem.inf
+Maxim Power Meter,maximpowermeter.inf
+Xbox Wireless Adapter for Windows,mt7612us_br.inf
+NVIDIA GeForce GPU,nvmso.inf
+Camera Sensor OV5693,ov5693.inf
+Camera Sensor OV7251,ov7251.inf
+Camera Sensor OV8865,ov8865.inf
+Mobile 6th/7th Generation Intel(R) Processor Family I/O PCI Express Root Port #1 - 9D10,sunrisepoint-lpsystem.inf
+Mobile 6th/7th Generation Intel(R) Processor Family I/O Northpeak - 9D26,sunrisepoint-lpsystemnorthpeak.inf
+Mobile 6th/7th Generation Intel(R) Processor Family I/O Thermal subsystem - 9D31,sunrisepoint-lpsystemthermal.inf
+Surface Accessory Firmware Update,surfaceaccessoryfwupdate.inf
+Surface ACPI Notify Driver,surfaceacpinotifydriver.inf
+Surface Base 2 Integration,surfacebase2integration.inf
+Surface Button,surfacebutton.inf
+Surface Display,surfacedisplay.inf
+Surface Display Color,surfacedisplaycolor.inf
+Surface Dock Firmware Update,surfacedockfwupdate.inf
+Surface Dock Integration,surfacedockintegration.inf
+Surface DTX,surfacedtxdriver.inf
+Surface Hot Plug,surfacehotplug.inf
+Surface Integration,surfaceintegrationdriver.inf
+Surface Integrated Sensor Hub,surfaceish.inf
+Surface Keyboard Backlight,surfacekeyboardbacklight.inf
+Surface ME,surfaceme.inf
+Surface NVM Express Controller,surfacenvmexpresscontroller.inf
+Surface Power Meter,surfacepowermeterdriver.inf
+Surface System Aggregator,surfacesam.inf
+Surface Radio Monitor,surfacesarmanager.inf
+Surface Integration Service Device,surfaceservicenulldriver.inf
+Surface Software Servicing,surfacesoftwareservicingdriver.inf
+Surface Storage Firmware Update,surfacestoragefwupdate.inf
+Surface System Telemetry,surfacesystemtelemetrydriver.inf
+Surface Tcon Device,surfacetcondriver.inf
+Surface Ucsi Device,surfaceucsi.inf
+Surface USB Hub Firmware Update,surfaceusbhubfwupdate.inf
