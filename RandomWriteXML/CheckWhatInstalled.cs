@@ -5,6 +5,7 @@ using System.Management;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.VisualBasic.FileIO;
 
 namespace RandomWriteXML
 {
@@ -119,11 +120,6 @@ namespace RandomWriteXML
                     if (WmiObject["DriverDate"] == null) { continue; }
                         else { driverDate = WmiObject["DriverDate"].ToString(); }
 
-                    //if (string.IsNullOrEmpty(infName = WmiObject["InfName"].ToString())) { continue; }
-                    //if (string.IsNullOrEmpty(installedDriverVersion = WmiObject["DriverVersion"].ToString())) { continue; }
-                    //if (string.IsNullOrEmpty(installedDeviceName = WmiObject["DeviceName"].ToString())) { continue; }
-                    //if (string.IsNullOrEmpty(driverDate = WmiObject["DriverDate"].ToString())) { continue; }
-
                     try
                     {
                         // there are zeros in driver versions in inf files that are not in the devMgr
@@ -155,33 +151,16 @@ namespace RandomWriteXML
                         }
                         catch
                         {
-                            Console.WriteLine("this date is formatted badly : " + currentDriverDate);
-                            Console.WriteLine("or is this date formatted badly? : " + expectedDriverDate);
-                            Console.WriteLine("....for this driver : " + infNameToTest);
-                            //Console.ReadKey();
                             continue;
                         }
 
                         if (installedDriverDate == expDriverDate)
                         {
-                            Console.WriteLine("the dates are equal is this the right driver?");
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine("the infNameToTest : " + infNameToTest);
-                            Console.WriteLine("friendlyDriverName : " + friendlyDriverName);
-                            Console.WriteLine("infName : " + infName);
-                            Console.WriteLine("installedDeviceName : " + installedDeviceName);
-                            Console.ForegroundColor = ConsoleColor.White;
-                            //Console.ReadKey();
-
                             if (infName.Equals(infNameToTest))
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE by date/name");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by date/name");
-                                Console.ForegroundColor = ConsoleColor.White;
-                                //Console.ReadKey();
                                 break;
                             }
                             else if (Regex.Match(installedDeviceName, infNameToTest, RegexOptions.IgnoreCase).Success)
@@ -189,10 +168,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE by date/name");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by date/name");
-                                Console.ForegroundColor = ConsoleColor.White;
-                                //Console.ReadKey();
                                 break;
                             }
                         }
@@ -204,9 +179,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE friendlyName/version : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by friendlyName/version");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -215,9 +187,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE friendlyName/date : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by friendlyName/version");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -231,9 +200,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE name/version : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by name/version");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -242,9 +208,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE name/date : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by name/date");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -258,9 +221,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE name/version : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by name/version");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -269,24 +229,18 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE name/date : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by name/date");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
                             else { continue; }
                         }
-                        else if (installedDeviceName.Equals(infNameToTest))
+                        else if (installedDeviceName.Contains(infNameToTest))
                         {
                             if (expectedDriverVersion.Equals(installedDriverVersion))
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE deviceName/version : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by deviceName/version");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -295,9 +249,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE deviceName/date : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by deviceName/date");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -311,9 +262,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE version/name : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by version/name");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -322,9 +270,6 @@ namespace RandomWriteXML
                                 Logger.Comment(infNameToTest);
                                 result = true;
                                 Logger.Comment("result from checkInstalled TRUE version/name : ");
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("result from checkInstalled TRUE by version/name");
-                                Console.ForegroundColor = ConsoleColor.White;
                                 Thread.Sleep(1000);
                                 break;
                             }
@@ -339,6 +284,35 @@ namespace RandomWriteXML
             Logger.FunctionLeave();
             Logger.Comment("result actually being returned from checkInstalled : " + result);
             Thread.Sleep(1000);
+            return result;
+        }
+
+        internal static string CSVParse(string infName)
+        {
+            string result = string.Empty;
+            var path = @"C:\Person.csv"; // Habeeb, "Dubai Media City, Dubai"
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                //csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+                    string DeviceName = fields[0];
+                    string CsvInfName = fields[1];
+
+                    if (CsvInfName.Equals(infName))
+                    {
+                        result = DeviceName;
+                    }
+                }
+            }
             return result;
         }
     }

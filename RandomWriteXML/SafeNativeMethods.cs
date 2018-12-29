@@ -8,9 +8,8 @@ namespace RandomWriteXML
 {
     class SafeNativeMethods
     {
-        internal static bool rebootRequired;
         //internal static Process process = new Process();
-        enum DriverInstallationExitCode { NotInstalled = 80, RebootRequired = 40, RebootNotRequired = 1, CopiedPackageToDriverStoreButNotInstalled = 100, SuccessfullyUninstalled = 0 };
+        //enum DriverInstallationExitCode { ElementNotFound = 490, DeviceCanNotStart = 100, NotInstalled = 800, RebootRequired = 400, SuccessfullyUninstalled = 000 };
         internal static string ConvertExitCodeToHex(int exitCode)
         {
             return String.Format("{0:X}", exitCode);
@@ -23,7 +22,7 @@ namespace RandomWriteXML
         /// <param name="line"></param>
         /// <param name="installer"></param>
         /// <param name="installArgs"></param>
-        internal static bool Install_Inf(string line, string installer, string installArgs)
+        internal static void Install_Inf(bool stopOnFail, string line, string installer, string installArgs)
         {
             Logger.FunctionEnter();
             #region STRINGS AND THINGS
@@ -35,12 +34,11 @@ namespace RandomWriteXML
             string errorCodeMessage;
             string installationExitCode;
             int TimeOut = 120;
-            int rebootRquiredExitCode = Convert.ToInt32(DriverInstallationExitCode.RebootRequired);
-            int rebootNotRquiredExitCode = Convert.ToInt32(DriverInstallationExitCode.RebootNotRequired);
-            int updatedInstallation = Convert.ToInt32(DriverInstallationExitCode.CopiedPackageToDriverStoreButNotInstalled);
-            int notInstalledExitCode = Convert.ToInt32(DriverInstallationExitCode.NotInstalled);
-            int InstalledExitCode = Convert.ToInt32(DriverInstallationExitCode.SuccessfullyUninstalled);
-            int strLen = line.LastIndexOf(@"\");
+            string DeviceCanNotStartExitCode = "0x100";
+            string NotInstalledExitCode = "0x800";
+            string ElementNotFoundExitCode = "0x480";
+            string NotExistsExitCode = "0xB7";
+
             #endregion
 
             try
@@ -61,62 +59,94 @@ namespace RandomWriteXML
                 string stdOutput = process.StandardOutput.ReadToEnd();
                 installationExitCode = "0x" + exitCodeInHex;
 
-                // sets a timeout period to wait so the program doesn't get stuck waiting endlessly
-                bool notTimeOut = process.WaitForExit(TimeOut);
-                if (notTimeOut == false)
+                if (stopOnFail)
                 {
-                    failureCause = "Driver installation Timed-Out";
-                    errorCodeMessage = string.Format(line + " Driver installation Timed-Out");
-                    Logger.Comment(line + " Driver installation Failed due to  Time-Out::: " + errorCodeMessage, expectedDriverVersion, DateTime.Now.ToString("MM/dd/yyyy H:mm:ss:fff"), beforeDriverStatus, afterDriverStatus, deviceRuning, failureCause);
-                }
-                //Add metadata to exit code
-                if (installationExitCode.Equals(rebootRquiredExitCode))
-                {
-                    GetData.GetExitCode(rebootRquiredExitCode.ToString(), stdOutput, errorMessage);
-                }
-                else if (installationExitCode.Equals(0x490))
-                {
-                    GetData.GetExitCode(installationExitCode.ToString(), stdOutput, errorMessage);
-                    Logger.Comment("got exit code 49, try to re-install : " + line);
-                    installArgs = " /C /A /Q /SE /F /PATH " + line;
-                    Install_Inf(line, installer, installArgs);
-                    rebootRequired = true;
-                }
-                else if (errorMessage.Contains("0x490"))
-                {
-                    GetData.GetExitCode(installationExitCode.ToString(), stdOutput, errorMessage);
-                    Logger.Comment("got exit code 49, try to re-install : " + line);
-                    installArgs = " /C /A /Q /SE /F /PATH " + line;
-                    Install_Inf(line, installer, installArgs);
-                    rebootRequired = true;
-                }
-                else if (installationExitCode.Equals(0xB7))
-                {
-                    GetData.GetExitCode(installationExitCode.ToString(), stdOutput, errorMessage);
-                    installArgs = " /C /U " + line + " /Q /D";
-                    Install_Inf(line, installer, installArgs);
-                    rebootRequired = true;
-                }
-                else if (installationExitCode.Equals(rebootNotRquiredExitCode))
-                {
-                    GetData.GetExitCode(rebootNotRquiredExitCode.ToString(), stdOutput, errorMessage);
-                }
-                else if (installationExitCode.Equals(updatedInstallation))
-                {
-                    GetData.GetExitCode(updatedInstallation.ToString(), stdOutput, errorMessage);
-                }
-                else if (installationExitCode.Equals(notInstalledExitCode))
-                {
-                    GetData.GetExitCode(notInstalledExitCode.ToString(), stdOutput, errorMessage);
-                    rebootRequired = true;
-                }
-                if (exitCode.Equals(1))
-                {
-                    rebootRequired = false;
-                }
-                else
-                {
-                    rebootRequired = true;
+                    // sets a timeout period to wait so the program doesn't get stuck waiting endlessly
+                    bool notTimeOut = process.WaitForExit(TimeOut);
+                    if (notTimeOut == false)
+                    {
+                        failureCause = "Driver installation Timed-Out";
+                        errorCodeMessage = string.Format(line + " Driver installation Timed-Out");
+                        Logger.Comment(line + " Driver installation Failed due to  Time-Out::: " + errorCodeMessage, expectedDriverVersion, DateTime.Now.ToString("MM/dd/yyyy H:mm:ss:fff"), beforeDriverStatus, afterDriverStatus, deviceRuning, failureCause);
+
+                        Logger.Comment("There was a failure please check the logs...");
+                        Logger.Comment("dptinst.exe timed out during install");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("There was a failure please check the logs...");
+                        Console.WriteLine("dptinst.exe timed out during install");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
+                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ReadKey();
+                        Environment.Exit(0);
+
+                    }
+                    //Add metadata to exit code
+                    else if (installationExitCode.Equals(ElementNotFoundExitCode))
+                    {
+                        Logger.Comment("There was a failure please check the logs...");
+                        Logger.Comment("dptinst.exe threw error code 49, element not found");
+                        Logger.Comment("possibly trying to uninstall a driver that is not yet installed");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("There was a failure please check the logs...");
+                        Console.WriteLine("dptinst.exe threw error code 49, element not found");
+                        Console.WriteLine("possibly trying to uninstall a driver that is not yet installed");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
+                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ReadKey();
+                        Environment.Exit(0);
+
+                    }
+                    else if (installationExitCode.Equals(NotInstalledExitCode))
+                    {
+                        Logger.Comment("There was a failure please check the logs...");
+                        Logger.Comment("failed to install");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("There was a failure please check the logs...");
+                        Console.WriteLine("failed to install");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
+                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ReadKey();
+                        Environment.Exit(0);
+
+                    }
+                    else if (installationExitCode.Equals(NotExistsExitCode))
+                    {
+                        Logger.Comment("There was a failure please check the logs...");
+                        Logger.Comment("dptinst.exe threw error Not Exists Exit Code = 0xB7");
+                        Logger.Comment("no device exists for this driver");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("There was a failure please check the logs...");
+                        Console.WriteLine("dptinst.exe threw error Not Exists Exit Code = 0xB7");
+                        Console.WriteLine("no device exists for this driver");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
+                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ReadKey();
+                        Environment.Exit(0);
+
+                    }
+                    else if (installationExitCode.Equals(DeviceCanNotStartExitCode))
+                    {
+                        Logger.Comment("There was a failure please check the logs...");
+                        Logger.Comment("dptinst.exe threw error code 10, Device Can Not Start");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("There was a failure please check the logs...");
+                        Console.WriteLine("dptinst.exe threw error code 10, Device Can Not Start");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
+                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ReadKey();
+                        Environment.Exit(0);
+
+                    }
                 }
                 process.Dispose();
             }
@@ -125,9 +155,7 @@ namespace RandomWriteXML
                 GetData.GetExceptionMessage(ex);
             }
             Thread.Sleep(1000);
-            Logger.Comment("this is the rebootrequired returned : " + rebootRequired);
-            Logger.FunctionLeave();
-            return rebootRequired;
+            Logger.FunctionLeave();            
         }
 
         /// <summary>
@@ -140,7 +168,7 @@ namespace RandomWriteXML
         /// <param name="InputTestFilePath"></param>
         /// <param name="rebootRequired"></param>
         /// <param name="hardwareID"></param>
-        internal static void InstallUninstallCall(bool rebootRequired, string infName, string line, string installer, string InputTestFilePath, string hardwareID)
+        internal static void InstallUninstallCall(bool stopOnFail, bool rebootRequired, string infName, string line, string installer, string InputTestFilePath, string hardwareID)
         {
             try
             {
@@ -154,31 +182,46 @@ namespace RandomWriteXML
                 bool isInstalled = CheckWhatInstalled.CheckInstalled(friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
                 if (isInstalled)
                 {
-                    Thread.Sleep(1000);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("----------------------------------------------------");
+                    Console.WriteLine("THIS VERSION IS INSTALLED NOW UN-INSTALLING NOW...");
+                    Console.WriteLine(infName);
+                    Console.WriteLine("----------------------------------------------------");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Thread.Sleep(500);
                     Logger.Comment("rebootRequired is showing as : " + rebootRequired);
                     //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                     installArgs = " /C /U " + line + " /Q /D";
-                    Install_Inf(line, installer, installArgs);
+                    Install_Inf(stopOnFail, line, installer, installArgs);
                     Logger.Comment("Operation should be complete: " + line);
+                    Thread.Sleep(500);
 
-                    if (rebootRequired.Equals(true))
+                    if (RegCheck.IsRebootPending())
                     {
-                        //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                        Logger.Comment("there is a pending reboot...");
+                        Thread.Sleep(1000);
                         RebootAndContinue.RebootCmd(true);
                     }
                 }
                 else
                 {
-                    Thread.Sleep(1000);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("----------------------------------------------------");
+                    Console.WriteLine("THIS VERSION WAS NOT INSTALLED YET INSTALLING NOW...");
+                    Console.WriteLine(infName);
+                    Console.WriteLine("----------------------------------------------------");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Thread.Sleep(500);
                     Logger.Comment("rebootRequired is showing as : " + rebootRequired);
-                    //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                     installArgs = " /C /A /Q /SE /F /PATH " + infPath;
-                    Install_Inf(line, installer, installArgs);
+                    Install_Inf(stopOnFail, line, installer, installArgs);
                     Logger.Comment("Operation should be complete: " + line);
+                    Thread.Sleep(2000);
 
-                    if (rebootRequired.Equals(true))
+                    if (RegCheck.IsRebootPending())
                     {
-                        //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
+                        Logger.Comment("there is a pending reboot...");
+                        Thread.Sleep(2000);
                         RebootAndContinue.RebootCmd(true);
                     }
                 }
@@ -189,35 +232,6 @@ namespace RandomWriteXML
                 GetData.GetExceptionMessage(ex);
             }
         }
-        #region NO LONGER IN USE AT THIS TIME
-        ///// <summary>
-        ///// this is called when installing firmware to perform the extra actions needed such as regkey writes and reboot
-        ///// </summary>
-        ///// <param name="infName"></param>
-        ///// <param name="infFileContent"></param>
-        ///// <param name="hardwareID"></param>
-        ///// <param name="rebootRequired"></param>
-        ///// <param name="line"></param>
-        ///// <param name="installer"></param>
-        ///// <param name="installArgs"></param>
-        ///// <param name="InputTestFilePath"></param>
-        //internal static void FirmwareInstall(string infName, string infFileContent, string hardwareID, string line, string installer, string installArgs, string InputTestFilePath)
-        //{
-        //    try
-        //    {
-        //        Logger.FunctionEnter();
-        //        RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired.Equals(true));
-        //        Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
-        //        XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
-        //        InstallUninstallCall(rebootRequired = true, infName, line, installer, InputTestFilePath, hardwareID);
-        //        Logger.FunctionLeave();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        GetData.GetExceptionMessage(ex);
-        //    }
-        //}
-        #endregion
 
         /// <summary>
         /// this is called when installing firmware to perform the extra actions needed such as regkey writes and reboot
@@ -230,7 +244,7 @@ namespace RandomWriteXML
         /// <param name="installer"></param>
         /// <param name="installArgs"></param>
         /// <param name="InputTestFilePath"></param>
-        internal static void RollbackInstall(string line, string infName, string infFileContent, string hardwareID, bool rebootRequired, string rollbackLine, string installer, string InputTestFilePath)
+        internal static void RollbackInstall(bool stopOnFail, string line, string infName, string infFileContent, string hardwareID, bool rebootRequired, string rollbackLine, string installer, string InputTestFilePath)
         {
             Logger.FunctionEnter();
             string installArgs;
@@ -242,14 +256,14 @@ namespace RandomWriteXML
                 string rollBackDIR = rollbackLine + rollbackINFnameDIR;
                 //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
                 installArgs = " /C /U " + line + " /Q /D";
-                Install_Inf(line, installer, installArgs);
+                Install_Inf(stopOnFail, line, installer, installArgs);
                 Logger.Comment("Uninstall Operation should be complete: " + line);
-                Thread.Sleep(5000);
+                Thread.Sleep(500);
                 installArgs = " /C /A /Q /SE /F /PATH " + rollBackDIR;
                 Logger.Comment("start rollback...");
-                Thread.Sleep(5000);
-                Install_Inf(line, installer, installArgs);
-                Thread.Sleep(5000);
+                Thread.Sleep(1000);
+                Install_Inf(stopOnFail, line, installer, installArgs);
+                Thread.Sleep(1000);
                 RebootAndContinue.RebootCmd(true);
             }
             catch (Exception ex)

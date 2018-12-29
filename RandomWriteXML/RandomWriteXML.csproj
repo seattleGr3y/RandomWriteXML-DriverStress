@@ -61,6 +61,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\CommandLine.exe</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Plossum CommandLine">
       <HintPath>Uilities\Plossum CommandLine.dll</HintPath>
     </Reference>

@@ -23,7 +23,7 @@ namespace RandomWriteXML
             xmlWriter.WriteStartElement("InfDirectories");
             xmlWriter.WriteWhitespace("\n");
             
-            foreach (string infDir in GetData.GetInfPathsList(supportFolderLOC))
+            foreach (string infDir in GetData.GetInfPathsList(dirName))
             {
                 string infName = Path.GetFileName(infDir);
                 infIndex++;
@@ -80,7 +80,6 @@ namespace RandomWriteXML
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("check the XML...");
             Console.ForegroundColor = ConsoleColor.White;
-            //Console.ReadKey();
         }
 
         #region TESTING THIS METHOD 10/17/2018
@@ -142,9 +141,11 @@ namespace RandomWriteXML
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
+                string StartSeedSTR = testInputData.XPathSelectElement("/Tests/TestChoices/StartSeed").Value.ToString();
+                Thread.Sleep(500);
                 testInputData.Save(InputTestFilePathBAK);
-
-                Logger.Comment("Starting list was this  : " + StartSeed);
+                Thread.Sleep(500);
+                Logger.Comment("Starting list was this  : " + StartSeedSTR);
                 Logger.Comment("Current list to execute : " + currentSeed);
                 Logger.FunctionLeave();
                 //return seed;
@@ -169,8 +170,8 @@ namespace RandomWriteXML
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
-                //int testRunLoop = int.Parse(testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value);
-                //testRunLoop--;
+                int testRunLoop = int.Parse(testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value);
+                executionCount--;
                 string executionCountSTR = Convert.ToString(executionCount);
                 testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCountSTR;
                 Logger.Comment("changing testRunLoop : " + executionCountSTR + " to testRunLoop - 1 ");
@@ -212,7 +213,7 @@ namespace RandomWriteXML
                         driverPath.Remove();
                     }
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
                 testInputData.Save(InputTestFilePath);
             }
             catch (Exception ex)

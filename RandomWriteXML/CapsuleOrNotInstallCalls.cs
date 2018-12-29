@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace RandomWriteXML
 {
@@ -19,8 +20,12 @@ namespace RandomWriteXML
         /// <param name="startChoice"></param>
         /// <param name="rollbackLine"></param>
         /// <param name="InputTestFilePath"></param>
-        internal static void IsNotCapsule(int? driverPathListCount, string infName, List<string> DriverPathList, string line, string InputTestFilePathBAK, string installer, int executionCount, string dirName, string startChoice, string rollbackLine, string InputTestFilePath)
+        internal static void IsNotCapsule(bool stopOnFail, int seedIndex, string infIndexListString, int? driverPathListCount, string infName, List<string> DriverPathList, string line, string InputTestFilePathBAK, string installer, int executionCount, string dirName, string startChoice, string rollbackLine, string InputTestFilePath)
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("seedIndex from IsNotCapsule : " + seedIndex);
+            DriverStressInit.UpdateXML(seedIndex);
+
             bool rebootRequired = false;
             Logger.FunctionEnter();
             string infFileContent = File.ReadAllText(line).ToUpper();
@@ -29,8 +34,13 @@ namespace RandomWriteXML
             string hardwareID = GetData.FirmwareInstallGetHID(line);
             driverPathListCount--;
 
+            Console.WriteLine("does the xml look correct now?");
+            Console.ForegroundColor = ConsoleColor.White;
+            //Console.ReadKey();
             Logger.Comment("this will now install : " + infName);
-            SafeNativeMethods.InstallUninstallCall(rebootRequired, infName, line, installer, InputTestFilePath, hardwareID);
+            int infListCount = DriverPathList.Count;
+            XMLReader.GetDriversPath(InputTestFilePath, executionCount, infListCount);
+            SafeNativeMethods.InstallUninstallCall(stopOnFail, rebootRequired, infName, line, installer, InputTestFilePath, hardwareID);
             Logger.FunctionLeave();
         }
 
@@ -45,8 +55,12 @@ namespace RandomWriteXML
         /// <param name="startChoice"></param>
         /// <param name="rollbackLine"></param>
         /// <param name="InputTestFilePath"></param>
-        internal static void IfIsCapsule(int? driverPathListCount, string infName, List<string> DriverPathList, string line, string InputTestFilePathBAK, string installer, int executionCount, string dirName, string startChoice, string rollbackLine, string InputTestFilePath)
+        internal static void IfIsCapsule(bool stopOnFail, int seedIndex, string infIndexListString, int? driverPathListCount, string infName, List<string> DriverPathList, string line, string InputTestFilePathBAK, string installer, int executionCount, string dirName, string startChoice, string rollbackLine, string InputTestFilePath)
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("seedIndex from IfIsCapsule : " + seedIndex);
+            DriverStressInit.UpdateXML(seedIndex);
+
             bool needRollBack = true;
             bool rebootRequired = true;
             Logger.FunctionEnter();
@@ -55,7 +69,7 @@ namespace RandomWriteXML
             string infFileContent = File.ReadAllText(line).ToUpper();
             string infDir = Path.GetDirectoryName(line);
             Logger.Comment("IfIsCapsule isCapsule infName " + infName);
-            Directory.CreateDirectory(rollbackLine);
+            //Directory.CreateDirectory(rollbackLine);
             string infNameToTest = Path.GetFileNameWithoutExtension(line);
             string expectedDriverDate = GetData.GetDriverDate(line);
             string infPath = Path.GetDirectoryName(line);
@@ -63,10 +77,11 @@ namespace RandomWriteXML
             string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, line);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("friendlyDriverName from IfIsCapsule : " + friendlyDriverName);
-            Console.WriteLine("friendlyDriverName from infNameToTest : " + infNameToTest);
-            Console.WriteLine("friendlyDriverName from expectedDriverVersion : " + expectedDriverVersion);
-            Console.WriteLine("friendlyDriverName from expectedDriverDate : " + expectedDriverDate);
+            Console.WriteLine("infNameToTest from IfIsCapsule : " + infNameToTest);
+            Console.WriteLine("expectedDriverVersion from IfIsCapsule : " + expectedDriverVersion);
+            Console.WriteLine("expectedDriverDate from IfIsCapsule : " + expectedDriverDate);
             Console.ForegroundColor = ConsoleColor.White;
+            //Console.ReadKey();
             bool isInstalled = CheckWhatInstalled.CheckInstalled(friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
 
             string hardwareID = GetData.FirmwareInstallGetHID(line);
@@ -78,10 +93,12 @@ namespace RandomWriteXML
                 Console.WriteLine("THIS VERSION IS CURRENTLY INSTALLED ROLLBACK NOW....");
                 Console.WriteLine("----------------------------------------------------");
                 Console.ForegroundColor = ConsoleColor.White;
-                GetData.IfWillNeedRollBack(line, needRollBack, infName, rollbackLine);
+                GetData.IfWillNeedRollBack(line, needRollBack, infName);
                 driverPathListCount--;
                 Logger.Comment("this will now begin to ROLLBACK : " + infName);
-                SafeNativeMethods.RollbackInstall(line, infName, infFileContent, hardwareID, rebootRequired = true, rollbackLine, installer, InputTestFilePath);
+                int infListCount = DriverPathList.Count;
+                XMLReader.GetDriversPath(InputTestFilePath, executionCount, infListCount);
+                SafeNativeMethods.RollbackInstall(stopOnFail, line, infName, infFileContent, hardwareID, rebootRequired = true, rollbackLine, installer, InputTestFilePath);
             }
             else
             {
@@ -97,11 +114,12 @@ namespace RandomWriteXML
                 driverPathListCount--;
                 Logger.Comment("this will now Install : " + infName);
                 installArgs = " /C /A /Q /SE /F /PATH " + infPath;
-                SafeNativeMethods.Install_Inf(line, installer, installArgs);
+                SafeNativeMethods.Install_Inf(stopOnFail, line, installer, installArgs);
                 RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
                 Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
-                //XMLWriter.RemoveXMLElemnt(InputTestFilePath, infName);
-                //RebootAndContinue.RebootCmd(true);
+                int infListCount = DriverPathList.Count;
+                XMLReader.GetDriversPath(InputTestFilePath, executionCount, infListCount);
+                RebootAndContinue.RebootCmd(true);
             }
             Logger.FunctionLeave();
         }

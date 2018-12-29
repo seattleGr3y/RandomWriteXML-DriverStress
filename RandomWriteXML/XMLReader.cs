@@ -13,38 +13,38 @@ namespace RandomWriteXML
         internal static List<string> testInputData = new List<string>();
         internal static List<string> DriverNameList = new List<string>();
         internal static string InputTestFilePathBAK = @".\StressTestXML.xml.BAK";
-        public static string DriverInfPath { get; private set; }
 
         /// <summary>
         /// get the list of driver paths for the app to use for execution
         /// </summary>
         /// <param name="InputTestFilePath"></param>
         /// <returns></returns>
-        internal static List<string> GetDriversPath(string InputTestFilePath)
+        internal static void GetDriversPath(string InputTestFilePath, int executionCount, int infListCount)
         {
+            List<string> TMPlist = new List<string>();
             try
             {
                 var testInputData = XDocument.Load(InputTestFilePath);
                 var driversPathList = testInputData.Descendants("InfDirectories");
-                int infsCount = driversPathList.Count();
-                if (infsCount.Equals(0))
-                {
-                    InputTestFilePath = InputTestFilePathBAK;
-                    testInputData = XDocument.Load(InputTestFilePath);
-                    driversPathList = testInputData.Descendants("InfDirectories");
-                }
 
                 foreach (var driverPath in driversPathList.Elements())
                 {
                     string DriverInfPath = driverPath.Attribute("InfPath").Value;
-                    XMLReader.testInputData.Add(DriverInfPath);
+                    Console.WriteLine("DriverInfPath  : " + DriverInfPath);
+                    TMPlist.Add(DriverInfPath);
                 }
-                return XMLReader.testInputData;
+
+                Console.WriteLine(TMPlist.Count());
+                //Console.ReadKey();
+                                
+                if (TMPlist.Count() == 0)
+                {
+                    DriverStressInit.RewriteXMLContinue(executionCount, infListCount);
+                }
             }
             catch (Exception ex)
             {
                 GetData.GetExceptionMessage(ex);
-                return null;
             }
         }
 
@@ -90,7 +90,7 @@ namespace RandomWriteXML
         /// </summary>
         /// <param name="InputTestFilePath"></param>
         /// <returns></returns>
-        internal static string FromINFIndex(string InputTestFilePath, int index)
+        internal static string FromINFIndex(int infListCount, string InputTestFilePath, int index, int executionCount, int driverPathListCount)
         {
             string result = string.Empty;
             try
@@ -111,7 +111,6 @@ namespace RandomWriteXML
                         Console.ForegroundColor = ConsoleColor.White;
                         result = line;
                     }
-                    else { continue; }
                 }
                 Logger.FunctionLeave();
                 return result;
@@ -235,12 +234,17 @@ namespace RandomWriteXML
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
-                string varIndexList = testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
-                //List<string> listSeed = new List<string>();
-                // listSeed = testInputData.XPathSelectElement("/DriverTests/Test/Seed").Value.ToList<string>;
-                Logger.Comment("randomized list to save for re-use if need be : " + varIndexList);
-                Logger.FunctionLeave();
-                result = varIndexList;
+                if (string.IsNullOrEmpty(testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString()))
+                {
+                    result = null;
+                }
+                else
+                {
+                    string varIndexList = testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value.ToString();
+                    Logger.Comment("randomized list to save for re-use if need be : " + varIndexList);
+                    Logger.FunctionLeave();
+                    result = varIndexList;
+                }
             }
             catch (Exception ex)
             {

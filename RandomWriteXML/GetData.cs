@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -97,7 +98,7 @@ namespace RandomWriteXML
                     Logger.Comment("the following should be the driver date");
                     Logger.Comment(expectedDriverDate);
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Expected Driver Date 3 : " + expectedDriverDate);
+                    Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
                     Console.ForegroundColor = ConsoleColor.White;
                     //Console.ReadKey();
                     return expectedDriverDate;
@@ -108,7 +109,7 @@ namespace RandomWriteXML
                     Logger.Comment("the following should be the driver date");
                     Logger.Comment(expectedDriverDate);
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Expected Driver Date 4 : " + expectedDriverDate);
+                    Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
                     Console.ForegroundColor = ConsoleColor.White;
                     //Console.ReadKey();
                     return expectedDriverDate;
@@ -124,10 +125,7 @@ namespace RandomWriteXML
         internal static void GetExceptionMessage(Exception ex)
         {
             Logger.Error(ex.ToString());
-            //Console.ForegroundColor = ConsoleColor.Red;
-            //Console.WriteLine(ex.ToString());
-            //Console.ForegroundColor = ConsoleColor.White;
-            //Console.ReadKey();
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -152,8 +150,12 @@ namespace RandomWriteXML
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        internal static bool CheckDriverIsFirmware(string line)
+        internal static bool CheckDriverIsFirmware(string line, int executionCount, int infListCount)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("CheckDriverIsFirmware method : " + line);
+            Console.ForegroundColor = ConsoleColor.White;
+            Thread.Sleep(500);
             Logger.FunctionEnter();
             string getIsFirmware = "Class=Firmware";
             bool result = false;
@@ -232,18 +234,22 @@ namespace RandomWriteXML
         /// that now needs to be 'installed' via the rollback folder so the old version is 
         /// now installed again (rollback)
         /// <returns></returns>
-        internal static void IfWillNeedRollBack(string line, bool needRollBack, string infName, string rollBackLine)
+        internal static void IfWillNeedRollBack(string line, bool needRollBack, string infName)
         {
             try
             {
                 Logger.FunctionEnter();
                 string rbInfName = Path.GetFileNameWithoutExtension(line);
                 string rollbackINFnameDIR = @"\" + rbInfName;
-                Directory.CreateDirectory(rollBackLine + rollbackINFnameDIR);
-                string rollBackDIR = rollBackLine + rollbackINFnameDIR;
+                string fullRollBackDir = Program.rollBackDir + rollbackINFnameDIR;
+                if (!Directory.Exists(fullRollBackDir))
+                {
+                    Directory.CreateDirectory(fullRollBackDir);
+                }
                 string dirToCopy = @"C:\Windows\System32\DriverStore\FileRepository\";
                 foreach (string dirToTest in Directory.EnumerateDirectories(dirToCopy))
                 {
+                    if (Directory.Exists(fullRollBackDir)) { break; }
                     if (Regex.Match(dirToTest, infName, RegexOptions.IgnoreCase).Success)
                     {
                         // Get the subdirectories for the specified directory.
@@ -252,9 +258,9 @@ namespace RandomWriteXML
                         FileInfo[] files = dir.GetFiles();
                         foreach (FileInfo file in files)
                         {
-                            string temppath = Path.Combine(rollBackLine, file.Name);
+                            string temppath = Path.Combine(fullRollBackDir, file.Name);
 
-                            if (!file.Exists)
+                            if (file.Exists)
                             {
                                 continue;
                             }
@@ -263,8 +269,8 @@ namespace RandomWriteXML
                                 file.CopyTo(temppath, false);
                             }
                         }
-                        Utilities.DirectoryCopy(dirToTest, rollBackDIR, true);
-                        Logger.Comment("copy stuff to rollBacks folder...");
+                        Utilities.DirectoryCopy(dirToTest, fullRollBackDir, true);
+                        Logger.Comment("copy stuff to RollBacks folder...");
                     }
                     else
                     {
@@ -421,15 +427,21 @@ namespace RandomWriteXML
             List<string> infPathList = new List<string>();
 
             var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", SearchOption.AllDirectories);
-            foreach (string infDir in infFiles)
+            foreach (string infFile in infFiles)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("getting the infPathList : " + infDir);
-                Console.ForegroundColor = ConsoleColor.White;
-                if (infDir.Contains(".inf"))
+                string infDir = Path.GetDirectoryName(infFile);
+                string infRealName = Path.GetFileNameWithoutExtension(infFile);
+                string infPathTMP = Path.GetFullPath(infFile);
+                if (infPathTMP.Contains("RollBacks"))
                 {
-                    Console.WriteLine(infDir);
-                    infPathList.Add(infDir);
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("RollBacks...don't add this to the damn list...");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    continue;
+                }
+                else if (infDir.Contains(infRealName))
+                {
+                    infPathList.Add(infFile);
                 }
             }
             return infPathList;
