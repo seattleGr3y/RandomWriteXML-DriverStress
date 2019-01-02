@@ -91,6 +91,7 @@ namespace DriverCapsuleStressTool
 
                     if (randomize)
                     {
+                        executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
                         foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                         {
                             string index = Convert.ToString(seedIndex);
@@ -104,7 +105,6 @@ namespace DriverCapsuleStressTool
                             string infName = Path.GetFileName(line);
 
                             Directory.CreateDirectory(Program.desktopPath + @"\RESULTS");
-                            executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
                             bool isCapsule = GetData.CheckDriverIsFirmware(line, executionCount, infListCount);
 
                             if (isCapsule)
@@ -135,6 +135,7 @@ namespace DriverCapsuleStressTool
 
                     else
                     {
+                        executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
                         foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                         {
                             string index = Convert.ToString(seedIndex);
@@ -146,7 +147,6 @@ namespace DriverCapsuleStressTool
                             string infName = Path.GetFileNameWithoutExtension(line);
                             string testIsStartChoice = GetData.GetTestFirst(InputTestFilePath);
                             string testInfName = infName.ToLower();
-                            executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
                             infIndexListString = File.ReadAllText(seedFilePath);
 
                             if (line.Contains(testIsStartChoice.ToLower()))
@@ -223,6 +223,7 @@ namespace DriverCapsuleStressTool
                         }
                         Thread.Sleep(500);
                     }
+                    executionCount--;
                 }
             }
             catch (Exception ex)

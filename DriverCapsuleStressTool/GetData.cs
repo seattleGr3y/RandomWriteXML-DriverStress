@@ -108,7 +108,11 @@ namespace DriverCapsuleStressTool
                         hardwareID = textLine.Substring(begingIndex, (endingIndex + 1) - begingIndex).TrimStart('{').TrimEnd('}');
                 }
             }
+            
             Logger.FunctionLeave();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("hardwareID in the GetHID method : " + hardwareID);
+            Console.ForegroundColor = ConsoleColor.Green;
             return hardwareID;
         }
 
@@ -557,18 +561,20 @@ namespace DriverCapsuleStressTool
 
                 if (miniDumpFiles.Count() > 0)
                 {
-
                     crashDumpOccurred = true;
-                    int fileStartIndex = miniDumpFiles[0].LastIndexOf('\\') + 1;
-                    string fileNameName = miniDumpFiles[0].Substring(fileStartIndex);
+                    foreach (string fileName in Directory.EnumerateFiles(miniDumpPath))
+                    {
+                        timeStamp = DateTime.Now.ToLocalTime().ToString();
+                        string archivedMinidumpFile = fileName.ToUpper().Replace(".DMP", String.Empty) + "_" + timeStamp + ".DMP";
+                        newMemoryDumpFIle = miniDumpArchive + "\\" + archivedMinidumpFile;
+                        string copyMiniDumpPath = miniDumpPath + fileName;
+                        Utilities.CopyFile(copyMiniDumpPath, newMemoryDumpFIle);
+                    }
 
+                    //int fileStartIndex = miniDumpFiles[0].LastIndexOf('\\') + 1;
+                    //string fileNameName = miniDumpFiles[0].Substring(fileStartIndex);
                     //crashDumpPath = miniDumpFiles[0];
-
                     //Rename crash dump file
-                    timeStamp = DateTime.Now.ToLocalTime().ToString();
-                    string archivedMinidumpFile = fileNameName.ToUpper().Replace(".DMP", String.Empty) + "_" + timeStamp + ".DMP";
-                    newMemoryDumpFIle = miniDumpArchive + "\\" + archivedMinidumpFile;
-                    File.Move(crashDumpPath, newMemoryDumpFIle);
 
                 }
             }
@@ -596,9 +602,6 @@ namespace DriverCapsuleStressTool
 
                 if (infPathTMP.Contains("Rollbacks"))
                 {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("Rollbacks...don't add this to the damn list...");
-                    Console.ForegroundColor = ConsoleColor.White;
                     continue;
                 }
                 if (infsList.Contains(infRealName))
@@ -637,9 +640,6 @@ namespace DriverCapsuleStressTool
 
                 if (infPathTMP.Contains("Rollbacks"))
                 {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("Rollbacks...don't add this to the damn list...");
-                    Console.ForegroundColor = ConsoleColor.White;
                     continue;
                 }
                 if (infPathList.Contains(infRealName))

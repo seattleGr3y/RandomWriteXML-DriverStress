@@ -259,6 +259,7 @@ namespace DriverCapsuleStressTool
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 var driversPathList = testInputData.Descendants("InfDirectories");
                 string seedIndexStr = Convert.ToString(seedIndex);
+                int currentInstallCount = 0;
 
                 foreach (var driverPath in driversPathList.Elements())
                 {
@@ -272,7 +273,7 @@ namespace DriverCapsuleStressTool
                         Console.ForegroundColor = ConsoleColor.White;
 
                         string currentInstallCountSTR = driverPath.Attribute("InstallCount").Value;
-                        int currentInstallCount = Convert.ToInt32(currentInstallCountSTR);
+                        currentInstallCount = Convert.ToInt32(currentInstallCountSTR);
                         currentInstallCount++;
                         driverPath.Attribute("InstallCount").Value = currentInstallCount.ToString();
                         testInputData.Save(InputTestFilePathBAK);
@@ -299,6 +300,7 @@ namespace DriverCapsuleStressTool
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 var driversPathList = testInputData.Descendants("InfDirectories");
                 string seedIndexStr = Convert.ToString(seedIndex);
+                int currentUnInstallCount = 0;
 
                 foreach (var driverPath in driversPathList.Elements())
                 {
@@ -312,7 +314,7 @@ namespace DriverCapsuleStressTool
                         Console.ForegroundColor = ConsoleColor.White;
 
                         string currentUnInstallCountSTR = driverPath.Attribute("UnInstallCount").Value;
-                        int currentUnInstallCount = Convert.ToInt32(currentUnInstallCountSTR);
+                        currentUnInstallCount = Convert.ToInt32(currentUnInstallCountSTR);
                         currentUnInstallCount++;
                         driverPath.Attribute("UnInstallCount").Value = currentUnInstallCount.ToString();
                         testInputData.Save(InputTestFilePathBAK);

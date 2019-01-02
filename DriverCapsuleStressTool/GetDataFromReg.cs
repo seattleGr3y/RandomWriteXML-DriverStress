@@ -76,7 +76,80 @@ namespace DriverCapsuleStressTool
         /// <param name="infName"></param>
         /// <param name="hardwareID"></param>
         /// <returns></returns>
-        internal static string GetOEMinfNameFromReg(string actualInfName, string hardwareID, string classGUID)
+        internal static void GetOEMinfNameFromReg(string actualInfName, string hardwareID, string classGUID)
+        {
+            string infNameFromReg = string.Empty;
+            Logger.FunctionEnter();
+            try
+            {
+                RegistryKey baseRk2;
+                baseRk2 = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\");
+                string[] subKeyList2 = baseRk2.GetSubKeyNames();
+                //hardwareID = hardwareID.TrimStart('{').TrimEnd('}');
+                foreach (string subKey2 in subKeyList2)
+                {
+                    if (string.IsNullOrEmpty(hardwareID)) { break; }
+                    if (string.IsNullOrEmpty(subKey2)) { continue; }
+
+                    RegistryKey regkey2 = baseRk2.OpenSubKey(subKey2);
+
+                    if (regkey2.ToString().Contains(classGUID))
+                    {
+                        string[] keyValueNamesList2 = regkey2.GetSubKeyNames();
+
+                        foreach (string keySubKeyValueName in keyValueNamesList2)
+                        {
+                            if (string.IsNullOrEmpty(keySubKeyValueName)) { continue; }
+                            if (keySubKeyValueName.Equals("Properties")) { continue; }
+
+                            RegistryKey SUBregkey2 = regkey2.OpenSubKey(keySubKeyValueName);
+
+                            string[] subSubkeyValueNamesList2 = SUBregkey2.GetValueNames();
+
+                            foreach (string subSUBsubKeyValueName in subSubkeyValueNamesList2)
+                            {
+                                if (string.IsNullOrEmpty(subSUBsubKeyValueName)) { continue; }
+
+                                if (subSUBsubKeyValueName.Equals("MatchingDeviceId"))
+                                {
+                                    string matchDevIDkey = SUBregkey2.GetValue("MatchingDeviceId").ToString().ToLower();
+
+                                    if (matchDevIDkey.Contains(hardwareID.ToLower()))
+                                    {
+                                        infNameFromReg = SUBregkey2.GetValue("InfPath").ToString();
+                                        Console.WriteLine(infNameFromReg);
+
+                                        foreach (string infToCheck in Directory.EnumerateFiles(oemInfPath))
+                                        {
+                                            if (infToCheck.Contains(infNameFromReg))
+                                            {
+                                                Logger.Comment("deleting the oem##.inf file : " + infNameFromReg);
+                                                File.Delete(oemInfPath + infNameFromReg);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Comment("exception thrown in GetDataFromReg checking if driver is installed...");
+                GetData.GetExceptionMessage(ex);
+            }
+            Logger.FunctionLeave();
+        }
+
+        /// <summary>
+        /// if exists find the oem##.inf file and delete it before attempting rollback
+        /// GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID);
+        /// </summary>
+        /// <param name="infName"></param>
+        /// <param name="hardwareID"></param>
+        /// <returns></returns>
+        internal static string GetOEMinfNameFromRegSTR(string actualInfName, string hardwareID, string classGUID)
         {
             string result = string.Empty;
             string infNameFromReg = string.Empty;
@@ -86,7 +159,7 @@ namespace DriverCapsuleStressTool
                 RegistryKey baseRk2;
                 baseRk2 = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\");
                 string[] subKeyList2 = baseRk2.GetSubKeyNames();
-                hardwareID = hardwareID.TrimStart('{').TrimEnd('}');
+                //hardwareID = hardwareID.TrimStart('{').TrimEnd('}');
                 foreach (string subKey2 in subKeyList2)
                 {
                     if (string.IsNullOrEmpty(subKey2)) { continue; }
@@ -118,6 +191,7 @@ namespace DriverCapsuleStressTool
                                     {
                                         infNameFromReg = SUBregkey2.GetValue("InfPath").ToString();
                                         result = infNameFromReg;
+                                        Console.WriteLine(infNameFromReg);
                                     }
                                 }
                             }
@@ -129,16 +203,6 @@ namespace DriverCapsuleStressTool
             {
                 Logger.Comment("exception thrown in GetDataFromReg checking if driver is installed...");
                 GetData.GetExceptionMessage(ex);
-            }
-
-            
-            foreach (string infToCheck in Directory.EnumerateFiles(oemInfPath))
-            {
-                if (infToCheck.Contains(infNameFromReg))
-                {
-                    Logger.Comment("deleting the oem##.inf file : " + infNameFromReg);
-                    File.Delete(oemInfPath + infNameFromReg);
-                }
             }
             Logger.FunctionLeave();
             return result;

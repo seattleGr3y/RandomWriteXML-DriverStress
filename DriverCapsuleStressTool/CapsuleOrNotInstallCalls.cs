@@ -30,10 +30,11 @@ namespace DriverCapsuleStressTool
                 string infDir = Path.GetDirectoryName(line);
                 string hardwareID = GetData.FirmwareInstallGetHID(line);
                 driverPathListCount--;
-                Logger.Comment("this will now install : " + infName);
+                Logger.Comment("this will now install infName : " + infName);
+                Logger.Comment("this will now install hardwareID : " + hardwareID);
                 //int infListCount = DriverPathList.Count;
                 //  XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
-                SafeNativeMethods.InstallUninstallCall(seedIndex, rebootRequired, infName, line, installer, InputTestFilePath, hardwareID);
+                SafeNativeMethods.InstallUninstallCall(seedIndex, rebootRequired, infName, line, installer, InputTestFilePath);
                 Logger.FunctionLeave();
             }
             catch (Exception ex)

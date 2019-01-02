@@ -53,10 +53,11 @@ namespace DriverCapsuleStressTool
 
                 /// write to a CSV
                 /// headers for csv file
-                var header = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\"",
+                var header = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\"",
                                            "InfName",
                                            "DeviceName",
                                            "DriverVersion",
+                                           "HardwareID",
                                            "DriverDate"
                                           );
                 installedDrivers.AppendLine(header);
@@ -68,9 +69,10 @@ namespace DriverCapsuleStressTool
 
                     foreach (ManagementObject WmiObject in s.Get())
                     {
-                        var listResults = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\"",
+                        var listResults = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\"",
                                               WmiObject["InfName"],
                                               WmiObject["DeviceName"],
+                                              WmiObject["HardwareID"],
                                               WmiObject["DriverVersion"],
                                               WmiObject["DriverDate"]
                                              );
@@ -103,6 +105,7 @@ namespace DriverCapsuleStressTool
             string csvFileName = "DeviceName-InfName.czv";
             string csvFileFullPath = Program.dirName + csvFileName;
             string infName = string.Empty;
+            string infNameFromReg = string.Empty;
             string installedDriverVersion = string.Empty;
             string installedDeviceName = string.Empty;
             DateTime installedDriverDate;
@@ -110,13 +113,21 @@ namespace DriverCapsuleStressTool
             string driverDate = string.Empty;
             bool result = false;
             string classGUID = GetData.GetClassGUID(line);
-            string infNameFromReg = GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
+            if (string.IsNullOrEmpty(hardwareID))
+            {
+                //do nothing for now
+                hardwareID = "0x00000000";
+                Console.WriteLine("not getting a hardwareID...??");
+                Logger.Comment("no hardwareID in the INF so we can't use it to check if driver is installed");
+            }
+            else
+            {
+                infNameFromReg = GetDataFromReg.GetOEMinfNameFromRegSTR(infName, hardwareID, classGUID);
+            }
             using (ManagementObjectSearcher s2 =
                     new ManagementObjectSearcher(
                     "root\\CIMV2",
                     "SELECT * FROM Win32_PnPSignedDriver"))
-
-
 
             foreach (ManagementObject WmiObject in s2.Get())
                 {

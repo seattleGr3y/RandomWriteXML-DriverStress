@@ -159,7 +159,7 @@ namespace DriverCapsuleStressTool
         /// <param name="InputTestFilePath"></param>
         /// <param name="rebootRequired"></param>
         /// <param name="hardwareID"></param>
-        internal static void InstallUninstallCall(int seedIndex, bool rebootRequired, string infName, string line, string installer, string InputTestFilePath, string hardwareID)
+        internal static void InstallUninstallCall(int seedIndex, bool rebootRequired, string infName, string line, string installer, string InputTestFilePath)
         {
             try
             {
@@ -171,6 +171,7 @@ namespace DriverCapsuleStressTool
                 string installArgs;
                 string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, line);
                 XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
+                string hardwareID = GetData.FirmwareInstallGetHID(line);
                 bool isInstalled = CheckWhatInstalled.CheckInstalled(line, hardwareID, friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
                 if (isInstalled)
                 {
@@ -257,8 +258,6 @@ namespace DriverCapsuleStressTool
                 string rbInfName = Path.GetFileNameWithoutExtension(line);
                 string infPath = Path.GetDirectoryName(line);
                 infName = infName.Replace("Surface", "");
-                string classGUID = GetData.GetClassGUID(line);
-                GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
 
                 var rollbackFiles = Directory.EnumerateFiles(Program.rollbackLine, "*.inf", SearchOption.AllDirectories);
                 foreach (string rollbackFile in rollbackFiles)
@@ -279,6 +278,8 @@ namespace DriverCapsuleStressTool
                 Thread.Sleep(1000);
                 Install_Inf(line, Program.installer, installArgs, seedIndex);
                 Thread.Sleep(1000);
+                string classGUID = GetData.GetClassGUID(line);
+                GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
                 GetDataFromReg.CheckRegIsInstalled(infName, hardwareID);
                 Thread.Sleep(1000);
                 RebootAndContinue.RebootCmd(true);
