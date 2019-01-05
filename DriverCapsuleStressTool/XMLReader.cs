@@ -100,10 +100,14 @@ namespace DriverCapsuleStressTool
 
                 foreach (var driverPath in driversPathList.Elements())
                 {
-                    string testLine = driverPath.Attribute("InfPath").Value;
+                    string testLine = driverPath.Attribute("InfPath").Value.ToLower();
+                    //Console.WriteLine("IndexFromINF finds testLine : " + testLine);
+                    //Console.ReadKey();
                     if (line.Equals(testLine))
                     {
                         string index = driverPath.Attribute("InfIndex").Value;
+                        //Console.WriteLine("IndexFromINF finds InfIndex : " + index);
+                        //Console.ReadKey();
                         result = index;
                     }
                     else { continue; }
@@ -223,6 +227,26 @@ namespace DriverCapsuleStressTool
                 Logger.Comment("randomized list to save for re-use if need be : " + varIndexList);
                 Logger.FunctionLeave();
                 result = varIndexList;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+            return result;
+        }
+        
+        internal static bool GetGroupFirmware(string InputTestFilePathBAK)
+        {
+            bool result = false;
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePathBAK);
+                string groupFirmwareSTR = testInputData.XPathSelectElement("/Tests/TestChoices/GroupFirmware").Value.ToString();
+                Logger.Comment("Should we install all firmware then reboot : " + groupFirmwareSTR);
+                bool groupFirmware = Convert.ToBoolean(groupFirmwareSTR);
+                Logger.FunctionLeave();
+                result = groupFirmware;
             }
             catch (Exception ex)
             {

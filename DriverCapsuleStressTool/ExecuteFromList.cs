@@ -12,6 +12,7 @@ namespace DriverCapsuleStressTool
     class ExecuteFromList
     {
         internal static List<string> capList = new List<string>();
+        internal static bool rebootRequired = false;
 
         /// <summary>
         /// executes the stress in the order given by the list that was created
@@ -26,6 +27,10 @@ namespace DriverCapsuleStressTool
         /// <param name="startChoice"></param>
         internal static void ExecuteTheList(bool randomize, int executionCount, string dirName, string InputTestFilePath, string supportFolderLOC, string seedFilePath, string startChoice)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("Waiting 3 seconds to be sure device is up and running...");
+            Console.ForegroundColor = ConsoleColor.White;
+            Thread.Sleep(3000);
             if (RegCheck.IsRebootPending())
             {
                 Logger.Comment("there is a pending reboot...");
@@ -56,10 +61,12 @@ namespace DriverCapsuleStressTool
             {
                 while (executionCount > 0)
                 {
-                    //int driverPathListCount;
                     List<string> DriverPathList = new List<string>();
                     string seedStr = XMLReader.GetSeed(Program.InputTestFilePathBAK);
-                    File.WriteAllText(Program.dirName + @"\" + executionCount + ".txt", seedStr);
+                    if (!File.Exists(Program.dirName + @"\" + executionCount + ".txt"))
+                    {
+                        File.WriteAllText(Program.dirName + @"\" + executionCount + ".txt", seedStr);
+                    }
 
                     string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                     Thread.Sleep(500);
@@ -75,13 +82,11 @@ namespace DriverCapsuleStressTool
                         if (randomize)
                         {
                             executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
-                            //executionCount--;
                             DriverStressInit.RewriteXMLContinue(executionCount, infListCount);
                         }
                         else
                         {
                             executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
-                            //executionCount--;
                             DriverStressInit.RewriteXMLContinue(executionCount, infListCount);
                         }
                     }
@@ -132,9 +137,74 @@ namespace DriverCapsuleStressTool
                         Thread.Sleep(500);
                     }
 
-
                     else
                     {
+                        // add ability to group install all firmware together with only one reboot
+                        // in this case the firmware would all install individually but have only one reboot
+                        // user should see each different color bar during reboot\install of all firmware
+                        bool groupFirmware = XMLReader.GetGroupFirmware(Program.InputTestFilePathBAK);
+
+                        if (groupFirmware)
+                        {
+                            executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
+                            foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
+                            {
+                                Console.WriteLine("if (groupFirmware) - seedIndex : " + seedIndex);
+                                
+                                string line = XMLReader.FromINFIndex(infListCount, InputTestFilePath, seedIndex, executionCount).ToLower();
+
+                                Console.WriteLine("if (groupFirmware) - line : " + line);
+                                //Console.ReadKey();
+
+                                bool isCapsule = GetData.CheckDriverIsFirmware(line, executionCount, infListCount);
+
+                                if (isCapsule)
+                                {
+                                    capList.Add(line);
+                                }
+                            }
+
+                            foreach (string groupedFirmware in capList)
+                            {
+                                if (capList.Equals(null))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    string seedIndexSTR = XMLReader.IndexFromINF(Program.InputTestFilePath, groupedFirmware);
+                                    int seedIndex = Convert.ToInt32(seedIndexSTR);
+                                    XMLWriter.RemoveXMLElemnt(InputTestFilePath, groupedFirmware, seedIndex);
+                                    XMLWriter.UpdateSeedXML(seedIndex);
+                                    Console.WriteLine("seedIndex : " + seedIndex);
+                                    // Console.ReadKey();
+
+                                    string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, groupedFirmware);
+                                    // XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
+                                    string hardwareID = GetData.FirmwareInstallGetHID(groupedFirmware);
+                                    string expectedDriverVersion = GetData.GetDriverVersion(groupedFirmware);
+                                    Logger.Comment("IfIsCapsule From RegCheck before IF : " + expectedDriverVersion);
+                                    string infNameToTest = Path.GetFileNameWithoutExtension(groupedFirmware);
+                                    string expectedDriverDate = GetData.GetDriverDate(groupedFirmware);
+                                    bool isInstalled = CheckWhatInstalled.CheckInstalled(groupedFirmware, hardwareID, friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
+
+                                    if (isInstalled)
+                                    {
+                                        string infFileContent = File.ReadAllText(groupedFirmware).ToUpper();
+                                        string infName = Path.GetFileNameWithoutExtension(groupedFirmware);
+                                        SafeNativeMethods.RollbackInstall(seedIndex, groupedFirmware, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
+                                    }
+                                    else
+                                    {
+                                        string groupedFirmwareDIR = Path.GetDirectoryName(groupedFirmware);
+                                        string installArgs = " /C /A /Q /SE /F /PATH " + groupedFirmwareDIR;
+                                        SafeNativeMethods.Install_Inf(groupedFirmware, Program.installer, installArgs, seedIndex);
+                                    }
+                                }
+                                RebootAndContinue.RebootCmd(true);
+                            }
+                        }
+
                         executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
                         foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                         {
@@ -159,7 +229,6 @@ namespace DriverCapsuleStressTool
                                     infListCount--;
                                     Logger.Comment("re-add the reg key to start post reboot...");
                                     Thread.Sleep(500);
-                                    capList.Add(line);
                                     CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
                                 }
                                 else if (infName.Contains("Surface"))

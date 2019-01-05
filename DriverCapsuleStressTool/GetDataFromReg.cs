@@ -14,6 +14,7 @@ namespace DriverCapsuleStressTool
         //internal static string origInfName;
         internal static string result = null;
         internal static string attemptStatusValue;
+        internal static string versionValue;
         internal static string oemInfPath = @"C:\Windows\INF\";
 
         /// <summary>
@@ -22,15 +23,18 @@ namespace DriverCapsuleStressTool
         /// </summary>
         /// <param name="infName"></param>
         /// <returns> value of LastAttempStatus or 0x12345678 if there was an error reading data </returns>
-        internal static bool CheckRegIsInstalled(string infName, string hardwareID)
+        internal static bool CheckRegIsInstalled(string infName, string hardwareID, string expectedDriverVersion, string line)
         {
             Logger.FunctionEnter();
             bool isInstalledREGcheck = false;
+            string attemptVersionValue;
             bool result = false;
+            //string versionInINF;
             string actualInfName = Path.GetFileNameWithoutExtension(infName);
             RegistryKey baseRk;
             baseRk = Registry.LocalMachine.OpenSubKey(@"HARDWARE\UEFI\ESRT");
             string[] subKeyList = baseRk.GetSubKeyNames();
+            string[] textInput = File.ReadAllLines(line);
 
             try
             {
@@ -41,11 +45,30 @@ namespace DriverCapsuleStressTool
                     {
                         // get the "LastAttemptStatus"
                         attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
+                        versionValue = regkey.GetValue("Version").ToString();
+                        attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
                         int attemptStatusValueINT = Convert.ToInt32(attemptStatusValue);
 
-                        if (attemptStatusValueINT == 0)
+                        //if (attemptVersionValue.Contains(expectedDriverVersion))
+                        //{
+                        //    if (attemptStatusValueINT == 0)
+                        //    {
+                        //        isInstalledREGcheck = true;
+                        //    }
+                        //}
+
+                        foreach (string textLine in textInput)
                         {
-                            isInstalledREGcheck = true;
+                            if (Regex.Match(textLine, versionValue).Success)
+                            {
+                                if (attemptStatusValueINT == 0)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Cyan;
+                                    Console.WriteLine("Matched the HW REV in the inf and Registry : " + isInstalledREGcheck);
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                    isInstalledREGcheck = true;
+                                }
+                            }
                         }
 
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -117,12 +140,17 @@ namespace DriverCapsuleStressTool
                                     if (matchDevIDkey.Contains(hardwareID.ToLower()))
                                     {
                                         infNameFromReg = SUBregkey2.GetValue("InfPath").ToString();
-                                        Console.WriteLine(infNameFromReg);
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
+                                        Console.WriteLine("infNameFromReg : " + infNameFromReg);
+                                        Console.ForegroundColor = ConsoleColor.White;
 
                                         foreach (string infToCheck in Directory.EnumerateFiles(oemInfPath))
                                         {
                                             if (infToCheck.Contains(infNameFromReg))
                                             {
+                                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                                Console.WriteLine("deleting the oem##.inf file : " + infNameFromReg);
+                                                Console.ForegroundColor = ConsoleColor.White;
                                                 Logger.Comment("deleting the oem##.inf file : " + infNameFromReg);
                                                 File.Delete(oemInfPath + infNameFromReg);
                                             }

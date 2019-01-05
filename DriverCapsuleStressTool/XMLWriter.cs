@@ -69,6 +69,11 @@ namespace DriverCapsuleStressTool
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
+            xmlWriter.WriteStartElement("GroupFirmware");
+            xmlWriter.WriteString(Program.groupFirmware.ToString());
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
             xmlWriter.WriteStartElement("StartChoice");
             xmlWriter.WriteString(startChoice);
             xmlWriter.WriteEndElement();

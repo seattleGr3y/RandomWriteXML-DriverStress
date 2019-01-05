@@ -75,17 +75,17 @@ namespace DriverCapsuleStressTool
             string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
             if (string.IsNullOrEmpty(infIndexListString))
             {
-                executionCount--;
+                //executionCount--;
                 RewriteXMLContinue(executionCount, infListCount);
             }
             else if (infListCount == 0)
             {
-                executionCount--;
+                //executionCount--;
                 RewriteXMLContinue(executionCount, infListCount);
             }
             else if (DriverPathList.Equals(null))
             {
-                executionCount--;
+                //executionCount--;
                 RewriteXMLContinue(executionCount, infListCount);
             }
             Logger.FunctionLeave();

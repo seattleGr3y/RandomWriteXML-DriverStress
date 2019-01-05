@@ -112,7 +112,7 @@ namespace DriverCapsuleStressTool
             Logger.FunctionLeave();
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("hardwareID in the GetHID method : " + hardwareID);
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.White;
             return hardwareID;
         }
 
@@ -140,13 +140,6 @@ namespace DriverCapsuleStressTool
                     Logger.Comment(expectedDriverVersion);
                     result = expectedDriverVersion;
                 }
-                //if (Regex.IsMatch(textLine, getVersion2).Equals(true))
-                //{
-                //    expectedDriverVersion = textLine.Split(',')[1];
-                //    Logger.Comment("the following should be the driver version");
-                //    Logger.Comment(expectedDriverVersion);
-                //    result = expectedDriverVersion;
-                //}
             }
             Logger.FunctionLeave();
             return result;
@@ -359,18 +352,13 @@ namespace DriverCapsuleStressTool
                 string rbInfName = Path.GetFileNameWithoutExtension(line).ToLower();
                 string rollbackINFnameDIR = @"\" + rbInfName;
                 string fullRollBackDir = (Program.rollbackLine + rollbackINFnameDIR).ToLower();
-                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Does the Rollbacks directory exist?");
+                Console.ForegroundColor = ConsoleColor.White;
                 //Console.ReadKey();
-                bool rollbackExists = CheckRollbacksExist(line, infName);
-                if (rollbackExists.Equals(true))
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine(fullRollBackDir + " fullRollBackDir already exists...move on and don't copy anything");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
+                string rollbackExists = CheckRollbacksExist(line, infName);
 
-                else if(rollbackExists.Equals(false))
+                if(rollbackExists.Equals(null))
                 {
                     Console.WriteLine("No Rollbacks exist...create-copy now...");
                     //Console.ReadKey();
@@ -395,6 +383,7 @@ namespace DriverCapsuleStressTool
                                 }
                                 else
                                 {
+                                    Console.ForegroundColor = ConsoleColor.Green;
                                     Console.WriteLine("copying files : " + file);
                                     Console.ForegroundColor = ConsoleColor.White;
                                     file.CopyTo(temppath, false);
@@ -411,6 +400,12 @@ namespace DriverCapsuleStressTool
                         }
                     }
                 }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(fullRollBackDir + " fullRollBackDir already exists...move on and don't copy anything");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
                 Logger.FunctionLeave();
             }
             catch (Exception ex)
@@ -419,26 +414,39 @@ namespace DriverCapsuleStressTool
             }
         }
 
-        internal static bool CheckRollbacksExist(string line, string infName)
+        internal static string CheckRollbacksExist(string line, string infName)
         {
-            bool rollbackExists = false;
-            infName = infName.Split('.')[0];
-            infName = infName.Replace("Surface", "").ToLower();
+            string result = string.Empty;
+           // string infName = "surfaceuefi1010";
+            infName = infName.Split('.')[0].ToLower();
+            infName = infName.Replace("Surface".ToLower(), "");
+            infName = Regex.Replace(infName, @"[\d-]", string.Empty);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("infName check if rollbackexists : " + infName);
+            Console.WriteLine("line : " + line);
+            Console.WriteLine("Program.rollbackLine : " + Program.rollbackLine);
             Console.ForegroundColor = ConsoleColor.White;
+            
             var infFiles = Directory.EnumerateFiles(Program.rollbackLine, "*.inf", System.IO.SearchOption.AllDirectories);
             foreach (string file in infFiles)
             {
-                if (file.Contains(infName))
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("file check if rollbackexists : " + file);
+                Console.ForegroundColor = ConsoleColor.White;
+
+                if (Regex.Match(file, infName, RegexOptions.IgnoreCase).Success)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine(file + " rollback file already exists somewhere so...move on and don't copy anything");
                     Console.ForegroundColor = ConsoleColor.White;
-                    rollbackExists = true;
+                    result = file;
+                }
+                else
+                {
+                    continue;
                 }
             }
-            return rollbackExists;
+            return result;
         }
 
         /// <summary>
@@ -540,7 +548,6 @@ namespace DriverCapsuleStressTool
             if (File.Exists(memoryDumpFile))
             {
                 crashDumpOccurred = true;
-                //crashDumpPath = memoryDumpFile;
 
                 //Rename crash dump file
                 memoryDumpFile = memoryDumpFile.Split('.')[0];
@@ -570,12 +577,6 @@ namespace DriverCapsuleStressTool
                         string copyMiniDumpPath = miniDumpPath + fileName;
                         Utilities.CopyFile(copyMiniDumpPath, newMemoryDumpFIle);
                     }
-
-                    //int fileStartIndex = miniDumpFiles[0].LastIndexOf('\\') + 1;
-                    //string fileNameName = miniDumpFiles[0].Substring(fileStartIndex);
-                    //crashDumpPath = miniDumpFiles[0];
-                    //Rename crash dump file
-
                 }
             }
             Logger.FunctionLeave();

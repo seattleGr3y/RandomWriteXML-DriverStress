@@ -61,11 +61,11 @@ namespace DriverCapsuleStressTool
                 bool needRollBack = true;
                 bool rebootRequired = true;
                 Logger.FunctionEnter();
-                string expectedDriverVersion = GetData.GetDriverVersion(line);
-                Logger.Comment("IfIsCapsule From RegCheck before IF : " + expectedDriverVersion);
                 string infFileContent = File.ReadAllText(line).ToUpper();
                 string infDir = Path.GetDirectoryName(line);
                 Logger.Comment("IfIsCapsule isCapsule infName " + infName);
+                string expectedDriverVersion = GetData.GetDriverVersion(line);
+                Logger.Comment("IfIsCapsule From RegCheck before IF : " + expectedDriverVersion);
                 string infNameToTest = Path.GetFileNameWithoutExtension(line);
                 string expectedDriverDate = GetData.GetDriverDate(line);
                 string infPath = Path.GetDirectoryName(line);
@@ -89,8 +89,11 @@ namespace DriverCapsuleStressTool
                     //infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine("seedIndex from IfIsCapsule : " + seedIndex);
+                    Console.ForegroundColor = ConsoleColor.White;
                     //XMLWriter.SetUnInstallCount(Program.InputTestFilePathBAK, seedIndex);
                     SafeNativeMethods.RollbackInstall(seedIndex, line, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
+                    Thread.Sleep(1000);
+                    RebootAndContinue.RebootCmd(true);
                 }
                 else
                 {
@@ -113,7 +116,7 @@ namespace DriverCapsuleStressTool
                     RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
                     Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
                     Thread.Sleep(1000);
-                    bool isInstalledRegCheck = GetDataFromReg.CheckRegIsInstalled(infName, hardwareID);
+                    bool isInstalledRegCheck = GetDataFromReg.CheckRegIsInstalled(infName, hardwareID, expectedDriverVersion, line);
                     if (isInstalledRegCheck.Equals(true))
                     {
                         Thread.Sleep(1000);
@@ -127,7 +130,6 @@ namespace DriverCapsuleStressTool
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine("-------------------------------------------------------------");
                             Console.WriteLine("THIS FAILED TO INSTALL ACCORDING TO THE REGISTRY...");
-                            Console.WriteLine("........something went wrong so installing again...");
                             Console.WriteLine("-------------------------------------------------------------");
                             Console.ForegroundColor = ConsoleColor.White;
 

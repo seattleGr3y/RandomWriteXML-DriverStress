@@ -257,32 +257,33 @@ namespace DriverCapsuleStressTool
                 RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired.Equals(true));
                 string rbInfName = Path.GetFileNameWithoutExtension(line);
                 string infPath = Path.GetDirectoryName(line);
-                infName = infName.Replace("Surface", "");
 
-                var rollbackFiles = Directory.EnumerateFiles(Program.rollbackLine, "*.inf", SearchOption.AllDirectories);
-                foreach (string rollbackFile in rollbackFiles)
-                {
-                    if (rollbackFile.ToLower().Contains(infName.ToLower()))
-                    {
-                        fullRollBackFile = rollbackFile;
-                        fullRollBackDIR = Path.GetDirectoryName(fullRollBackFile);
-                    }
-                }
+                fullRollBackDIR = GetData.CheckRollbacksExist(line, infName);
+                string fullRollBackDIRdir = Path.GetDirectoryName(fullRollBackDIR);
 
                 installArgs = " /C /U " + line + " /Q /D";
                 Install_Inf(line, Program.installer, installArgs, seedIndex);
                 Logger.Comment("Uninstall Operation should be complete: " + line);
                 Thread.Sleep(500);
-                installArgs = " /C /A /Q /SE /F /PATH " + fullRollBackDIR; 
+                installArgs = " /C /A /Q /SE /F /PATH " + fullRollBackDIRdir; 
                 Logger.Comment("start rollback...");
                 Thread.Sleep(1000);
                 Install_Inf(line, Program.installer, installArgs, seedIndex);
                 Thread.Sleep(1000);
                 string classGUID = GetData.GetClassGUID(line);
+                string expectedDriverVersion = GetData.GetDriverVersion(line);
                 GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
-                GetDataFromReg.CheckRegIsInstalled(infName, hardwareID);
-                Thread.Sleep(1000);
-                RebootAndContinue.RebootCmd(true);
+                bool isInstalledRegCheck = GetDataFromReg.CheckRegIsInstalled(infName, hardwareID, expectedDriverVersion, line);
+                
+                if (isInstalledRegCheck.Equals(false))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("according to the registry this did not actually install");
+                    Console.WriteLine("..even if there are no errors being thrown this needs to be");
+                    Console.WriteLine("manually checked...NOW");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ReadKey();
+                }
             }
             catch (Exception ex)
             {

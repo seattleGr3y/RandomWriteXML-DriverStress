@@ -25,7 +25,9 @@ namespace DriverCapsuleStressTool
         internal static int executionCount = 0;
         internal static bool randomize = false;
         internal static bool stopOnError = false;
+        internal static bool groupFirmware = false;
         internal static string randomizeList = "false";
+        internal static string groupFirmwareSTR = "false";
         internal static string stopOnErrorSTR = "false";
         internal static string installer = dirName + @"\dpinst.exe";
         internal static string rollBackDir = @"\Rollbacks";
@@ -134,6 +136,9 @@ namespace DriverCapsuleStressTool
 
                     stopOnErrorSTR = args[3];
                     stopOnError = Convert.ToBoolean(stopOnErrorSTR);
+
+                    groupFirmwareSTR = args[4];
+                    groupFirmware = Convert.ToBoolean(groupFirmwareSTR);
 
                     supportFolderLOC = dirName;
 
