@@ -64,7 +64,9 @@ namespace DriverCapsuleStressTool
                                 if (attemptStatusValueINT == 0)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Cyan;
+                                    Console.WriteLine("######################################################");
                                     Console.WriteLine("Matched the HW REV in the inf and Registry : " + isInstalledREGcheck);
+                                    Console.WriteLine("######################################################");
                                     Console.ForegroundColor = ConsoleColor.White;
                                     isInstalledREGcheck = true;
                                 }
