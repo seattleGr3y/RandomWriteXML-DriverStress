@@ -40,7 +40,7 @@ namespace DriverCapsuleStressTool
             int TimeOut = 120;
             string notInstalledExitCode = "0x800";
             string ElementNotFoundCode = "0x490";
-            string DeviceCanNotStartCode = "0x100";
+            string DeviceCanNotStartCode = "0x10";
             //string NoMatchingDevice = "0xB7";
             #endregion
 
@@ -95,18 +95,21 @@ namespace DriverCapsuleStressTool
                 {
                     if (notTimeOut == false)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         failureCause = "Driver installation Timed-Out";
                         errorCodeMessage = string.Format(line + " Driver installation Timed-Out");
                         Logger.Comment(line + " Driver installation Failed due to  Time-Out::: " + errorCodeMessage, expectedDriverVersion, DateTime.Now.ToString("MM/dd/yyyy H:mm:ss:fff"), beforeDriverStatus, afterDriverStatus, deviceRuning, failureCause);
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
                         Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
                         Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ForegroundColor = ConsoleColor.White;
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
                     //Add metadata to exit code
                     else if (installationExitCode.Equals(ElementNotFoundCode))
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         GetData.GetExitCode(installationExitCode, stdOutput, errorMessage);
                         Logger.Comment("got exit code 49, try to re-install : " + line);
                         Logger.Comment("Elemnt not found error, trying to uninstall a device that is not currently installed");
@@ -115,26 +118,31 @@ namespace DriverCapsuleStressTool
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
                         Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
                         Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ForegroundColor = ConsoleColor.White;
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
                     else if (installationExitCode.Equals(DeviceCanNotStartCode))
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Logger.Comment("CODE 10 : device cannot start error for " + line);
                         Console.WriteLine("CODE 10 : device cannot start error for " + line);
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
                         Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
                         Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ForegroundColor = ConsoleColor.White;
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
                     else if (installationExitCode.Equals(notInstalledExitCode))
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Logger.Comment("not installed...what is up...");
                         Console.WriteLine("not installed...what is up...");
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
                         Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
                         Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Console.ForegroundColor = ConsoleColor.White;
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
