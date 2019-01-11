@@ -25,7 +25,8 @@ namespace DriverCapsuleStressTool
         internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
         {
             string failedCount = "0";
-            string passedCount = "0";
+            string successInstallResults = "0";
+            string successUninstallResults = "0";
             string errorCount = "0";
             bool dumpsExist = false;
             XmlWriter xmlWriter = XmlWriter.Create(InputTestFilePath);
@@ -103,8 +104,13 @@ namespace DriverCapsuleStressTool
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
-            xmlWriter.WriteStartElement("PassedCount");
-            xmlWriter.WriteString(passedCount);
+            xmlWriter.WriteStartElement("SuccessfullInstall");
+            xmlWriter.WriteString(successInstallResults);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
+            xmlWriter.WriteStartElement("SuccessfullUninstall");
+            xmlWriter.WriteString(successUninstallResults);
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
@@ -167,7 +173,7 @@ namespace DriverCapsuleStressTool
         /// <param name="InputTestFilePathBAK"></param>
         /// XMLWriter.LogResults(InputTestFilePathBAK, errorCount, failedCount, passedCount, dumpExist);
         /// <returns></returns>
-        internal static void LogResults(string InputTestFilePathBAK, string errorCount, string failedCount, string passedCount, string dumpExist)
+        internal static void LogResults(string InputTestFilePathBAK, string errorCount, string failedCount, string successUninstallResults, string successInstallResults, string dumpExist)
         {
             try
             {
@@ -175,7 +181,8 @@ namespace DriverCapsuleStressTool
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 testInputData.XPathSelectElement("/Tests/TestChoices/ErrorCount").Value = errorCount;
                 testInputData.XPathSelectElement("/Tests/TestChoices/FailedCount").Value = failedCount;
-                testInputData.XPathSelectElement("/Tests/TestChoices/PassedCount").Value = passedCount;
+                testInputData.XPathSelectElement("/Tests/TestChoices/SuccessfullInstalls").Value = successInstallResults;
+                testInputData.XPathSelectElement("/Tests/TestChoices/SuccessfullUninstalls").Value = successUninstallResults;
                 testInputData.XPathSelectElement("/Tests/TestChoices/DumpExists").Value = dumpExist;
                 testInputData.Save(InputTestFilePathBAK);
 

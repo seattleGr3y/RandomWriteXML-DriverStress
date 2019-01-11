@@ -8,10 +8,12 @@ namespace DriverCapsuleStressTool
     class ParseForResults
     {
         internal static string errorCode = "Error code ";
-        internal static string passedResults = "Successfully installed ";
+        internal static string successUninstallResults = "Successfully uninstalled";
+        internal static string successinstallResults = "Installation was successful.";
         internal static string failedResults = "Falied to install ";
         internal static int errorCount = 0;
-        internal static int passedCount = 0;
+        internal static int successInstallCount = 0; 
+        internal static int successUninstallCount = 0; 
         internal static int failedCount = 0;
         internal static string dumpExist = "False";
         
@@ -35,10 +37,16 @@ namespace DriverCapsuleStressTool
                         Console.WriteLine("error here : " + line);
                     }
 
-                    if (line.Contains(passedResults))
+                    if (line.Contains(successUninstallResults))
                     {
-                        passedCount++;
-                        Console.WriteLine("passedResults here : " + line);
+                        successUninstallCount++;
+                        Console.WriteLine("successUninstallCount here : " + line);
+                    }
+
+                    if (line.Contains(successinstallResults))
+                    {
+                        successInstallCount++;
+                        Console.WriteLine("successInstallCount here : " + line);
                     }
 
                     if (line.Contains(failedResults))
@@ -49,7 +57,8 @@ namespace DriverCapsuleStressTool
                 }
 
                 Console.WriteLine("failedCount : " + failedCount);
-                Console.WriteLine("passedCount : " + passedCount);
+                Console.WriteLine("successinstallCount : " + successInstallCount);
+                Console.WriteLine("successUninstallCount : " + successUninstallCount);
                 Console.WriteLine("errorCount  : " + errorCount);
             }
 
@@ -61,7 +70,7 @@ namespace DriverCapsuleStressTool
                 }
                 else { continue; }
             }
-            XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), passedCount.ToString(), dumpExist);
+            XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), successInstallCount.ToString(), successUninstallCount.ToString(), dumpExist);
         }
     }
 }

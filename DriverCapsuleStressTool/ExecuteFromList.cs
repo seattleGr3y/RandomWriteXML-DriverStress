@@ -65,12 +65,17 @@ namespace DriverCapsuleStressTool
                 {
                     List<string> DriverPathList = new List<string>();
                     string seedStr = XMLReader.GetSeed(Program.InputTestFilePathBAK);
-                    if (!File.Exists(Program.dirName + @"\" + executionCount + ".txt"))
+                    if (!File.Exists(Program.dirName + @"\executionCount_" + executionCount + ".txt"))
                     {
-                        File.WriteAllText(Program.dirName + @"\" + executionCount + ".txt", seedStr);
+                        File.WriteAllText(Program.dirName + @"\executionCount_" + executionCount + ".txt", seedStr);
+                    }
+                    if (File.Exists(Program.dirName + @"\" + executionCount + "*.txt"))
+                    {
+                        File.Delete(Program.dirName + @"\" + executionCount + "*.txt");
+                        File.WriteAllText(Program.dirName + @"\executionCount_" + executionCount + ".txt", seedStr);
                     }
 
-                    string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
+                        string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                     Thread.Sleep(500);
                     XDocument xdoc = XDocument.Load(Program.InputTestFilePath);
                     int infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
@@ -145,6 +150,7 @@ namespace DriverCapsuleStressTool
                         // in this case the firmware would all install individually but have only one reboot
                         // user should see each different color bar during reboot\install of all firmware
                         bool groupFirmware = XMLReader.GetGroupFirmware(Program.InputTestFilePathBAK);
+                        int capListCount = 0;
 
                         if (groupFirmware)
                         {
@@ -162,17 +168,19 @@ namespace DriverCapsuleStressTool
 
                                 if (isCapsule)
                                 {
+                                    capListCount++;
                                     capList.Add(line);
                                 }
+                                else { continue; }
                             }
 
                             foreach (string groupedFirmware in capList)
                             {
-                                if (capList.Equals(null))
+                                if (capListCount == 0)
                                 {
                                     break;
                                 }
-                                else
+                                else if (capListCount >= 1)
                                 {
                                     string seedIndexSTR = XMLReader.IndexFromINF(Program.InputTestFilePath, groupedFirmware);
                                     int seedIndex = Convert.ToInt32(seedIndexSTR);
@@ -202,6 +210,10 @@ namespace DriverCapsuleStressTool
                                         string installArgs = " /C /A /Q /SE /F /PATH " + groupedFirmwareDIR;
                                         SafeNativeMethods.Install_Inf(groupedFirmware, Program.installer, installArgs, seedIndex);
                                     }
+                                }
+                                else
+                                {
+                                    continue;
                                 }
                                 RebootAndContinue.RebootCmd(true);
                             }
