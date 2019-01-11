@@ -51,6 +51,7 @@ namespace DriverCapsuleStressTool
                 Console.WriteLine("at this point...I think I am done...am I?");
                 Console.WriteLine("-----------------------------------------");
                 Console.ForegroundColor = ConsoleColor.White;
+                ParseForResults.ParseFromdpinstLog(Program.resultsLogDir);
                 File.Create(Program.dirName + @"\DONE.TXT");
                 CheckWhatInstalled.CheckInstalledCSV();
                 Console.ReadKey();

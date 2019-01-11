@@ -57,7 +57,7 @@ namespace DriverCapsuleStressTool
 
             string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
             List<string> DriverPathList = new List<string>();
-
+            
             DriverPathList = GetData.GetInfPathsList(Program.dirName);
             infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
             Directory.CreateDirectory(Program.desktopPath + @"\RESULTS");

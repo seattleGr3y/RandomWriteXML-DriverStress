@@ -30,6 +30,7 @@ namespace DriverCapsuleStressTool
         internal static string groupFirmwareSTR = "false";
         internal static string stopOnErrorSTR = "false";
         internal static string installer = dirName + @"\dpinst.exe";
+        internal static string resultsLogDir = @"\Results\DPINST.LOG";
         internal static string rollBackDir = @"\Rollbacks";
         internal static string rollbackLine = (dirName + rollBackDir).ToLower();
         internal static string stressAppPath = dirName + @"\DriverCapsuleStressTool.exe";
