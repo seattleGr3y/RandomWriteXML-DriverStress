@@ -24,6 +24,10 @@ namespace DriverCapsuleStressTool
         /// <param name="InputTestFilePath"></param>
         internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
         {
+            string failedCount = "0";
+            string passedCount = "0";
+            string errorCount = "0";
+            bool dumpsExist = false;
             XmlWriter xmlWriter = XmlWriter.Create(InputTestFilePath);
             int infIndex = 0;
 
@@ -94,6 +98,26 @@ namespace DriverCapsuleStressTool
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
+            xmlWriter.WriteStartElement("ErrorCount");
+            xmlWriter.WriteString(errorCount);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
+            xmlWriter.WriteStartElement("PassedCount");
+            xmlWriter.WriteString(passedCount);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
+            xmlWriter.WriteStartElement("FailedCount");
+            xmlWriter.WriteString(failedCount);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
+            xmlWriter.WriteStartElement("DumpsExists");
+            xmlWriter.WriteString(dumpsExist.ToString());
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
             xmlWriter.WriteStartElement("InfsPathListCount");
             xmlWriter.WriteString(infsPathListCount.ToString());
             xmlWriter.WriteEndElement();
@@ -141,6 +165,34 @@ namespace DriverCapsuleStressTool
         /// read the XML to find the number of times it will need to loop through the list
         /// </summary>
         /// <param name="InputTestFilePathBAK"></param>
+        /// XMLWriter.LogResults(InputTestFilePathBAK, errorCount, failedCount, passedCount, dumpExist);
+        /// <returns></returns>
+        internal static void LogResults(string InputTestFilePathBAK, string errorCount, string failedCount, string passedCount, string dumpExist)
+        {
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePathBAK);
+                testInputData.XPathSelectElement("/Tests/TestChoices/ErrorCount").Value = errorCount;
+                testInputData.XPathSelectElement("/Tests/TestChoices/FailedCount").Value = failedCount;
+                testInputData.XPathSelectElement("/Tests/TestChoices/PassedCount").Value = passedCount;
+                testInputData.XPathSelectElement("/Tests/TestChoices/DumpExists").Value = dumpExist;
+                testInputData.Save(InputTestFilePathBAK);
+
+                Logger.FunctionLeave();
+                //return seed;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+                //return null;
+            }
+        }
+
+        /// <summary>
+        /// read the XML to find the number of times it will need to loop through the list
+        /// </summary>
+        /// <param name="InputTestFilePathBAK"></param>
         /// <returns></returns>
         internal static void SaveSeed(string InputTestFilePathBAK, string StartSeed, string currentSeed)
         {
@@ -161,7 +213,7 @@ namespace DriverCapsuleStressTool
                 //return null;
             }
         }
-        
+
         /// <summary>
         /// decrease the testRunLoop count so that each time we loop through the list
         /// it will know to execute the list the correct number of remaining times

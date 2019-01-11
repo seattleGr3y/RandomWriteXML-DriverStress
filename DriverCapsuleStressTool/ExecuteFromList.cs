@@ -1,6 +1,7 @@
 ﻿using Microsoft.HWSW.Test.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -44,13 +45,14 @@ namespace DriverCapsuleStressTool
             if (executionCount == 0)
             {
                 Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.desktopPath + @"\RESULTS\DPINST.LOG");
+                Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
                 Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("-----------------------------------------");
                 Console.WriteLine("at this point...I think I am done...am I?");
                 Console.WriteLine("-----------------------------------------");
                 Console.ForegroundColor = ConsoleColor.White;
+                ParseForResults.ParseFromdpinstLog(Program.resultsLogDir);
                 File.Create(Program.dirName + @"\DONE.TXT");
                 CheckWhatInstalled.CheckInstalledCSV();
                 Console.ReadKey();
@@ -117,7 +119,7 @@ namespace DriverCapsuleStressTool
                                 Logger.Comment("this is firmware treat it as such and reboot or rollback\reboot...");
                                 Thread.Sleep(500);
                                 infListCount--;
-                                CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);                                
+                                CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
                             }
                             else if (infName.Contains("Surface"))
                             {
@@ -150,7 +152,7 @@ namespace DriverCapsuleStressTool
                             foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                             {
                                 Console.WriteLine("if (groupFirmware) - seedIndex : " + seedIndex);
-                                
+
                                 string line = XMLReader.FromINFIndex(infListCount, InputTestFilePath, seedIndex, executionCount).ToLower();
 
                                 Console.WriteLine("if (groupFirmware) - line : " + line);
@@ -259,7 +261,7 @@ namespace DriverCapsuleStressTool
                             Thread.Sleep(100);
                             string indexString = Convert.ToString(index);
                             if (index.Equals(null)) { continue; }
-                            
+
                             string line = XMLReader.FromINFIndex(infListCount, InputTestFilePath, seedIndex, executionCount).ToLower();
                             bool isCapsule = GetData.CheckDriverIsFirmware(line, executionCount, infListCount);
                             string infName = Path.GetFileName(line);
@@ -272,7 +274,7 @@ namespace DriverCapsuleStressTool
                                 Logger.Comment("this is firmware and will need to reboot...");
                                 Thread.Sleep(500);
                                 infListCount--;
-                                CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);                                
+                                CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, InputTestFilePath);
                             }
                             else if (infName.Contains("Surface"))
                             {

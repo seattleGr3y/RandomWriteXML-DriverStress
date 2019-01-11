@@ -116,7 +116,7 @@ namespace DriverCapsuleStressTool
                     RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
                     Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
                     Thread.Sleep(1000);
-                    bool isInstalledRegCheck = GetDataFromReg.CheckRegIsInstalled(infName, hardwareID, expectedDriverVersion, line);
+                    bool isInstalledRegCheck = GetDataFromReg.CheckRegCapsuleIsInstalled(infName, hardwareID, expectedDriverVersion, line);
                     if (isInstalledRegCheck.Equals(true))
                     {
                         Thread.Sleep(1000);

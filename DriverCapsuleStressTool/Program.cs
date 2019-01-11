@@ -13,7 +13,7 @@ namespace DriverCapsuleStressTool
 {
     class Program
     {
-        internal static string dirName = Environment.CurrentDirectory;        
+        internal static string dirName = Environment.CurrentDirectory;
         internal static string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         internal static string InputTestFile = @"\StressTestXML.xml";
         internal static string InputTestFilePath = dirName + InputTestFile;
@@ -30,6 +30,8 @@ namespace DriverCapsuleStressTool
         internal static string groupFirmwareSTR = "false";
         internal static string stopOnErrorSTR = "false";
         internal static string installer = dirName + @"\dpinst.exe";
+        internal static string resultsLogDir = desktopPath + @"\Results\DPINST.LOG";
+        internal static string lastInstalled = dirName + @"\LastInstalled.txt";
         internal static string rollBackDir = @"\Rollbacks";
         internal static string rollbackLine = (dirName + rollBackDir).ToLower();
         internal static string stressAppPath = dirName + @"\DriverCapsuleStressTool.exe";
@@ -43,7 +45,7 @@ namespace DriverCapsuleStressTool
         private static readonly IntPtr ThisConsole = GetConsoleWindow();
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        
+
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         private const int HIDE = 0;
         private const int MAXIMIZE = 3;
@@ -68,7 +70,7 @@ namespace DriverCapsuleStressTool
         internal static void Main(string[] args)
         {
             ShowWindow(ThisConsole, MAXIMIZE);
-            
+
             try
             {
                 Process devMgr = new Process();

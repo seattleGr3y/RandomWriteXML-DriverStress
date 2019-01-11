@@ -8,10 +8,7 @@ namespace DriverCapsuleStressTool
 {
     class GetDataFromReg
     {
-        //internal static string infNameKeyValue;
-        //internal static string origInfNameKey;
         internal static string infNameFromReg = null;
-        //internal static string origInfName;
         internal static string result = null;
         internal static string attemptStatusValue;
         internal static string versionValue;
@@ -23,13 +20,71 @@ namespace DriverCapsuleStressTool
         /// </summary>
         /// <param name="infName"></param>
         /// <returns> value of LastAttempStatus or 0x12345678 if there was an error reading data </returns>
-        internal static bool CheckRegIsInstalled(string infName, string hardwareID, string expectedDriverVersion, string line)
+        internal static bool CheckRegDriverIsInstalled(string infName, string hardwareID, string expectedDriverVersion, string line)
         {
             Logger.FunctionEnter();
             bool isInstalledREGcheck = false;
             string attemptVersionValue;
             bool result = false;
-            //string versionInINF;
+            string actualInfName = Path.GetFileNameWithoutExtension(infName);
+            RegistryKey baseRk;
+            baseRk = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\");
+            string[] subKeyList = baseRk.GetSubKeyNames();
+            string[] textInput = File.ReadAllLines(line);
+
+            try
+            {
+                foreach (string subKey in subKeyList)
+                {
+                    RegistryKey regkey = baseRk.OpenSubKey(subKey);
+                    if (Regex.Match(subKey, hardwareID, RegexOptions.IgnoreCase).Success)
+                    {
+                        // get the "LastAttemptStatus" "LastAttemptVersion" "Version"
+                        // using what I need to when needed may use them all eventually
+                        // for now just gathering
+                        attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
+                        versionValue = regkey.GetValue("Version").ToString();
+                        attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
+                        int attemptStatusValueINT = Convert.ToInt32(attemptStatusValue);
+
+                        foreach (string textLine in textInput)
+                        {
+                            if (Regex.Match(textLine, versionValue).Success)
+                            {
+                                if (attemptStatusValueINT == 0)
+                                {
+                                    isInstalledREGcheck = true;
+                                    Logger.Comment("Matched the HW REV in the inf and Registry : " + attemptVersionValue);
+                                }
+                            }
+                        }
+                        Logger.Comment("result from the registry isInstalledREGcheck : " + attemptVersionValue);
+                        result = isInstalledREGcheck;
+                    }
+                    else { continue; }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Comment("exception thrown in GetDataFromReg checking if driver is installed...");
+                GetData.GetExceptionMessage(ex);
+            }
+            Logger.Comment("result from the registry isInstalledREGcheck 1 : " + result);
+            return result;
+        }
+
+        /// <summary>
+        /// check the registry to be sure firmware is installed
+        /// GetDataFromReg.CheckRegIsInstalled(infName, hardwareID);
+        /// </summary>
+        /// <param name="infName"></param>
+        /// <returns> value of LastAttempStatus or 0x12345678 if there was an error reading data </returns>
+        internal static bool CheckRegCapsuleIsInstalled(string infName, string hardwareID, string expectedDriverVersion, string line)
+        {
+            Logger.FunctionEnter();
+            bool isInstalledREGcheck = false;
+            string attemptVersionValue;
+            bool result = false;
             string actualInfName = Path.GetFileNameWithoutExtension(infName);
             RegistryKey baseRk;
             baseRk = Registry.LocalMachine.OpenSubKey(@"HARDWARE\UEFI\ESRT");
@@ -43,42 +98,29 @@ namespace DriverCapsuleStressTool
                     RegistryKey regkey = baseRk.OpenSubKey(subKey);
                     if (Regex.Match(subKey, hardwareID, RegexOptions.IgnoreCase).Success)
                     {
-                        // get the "LastAttemptStatus"
+                        // get the "LastAttemptStatus" "LastAttemptVersion" "Version"
+                        // using what I need to when needed may use them all eventually
+                        // for now just gathering
                         attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
                         versionValue = regkey.GetValue("Version").ToString();
                         attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
                         int attemptStatusValueINT = Convert.ToInt32(attemptStatusValue);
-
-                        //if (attemptVersionValue.Contains(expectedDriverVersion))
-                        //{
-                        //    if (attemptStatusValueINT == 0)
-                        //    {
-                        //        isInstalledREGcheck = true;
-                        //    }
-                        //}
-
+                        
                         foreach (string textLine in textInput)
                         {
                             if (Regex.Match(textLine, versionValue).Success)
                             {
                                 if (attemptStatusValueINT == 0)
                                 {
-                                    Console.ForegroundColor = ConsoleColor.Cyan;
-                                    Console.WriteLine("Matched the HW REV in the inf and Registry : " + isInstalledREGcheck);
-                                    Console.ForegroundColor = ConsoleColor.White;
                                     isInstalledREGcheck = true;
+                                    Logger.Comment("Matched the HW REV in the inf and Registry : " + attemptVersionValue);
                                 }
                             }
                         }
-
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Logger.Comment("result from the registry isInstalledREGcheck : " + isInstalledREGcheck);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Logger.Comment("result from the registry isInstalledREGcheck : " + attemptVersionValue);
                         result = isInstalledREGcheck;
-
                     }
                     else { continue; }
-                    //}
                 }
             }
             catch (Exception ex)
@@ -86,9 +128,7 @@ namespace DriverCapsuleStressTool
                 Logger.Comment("exception thrown in GetDataFromReg checking if driver is installed...");
                 GetData.GetExceptionMessage(ex);
             }
-            Console.ForegroundColor = ConsoleColor.Green;
             Logger.Comment("result from the registry isInstalledREGcheck 1 : " + result);
-            Console.ForegroundColor = ConsoleColor.White;
             return result;
         }
 

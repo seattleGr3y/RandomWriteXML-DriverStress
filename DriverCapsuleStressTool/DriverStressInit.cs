@@ -24,11 +24,7 @@ namespace DriverCapsuleStressTool
         /// Where most of the work is done to decide what to do then call the methods to do so
         /// </summary>
         /// <param name="installer"></param>
-        /// <param name="
-        /// 
-        /// 
-        /// 
-        /// "></param>
+        /// <param name=""></param>
         /// <param name="dirName"></param>
         /// <param name="startChoice"></param>
         internal static void StartStress(string InputTestFilePath, string installer, string dirName, string startChoice, string rollbackLine, int infListCount = 0)

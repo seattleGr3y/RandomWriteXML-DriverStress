@@ -165,6 +165,35 @@ namespace DriverCapsuleStressTool
                         infNameToTest = infNameToTest.Split('.')[0];
                         if (infNameToTest.Equals("SurfaceEC")) { infNameToTest = "SurfaceEmbeddedControllerFirmware"; }
                         
+                        string currentDriverDate = driverDate.Split('.')[0].Insert(4, "/").Insert(7, "/").TrimEnd('0');
+                        
+                        installedDriverDate = Convert.ToDateTime(currentDriverDate);
+                        expDriverDate = Convert.ToDateTime(expectedDriverDate);
+
+                        //try
+                        //{
+                        //    installedDriverDate = Convert.ToDateTime(currentDriverDate);
+                        //    expDriverDate = Convert.ToDateTime(expectedDriverDate);
+                        //}
+                        //catch
+                        //{
+                        //    Console.WriteLine("not getting the date correctly...why?");
+                        //    continue;
+                        //}
+
+                        //Console.ForegroundColor = ConsoleColor.Cyan;
+                        //Console.WriteLine("installedDriverDate : " + installedDriverDate);
+                        //Console.WriteLine("expectedDriverDate : " + expectedDriverDate);
+                        //Console.ForegroundColor = ConsoleColor.White;
+                        //Thread.Sleep(2000);
+
+                        //if (installedDriverDate >= expDriverDate)
+                        //{
+                        //    Logger.Comment(infNameToTest);
+                        //    Logger.Comment("result from checkInstalled TRUE by date/name" + result);
+                        //    return true;
+                        //}
+
                         if (infName.Equals(infNameFromReg))
                         {
                             Console.WriteLine(expectedDriverVersion);
@@ -181,24 +210,13 @@ namespace DriverCapsuleStressTool
                             else { continue; }
                         }
 
-                        string currentDriverDate = driverDate.Split('.')[0].Insert(4, "/").Insert(7, "/").TrimEnd('0');
-                        try
-                        {
-                            installedDriverDate = Convert.ToDateTime(currentDriverDate);
-                            expDriverDate = Convert.ToDateTime(expectedDriverDate);
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-
                         if (friendlyDriverName.Equals(installedDeviceName))
                         {
                             if (expectedDriverVersion.Equals(installedDriverVersion))
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE name/version : ");
+                                Logger.Comment("result from checkInstalled TRUE name/version : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -206,7 +224,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE name/date : ");
+                                Logger.Comment("result from checkInstalled TRUE name/date : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -219,7 +237,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE friendlyName/version : ");
+                                Logger.Comment("result from checkInstalled TRUE friendlyName/version : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -227,7 +245,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE friendlyName/date : ");
+                                Logger.Comment("result from checkInstalled TRUE friendlyName/date : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -243,7 +261,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE name/version : ");
+                                Logger.Comment("result from checkInstalled TRUE name/version : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -251,7 +269,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE name/date : ");
+                                Logger.Comment("result from checkInstalled TRUE name/date : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -264,14 +282,14 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE by date/name");
+                                Logger.Comment("result from checkInstalled TRUE by date/name" + result);
                                 //break;
                             }
                             else if (Regex.Match(installedDeviceName, infNameToTest, RegexOptions.IgnoreCase).Success)
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE by date/name");
+                                Logger.Comment("result from checkInstalled TRUE by date/name" + result);
                                 //break;
                             }
                         }
@@ -282,7 +300,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE deviceName/version : ");
+                                Logger.Comment("result from checkInstalled TRUE deviceName/version : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -290,7 +308,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE deviceName/date : ");
+                                Logger.Comment("result from checkInstalled TRUE deviceName/date : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -303,7 +321,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE version/name : ");
+                                Logger.Comment("result from checkInstalled TRUE version/name : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }
@@ -311,7 +329,7 @@ namespace DriverCapsuleStressTool
                             {
                                 Logger.Comment(infNameToTest);
                                 result = true;
-                                Logger.Comment("result from checkInstalled TRUE version/name : ");
+                                Logger.Comment("result from checkInstalled TRUE version/name : " + result);
                                 Thread.Sleep(1000);
                                 //break;
                             }

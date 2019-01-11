@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using System.IO.Compression;
 
 namespace DriverCapsuleStressTool
 {
@@ -190,8 +191,7 @@ namespace DriverCapsuleStressTool
         internal static string GetDriverDate(string line)
         {
             //
-            string getVersion = "DriverVer=";
-            string getVersion2 = "DriverVer = ";
+            string getVersion = "DriverVer";
             string[] textInput;
             string expectedDriverDate = string.Empty;
             textInput = File.ReadAllLines(line);
@@ -201,17 +201,6 @@ namespace DriverCapsuleStressTool
                 if (Regex.Match(textLine, getVersion).Success)
                 {
                     expectedDriverDate = textLine.Split(',')[0].Split('=')[1];
-                    Logger.Comment("the following should be the driver date");
-                    Logger.Comment(expectedDriverDate);
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    //Console.ReadKey();
-                    return expectedDriverDate;
-                }
-                else if (Regex.Match(textLine, getVersion2).Success)
-                {
-                    expectedDriverDate = textLine.Split(',')[0].Split('=')[1]; ;
                     Logger.Comment("the following should be the driver date");
                     Logger.Comment(expectedDriverDate);
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -419,7 +408,7 @@ namespace DriverCapsuleStressTool
             string result = string.Empty;
            // string infName = "surfaceuefi1010";
             infName = infName.Split('.')[0].ToLower();
-            infName = infName.Replace("Surface".ToLower(), "");
+            infName = infName.Replace("surface", "");
             infName = Regex.Replace(infName, @"[\d-]", string.Empty);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("infName check if rollbackexists : " + infName);
@@ -431,7 +420,8 @@ namespace DriverCapsuleStressTool
             foreach (string file in infFiles)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("file check if rollbackexists : " + file);
+                Console.WriteLine("file check if rollback exists : " + file);
+                Console.WriteLine("infName check if rollback exists : " + infName);
                 Console.ForegroundColor = ConsoleColor.White;
 
                 if (Regex.Match(file, infName, RegexOptions.IgnoreCase).Success)
@@ -593,7 +583,16 @@ namespace DriverCapsuleStressTool
         {
             List<string> infPathList = new List<string>();
             List<string> infsList = GetInfNameFromCSV(Program.dirName);
-
+            #region TRIED TO IMPLEMENT ENUMERATE ZIP FILES...NOT WORKING FOR SOME REASON 
+            //var checkForZIP = Directory.EnumerateFileSystemEntries(Program.dirName);
+            //foreach (string checkedEntry in checkForZIP)
+            //{
+            //    if (checkedEntry.EndsWith(".zip"))
+            //    {
+            //        ZipFile.ExtractToDirectory(checkedEntry, Program.dirName);
+            //    }
+            //}
+            #endregion
             var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);
             foreach (string infFile in infFiles)
             {
