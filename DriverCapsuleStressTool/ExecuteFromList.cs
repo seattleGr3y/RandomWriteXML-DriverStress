@@ -1,12 +1,10 @@
 ﻿using Microsoft.HWSW.Test.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
-using System.Xml.XPath;
 
 namespace DriverCapsuleStressTool
 {
@@ -75,7 +73,7 @@ namespace DriverCapsuleStressTool
                         File.WriteAllText(Program.dirName + @"\executionCount_" + executionCount + ".txt", seedStr);
                     }
 
-                        string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
+                    string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                     Thread.Sleep(500);
                     XDocument xdoc = XDocument.Load(Program.InputTestFilePath);
                     int infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
@@ -174,46 +172,37 @@ namespace DriverCapsuleStressTool
                                 else { continue; }
                             }
 
-                            foreach (string groupedFirmware in capList)
+                            while (capListCount > 1)
                             {
-                                if (capListCount == 0)
+                                foreach (string groupedFirmware in capList)
                                 {
-                                    break;
-                                }
-                                else if (capListCount >= 1)
-                                {
-                                    string seedIndexSTR = XMLReader.IndexFromINF(Program.InputTestFilePath, groupedFirmware);
-                                    int seedIndex = Convert.ToInt32(seedIndexSTR);
-                                    XMLWriter.RemoveXMLElemnt(InputTestFilePath, groupedFirmware, seedIndex);
-                                    XMLWriter.UpdateSeedXML(seedIndex);
-                                    Console.WriteLine("seedIndex : " + seedIndex);
-                                    // Console.ReadKey();
-
-                                    string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, groupedFirmware);
-                                    // XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
-                                    string hardwareID = GetData.FirmwareInstallGetHID(groupedFirmware);
-                                    string expectedDriverVersion = GetData.GetDriverVersion(groupedFirmware);
-                                    Logger.Comment("IfIsCapsule From RegCheck before IF : " + expectedDriverVersion);
-                                    string infNameToTest = Path.GetFileNameWithoutExtension(groupedFirmware);
-                                    string expectedDriverDate = GetData.GetDriverDate(groupedFirmware);
-                                    bool isInstalled = CheckWhatInstalled.CheckInstalled(groupedFirmware, hardwareID, friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
-
-                                    if (isInstalled)
                                     {
-                                        string infFileContent = File.ReadAllText(groupedFirmware).ToUpper();
-                                        string infName = Path.GetFileNameWithoutExtension(groupedFirmware);
-                                        SafeNativeMethods.RollbackInstall(seedIndex, groupedFirmware, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
+                                        string seedIndexSTR = XMLReader.IndexFromINF(Program.InputTestFilePath, groupedFirmware);
+                                        int seedIndex = Convert.ToInt32(seedIndexSTR);
+                                        XMLWriter.RemoveXMLElemnt(InputTestFilePath, groupedFirmware, seedIndex);
+                                        Console.WriteLine("seedIndex : " + seedIndex);
+
+                                        string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, groupedFirmware);
+                                        string hardwareID = GetData.FirmwareInstallGetHID(groupedFirmware);
+                                        string expectedDriverVersion = GetData.GetDriverVersion(groupedFirmware);
+                                        Logger.Comment("IfIsCapsule From RegCheck before IF : " + expectedDriverVersion);
+                                        string infNameToTest = Path.GetFileNameWithoutExtension(groupedFirmware);
+                                        string expectedDriverDate = GetData.GetDriverDate(groupedFirmware);
+                                        bool isInstalled = CheckWhatInstalled.CheckInstalled(groupedFirmware, hardwareID, friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
+
+                                        if (isInstalled)
+                                        {
+                                            string infFileContent = File.ReadAllText(groupedFirmware).ToUpper();
+                                            string infName = Path.GetFileNameWithoutExtension(groupedFirmware);
+                                            SafeNativeMethods.RollbackInstall(seedIndex, groupedFirmware, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
+                                        }
+                                        else
+                                        {
+                                            string groupedFirmwareDIR = Path.GetDirectoryName(groupedFirmware);
+                                            string installArgs = " /C /A /Q /SE /F /PATH " + groupedFirmwareDIR;
+                                            SafeNativeMethods.Install_Inf(groupedFirmware, Program.installer, installArgs, seedIndex);
+                                        }
                                     }
-                                    else
-                                    {
-                                        string groupedFirmwareDIR = Path.GetDirectoryName(groupedFirmware);
-                                        string installArgs = " /C /A /Q /SE /F /PATH " + groupedFirmwareDIR;
-                                        SafeNativeMethods.Install_Inf(groupedFirmware, Program.installer, installArgs, seedIndex);
-                                    }
-                                }
-                                else
-                                {
-                                    continue;
                                 }
                                 RebootAndContinue.RebootCmd(true);
                             }

@@ -60,7 +60,7 @@ namespace DriverCapsuleStressTool
             
             DriverPathList = GetData.GetInfPathsList(Program.dirName);
             infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
-            Directory.CreateDirectory(Program.desktopPath + @"\RESULTS");
+            Directory.CreateDirectory(Program.resultsLogDir);
             int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
             if (!File.Exists(InputTestFilePathBAK))

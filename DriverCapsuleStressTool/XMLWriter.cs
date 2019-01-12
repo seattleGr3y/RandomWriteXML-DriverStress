@@ -274,7 +274,12 @@ namespace DriverCapsuleStressTool
                     if (DriverInfPath.Contains(tmpInfName))
                     {
                         driverPath.Remove();
-                        Thread.Sleep(500);
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("######################################");
+                        Console.WriteLine("Remove XML Element for : " + tmpInfName);
+                        Console.WriteLine("######################################");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Thread.Sleep(2000);
                         testInputData.Save(InputTestFilePath);
                         Thread.Sleep(500);
                         UpdateSeedXML(seedIndex);
