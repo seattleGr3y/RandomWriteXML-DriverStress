@@ -20,7 +20,7 @@ namespace DriverCapsuleStressTool
         /// </summary>
         /// <param name="infName"></param>
         /// <returns> value of LastAttempStatus or 0x12345678 if there was an error reading data </returns>
-        internal static bool CheckRegDriverIsInstalled(string infName, string hardwareID, string expectedDriverVersion, string line)
+        internal static bool CheckRegDriverIsInstalled(string classGUID, string infName, string hardwareID, string expectedDriverVersion, string line)
         {
             Logger.FunctionEnter();
             bool isInstalledREGcheck = false;
@@ -34,34 +34,68 @@ namespace DriverCapsuleStressTool
 
             try
             {
-                foreach (string subKey in subKeyList)
+                if (string.IsNullOrEmpty(hardwareID))
                 {
-                    RegistryKey regkey = baseRk.OpenSubKey(subKey);
-                    if (Regex.Match(subKey, hardwareID, RegexOptions.IgnoreCase).Success)
+                    foreach (string subKey in subKeyList)
                     {
-                        // get the "LastAttemptStatus" "LastAttemptVersion" "Version"
-                        // using what I need to when needed may use them all eventually
-                        // for now just gathering
-                        attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
-                        versionValue = regkey.GetValue("Version").ToString();
-                        attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
-                        int attemptStatusValueINT = Convert.ToInt32(attemptStatusValue);
-
-                        foreach (string textLine in textInput)
+                        RegistryKey regkey = baseRk.OpenSubKey(subKey);
+                        if (Regex.Match(subKey, classGUID, RegexOptions.IgnoreCase).Success)
                         {
-                            if (Regex.Match(textLine, versionValue).Success)
+                            // get the "LastAttemptStatus" "LastAttemptVersion" "Version"
+                            // using what I need to when needed may use them all eventually
+                            // for now just gathering Version ...likely all I need
+
+                           if (!subKey.Contains("Version")) { continue; }
+                            attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
+                            versionValue = regkey.GetValue("Version").ToString();
+                            attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
+                            int attemptStatusValueINT = Convert.ToInt32(attemptStatusValue);
+
+                            foreach (string textLine in textInput)
                             {
-                                if (attemptStatusValueINT == 0)
+                                if (Regex.Match(textLine, versionValue).Success)
                                 {
-                                    isInstalledREGcheck = true;
-                                    Logger.Comment("Matched the HW REV in the inf and Registry : " + attemptVersionValue);
+                                    if (attemptStatusValueINT == 0)
+                                    {
+                                        isInstalledREGcheck = true;
+                                        Logger.Comment("Matched the HW REV in the inf and Registry : " + attemptVersionValue);
+                                    }
                                 }
                             }
+                            Logger.Comment("result from the registry isInstalledREGcheck : " + attemptVersionValue);
+                            result = isInstalledREGcheck;
                         }
-                        Logger.Comment("result from the registry isInstalledREGcheck : " + attemptVersionValue);
-                        result = isInstalledREGcheck;
+                        else { continue; }
                     }
-                    else { continue; }
+                }
+                else
+                {
+                    foreach (string subKey in subKeyList)
+                    {
+                        RegistryKey regkey = baseRk.OpenSubKey(subKey);
+                        if (Regex.Match(subKey, hardwareID, RegexOptions.IgnoreCase).Success)
+                        {
+                            attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
+                            versionValue = regkey.GetValue("Version").ToString();
+                            attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
+                            int attemptStatusValueINT = Convert.ToInt32(attemptStatusValue);
+
+                            foreach (string textLine in textInput)
+                            {
+                                if (Regex.Match(textLine, versionValue).Success)
+                                {
+                                    if (attemptStatusValueINT == 0)
+                                    {
+                                        isInstalledREGcheck = true;
+                                        Logger.Comment("Matched the HW REV in the inf and Registry : " + attemptVersionValue);
+                                    }
+                                }
+                            }
+                            Logger.Comment("result from the registry isInstalledREGcheck : " + attemptVersionValue);
+                            result = isInstalledREGcheck;
+                        }
+                        else { continue; }
+                    }
                 }
             }
             catch (Exception ex)
@@ -98,9 +132,6 @@ namespace DriverCapsuleStressTool
                     RegistryKey regkey = baseRk.OpenSubKey(subKey);
                     if (Regex.Match(subKey, hardwareID, RegexOptions.IgnoreCase).Success)
                     {
-                        // get the "LastAttemptStatus" "LastAttemptVersion" "Version"
-                        // using what I need to when needed may use them all eventually
-                        // for now just gathering
                         attemptStatusValue = regkey.GetValue("LastAttemptStatus").ToString();
                         versionValue = regkey.GetValue("Version").ToString();
                         attemptVersionValue = regkey.GetValue("LastAttemptVersion").ToString();
@@ -148,7 +179,6 @@ namespace DriverCapsuleStressTool
                 RegistryKey baseRk2;
                 baseRk2 = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\");
                 string[] subKeyList2 = baseRk2.GetSubKeyNames();
-                //hardwareID = hardwareID.TrimStart('{').TrimEnd('}');
                 foreach (string subKey2 in subKeyList2)
                 {
                     if (string.IsNullOrEmpty(hardwareID)) { break; }
@@ -227,7 +257,6 @@ namespace DriverCapsuleStressTool
                 RegistryKey baseRk2;
                 baseRk2 = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\");
                 string[] subKeyList2 = baseRk2.GetSubKeyNames();
-                //hardwareID = hardwareID.TrimStart('{').TrimEnd('}');
                 foreach (string subKey2 in subKeyList2)
                 {
                     if (string.IsNullOrEmpty(subKey2)) { continue; }

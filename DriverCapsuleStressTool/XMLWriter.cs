@@ -22,13 +22,14 @@ namespace DriverCapsuleStressTool
         /// <param name="executionCount"></param>
         /// <param name="supportFolderLOC"></param>
         /// <param name="InputTestFilePath"></param>
-        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
+        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath, string stopOnErrorSTR, string groupFirmwareSTR)
         {
-            string failedCount = "0";
-            string successInstallResults = "0";
-            string successUninstallResults = "0";
-            string errorCount = "0";
-            bool dumpsExist = false;
+            //string failedCount = "0";
+            //string successInstallResults = "0";
+            //string successUninstallResults = "0";
+            //string errorCount = "0";
+            string dumpExist = "False";
+            string logString = string.Empty;
             XmlWriter xmlWriter = XmlWriter.Create(InputTestFilePath);
             int infIndex = 0;
 
@@ -52,8 +53,13 @@ namespace DriverCapsuleStressTool
                 xmlWriter.WriteAttributeString("InfName", friendlyInfName);
                 xmlWriter.WriteAttributeString("InfPath", infDir);
                 xmlWriter.WriteAttributeString("InfIndex", infIndex.ToString());
-                xmlWriter.WriteAttributeString("InstallCount", "0");
-                xmlWriter.WriteAttributeString("UnInstallCount", "0");
+                xmlWriter.WriteAttributeString("ErrorCount", "0");
+                xmlWriter.WriteAttributeString("FailedCount", "0");
+                xmlWriter.WriteAttributeString("SuccessfullInstalls", "0");
+                xmlWriter.WriteAttributeString("SuccessfullUninstalls", "0");
+                xmlWriter.WriteAttributeString("RollbacksErrorCount", "0");
+                xmlWriter.WriteAttributeString("RollbacksFailedCount", "0");
+                xmlWriter.WriteAttributeString("SuccessfullRollbacks", "0");
                 xmlWriter.WriteEndElement();
                 xmlWriter.WriteWhitespace("\n");
             }
@@ -75,12 +81,17 @@ namespace DriverCapsuleStressTool
             xmlWriter.WriteWhitespace("\n");
 
             xmlWriter.WriteStartElement("GroupFirmware");
-            xmlWriter.WriteString(Program.groupFirmware.ToString());
+            xmlWriter.WriteString(groupFirmwareSTR);
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
             xmlWriter.WriteStartElement("StartChoice");
             xmlWriter.WriteString(startChoice);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
+            xmlWriter.WriteStartElement("StopOnError");
+            xmlWriter.WriteString(stopOnErrorSTR);
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
@@ -99,28 +110,35 @@ namespace DriverCapsuleStressTool
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
-            xmlWriter.WriteStartElement("ErrorCount");
-            xmlWriter.WriteString(errorCount);
+            #region MOVING THIS TO PER INF ABOVE
+            //xmlWriter.WriteStartElement("ErrorCount");
+            //xmlWriter.WriteString(errorCount);
+            //xmlWriter.WriteEndElement();
+            //xmlWriter.WriteWhitespace("\n");
+
+            //xmlWriter.WriteStartElement("SuccessfullInstalls");
+            //xmlWriter.WriteString(successInstallResults);
+            //xmlWriter.WriteEndElement();
+            //xmlWriter.WriteWhitespace("\n");
+
+            //xmlWriter.WriteStartElement("SuccessfullUninstalls");
+            //xmlWriter.WriteString(successUninstallResults);
+            //xmlWriter.WriteEndElement();
+            //xmlWriter.WriteWhitespace("\n");
+
+            //xmlWriter.WriteStartElement("FailedCount");
+            //xmlWriter.WriteString(failedCount);
+            //xmlWriter.WriteEndElement();
+            //xmlWriter.WriteWhitespace("\n");
+            #endregion
+
+            xmlWriter.WriteStartElement("DumpExists");
+            xmlWriter.WriteString(dumpExist);
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
-            xmlWriter.WriteStartElement("SuccessfullInstall");
-            xmlWriter.WriteString(successInstallResults);
-            xmlWriter.WriteEndElement();
-            xmlWriter.WriteWhitespace("\n");
-
-            xmlWriter.WriteStartElement("SuccessfullUninstall");
-            xmlWriter.WriteString(successUninstallResults);
-            xmlWriter.WriteEndElement();
-            xmlWriter.WriteWhitespace("\n");
-
-            xmlWriter.WriteStartElement("FailedCount");
-            xmlWriter.WriteString(failedCount);
-            xmlWriter.WriteEndElement();
-            xmlWriter.WriteWhitespace("\n");
-
-            xmlWriter.WriteStartElement("DumpsExists");
-            xmlWriter.WriteString(dumpsExist.ToString());
+            xmlWriter.WriteStartElement("FailedErroredINFs");
+            xmlWriter.WriteString(logString);
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
@@ -173,26 +191,35 @@ namespace DriverCapsuleStressTool
         /// <param name="InputTestFilePathBAK"></param>
         /// XMLWriter.LogResults(InputTestFilePathBAK, errorCount, failedCount, passedCount, dumpExist);
         /// <returns></returns>
-        internal static void LogResults(string InputTestFilePathBAK, string errorCount, string failedCount, string successUninstallResults, string successInstallResults, string dumpExist)
+        internal static void LogResults(string InputTestFilePathBAK, string errorCount, string failedCount, string successInstallResults, string successUninstallResults,
+            string rollBackErrorCount, string rollBackFailedCount, string rollBackSuccessCount, string dumpExist, string logString)
         {
-            try
+            try 
             {
                 Logger.FunctionEnter();
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
-                testInputData.XPathSelectElement("/Tests/TestChoices/ErrorCount").Value = errorCount;
-                testInputData.XPathSelectElement("/Tests/TestChoices/FailedCount").Value = failedCount;
-                testInputData.XPathSelectElement("/Tests/TestChoices/SuccessfullInstalls").Value = successInstallResults;
-                testInputData.XPathSelectElement("/Tests/TestChoices/SuccessfullUninstalls").Value = successUninstallResults;
-                testInputData.XPathSelectElement("/Tests/TestChoices/DumpExists").Value = dumpExist;
-                testInputData.Save(InputTestFilePathBAK);
 
+                var driversPathList = testInputData.Descendants("InfDirectories");
+                foreach (var driverPath in driversPathList.Elements())
+                {
+                    driverPath.Attribute("ErrorCount").Value = errorCount;
+                    driverPath.Attribute("FailedCount").Value = failedCount;
+                    driverPath.Attribute("SuccessfullInstalls").Value = successInstallResults;
+                    driverPath.Attribute("SuccessfullUninstalls").Value = successUninstallResults;
+                    driverPath.Attribute("RollbacksErrorCount").Value = rollBackErrorCount;
+                    driverPath.Attribute("RollbacksFailedCount").Value = rollBackFailedCount;
+                    driverPath.Attribute("SuccessfullRollbacks").Value = rollBackSuccessCount;
+                    testInputData.Save(InputTestFilePathBAK);
+                }
+                testInputData.XPathSelectElement("/Tests/TestChoices/DumpExists").Value = dumpExist;
+                testInputData.XPathSelectElement("/Tests/TestChoices/FailedErroredINFs").Value = logString;
+                testInputData.Save(InputTestFilePathBAK);
+                //Thread.Sleep(500);
                 Logger.FunctionLeave();
-                //return seed;
             }
             catch (Exception ex)
             {
                 GetData.GetExceptionMessage(ex);
-                //return null;
             }
         }
 
@@ -236,6 +263,12 @@ namespace DriverCapsuleStressTool
                 var testInputData = XDocument.Load(InputTestFilePathBAK);
                 int testRunLoop = int.Parse(testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value);
                 executionCount--;
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("executionCount :: " + executionCount);
+                Console.WriteLine("within the decrementExecutionCount method");
+                Console.WriteLine("should be getting smaller correctly");
+                Console.ForegroundColor = ConsoleColor.White;
+                //Thread.Sleep(10000);
                 string executionCountSTR = Convert.ToString(executionCount);
                 testInputData.XPathSelectElement("/Tests/TestChoices/ExecutionCount").Value = executionCountSTR;
                 Logger.Comment("=======================================");
@@ -274,9 +307,14 @@ namespace DriverCapsuleStressTool
                     if (DriverInfPath.Contains(tmpInfName))
                     {
                         driverPath.Remove();
-                        Thread.Sleep(500);
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("######################################");
+                        Console.WriteLine("Remove XML Element for : " + tmpInfName);
+                        Console.WriteLine("######################################");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        //Thread.Sleep(2000);
                         testInputData.Save(InputTestFilePath);
-                        Thread.Sleep(500);
+                        //Thread.Sleep(500);
                         UpdateSeedXML(seedIndex);
                     }
                 }
@@ -304,93 +342,94 @@ namespace DriverCapsuleStressTool
 
             var testInputData = XDocument.Load(Program.InputTestFilePathBAK);
             testInputData.XPathSelectElement("/Tests/TestChoices/CurrentSeed").Value = currentSeed;
-            Thread.Sleep(500);
+            //Thread.Sleep(500);
             testInputData.Save(Program.InputTestFilePathBAK);
 
             File.WriteAllText(Program.seedFilePath, currentSeed);
         }
 
-        /// <summary>
-        /// Tracking number of times each inf is installed 
-        /// </summary>
-        /// <param name="InputTestFilePathBAK"></param>
-        /// <param name="infName"></param>
-        internal static void SetInstallCount(string InputTestFilePathBAK, int seedIndex)
-        {
-            try
-            {
-                Logger.FunctionEnter();
-                var testInputData = XDocument.Load(InputTestFilePathBAK);
-                var driversPathList = testInputData.Descendants("InfDirectories");
-                string seedIndexStr = Convert.ToString(seedIndex);
-                int currentInstallCount = 0;
+        #region LOGGING ITERATION COUNT DIFFERENTLY WILL REMOVE
+        ///// <summary>
+        ///// Tracking number of times each inf is installed 
+        ///// </summary>
+        ///// <param name="InputTestFilePathBAK"></param>
+        ///// <param name="infName"></param>
+        //internal static void SetInstallCount(string InputTestFilePathBAK, int seedIndex)
+        //{
+        //    try
+        //    {
+        //        Logger.FunctionEnter();
+        //        var testInputData = XDocument.Load(InputTestFilePathBAK);
+        //        var driversPathList = testInputData.Descendants("InfDirectories");
+        //        string seedIndexStr = Convert.ToString(seedIndex);
+        //        //int currentInstallCount = 0;
 
-                foreach (var driverPath in driversPathList.Elements())
-                {
-                    string indexFromXML = driverPath.Attribute("InfIndex").Value;
+        //        foreach (var driverPath in driversPathList.Elements())
+        //        {
+        //            string indexFromXML = driverPath.Attribute("InfIndex").Value;
 
-                    if (indexFromXML.Equals(seedIndexStr))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("seedIndexStr SetInstallCount method : " + seedIndexStr);
-                        Console.WriteLine("indexFromXML SetInstallCount method : " + indexFromXML);
-                        Console.ForegroundColor = ConsoleColor.White;
+        //            if (indexFromXML.Equals(seedIndexStr))
+        //            {
+        //                Console.ForegroundColor = ConsoleColor.Yellow;
+        //                Console.WriteLine("seedIndexStr SetInstallCount method : " + seedIndexStr);
+        //                Console.WriteLine("indexFromXML SetInstallCount method : " + indexFromXML);
+        //                Console.ForegroundColor = ConsoleColor.White;
 
-                        string currentInstallCountSTR = driverPath.Attribute("InstallCount").Value;
-                        currentInstallCount = Convert.ToInt32(currentInstallCountSTR);
-                        currentInstallCount++;
-                        driverPath.Attribute("InstallCount").Value = currentInstallCount.ToString();
-                        testInputData.Save(InputTestFilePathBAK);
-                        Thread.Sleep(2000);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                GetData.GetExceptionMessage(ex);
-            }
-        }
+        //                string currentInstallCountSTR = driverPath.Attribute("InstallCount").Value;
+        //                int currentInstallCount = Convert.ToInt32(currentInstallCountSTR);
+        //                currentInstallCount++;
+        //                driverPath.Attribute("InstallCount").Value = currentInstallCount.ToString();
+        //                testInputData.Save(InputTestFilePathBAK);
+        //                Thread.Sleep(2000);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        GetData.GetExceptionMessage(ex);
+        //    }
+        //}
 
-        /// <summary>
-        /// Tracking number of times each inf is uninstalled 
-        /// </summary> 
-        /// <param name="InputTestFilePathBAK"></param>
-        /// <param name="infName"></param>
-        internal static void SetUnInstallCount(string InputTestFilePathBAK, int seedIndex)
-        {
-            try
-            {
-                Logger.FunctionEnter();
-                var testInputData = XDocument.Load(InputTestFilePathBAK);
-                var driversPathList = testInputData.Descendants("InfDirectories");
-                string seedIndexStr = Convert.ToString(seedIndex);
-                int currentUnInstallCount = 0;
+        ///// <summary>
+        ///// Tracking number of times each inf is uninstalled 
+        ///// </summary> 
+        ///// <param name="InputTestFilePathBAK"></param>
+        ///// <param name="infName"></param>
+        //internal static void SetUnInstallCount(string InputTestFilePathBAK, int seedIndex)
+        //{
+        //    try
+        //    {
+        //        Logger.FunctionEnter();
+        //        var testInputData = XDocument.Load(InputTestFilePathBAK);
+        //        var driversPathList = testInputData.Descendants("InfDirectories");
+        //        string seedIndexStr = Convert.ToString(seedIndex);
+        //        int currentUnInstallCount = 0;
 
-                foreach (var driverPath in driversPathList.Elements())
-                {
-                    string indexFromXML = driverPath.Attribute("InfIndex").Value;
+        //        foreach (var driverPath in driversPathList.Elements())
+        //        {
+        //            string indexFromXML = driverPath.Attribute("InfIndex").Value;
 
-                    if (indexFromXML.Equals(seedIndexStr))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("seedIndexStr SetInstallCount method : " + seedIndexStr);
-                        Console.WriteLine("indexFromXML SetInstallCount method : " + indexFromXML);
-                        Console.ForegroundColor = ConsoleColor.White;
+        //            if (indexFromXML.Equals(seedIndexStr))
+        //            {
+        //                Console.ForegroundColor = ConsoleColor.Yellow;
+        //                Console.WriteLine("seedIndexStr SetInstallCount method : " + seedIndexStr);
+        //                Console.WriteLine("indexFromXML SetInstallCount method : " + indexFromXML);
+        //                Console.ForegroundColor = ConsoleColor.White;
 
-                        string currentUnInstallCountSTR = driverPath.Attribute("UnInstallCount").Value;
-                        currentUnInstallCount = Convert.ToInt32(currentUnInstallCountSTR);
-                        currentUnInstallCount++;
-                        driverPath.Attribute("UnInstallCount").Value = currentUnInstallCount.ToString();
-                        testInputData.Save(InputTestFilePathBAK);
-                        Thread.Sleep(2000);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                GetData.GetExceptionMessage(ex);
-            }
-        }
-
+        //                string currentUnInstallCountSTR = driverPath.Attribute("UnInstallCount").Value;
+        //                currentUnInstallCount = Convert.ToInt32(currentUnInstallCountSTR);
+        //                currentUnInstallCount++;
+        //                driverPath.Attribute("UnInstallCount").Value = currentUnInstallCount.ToString();
+        //                testInputData.Save(InputTestFilePathBAK);
+        //                Thread.Sleep(2000);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        GetData.GetExceptionMessage(ex);
+        //    }
+        //}
+        #endregion
     }
 }

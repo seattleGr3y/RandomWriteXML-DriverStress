@@ -1,9 +1,8 @@
-﻿using Microsoft.HWSW.Test.Utilities;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
+using Microsoft.HWSW.Test.Utilities;
 
 namespace DriverCapsuleStressTool
 {
@@ -41,7 +40,7 @@ namespace DriverCapsuleStressTool
             string notInstalledExitCode = "0x800";
             string ElementNotFoundCode = "0x490";
             string DeviceCanNotStartCode = "0x10";
-            string InfFileAlteredCode = "0x3EE";
+            string InfFileAlteredCode = "0x80010000";
             string NoMatchingDevice = "0xB7";
             #endregion
 
@@ -53,17 +52,7 @@ namespace DriverCapsuleStressTool
                 Logger.Comment("=========================");
                 Logger.Comment(line);
                 Logger.Comment(installer + installArgs);
-
-                if (installArgs.Contains("/u /c"))
-                {
-                    XMLWriter.SetUnInstallCount(Program.InputTestFilePathBAK, seedIndex);
-                }
-                else
-                {
-                    File.WriteAllText(Program.lastInstalled, line);
-                    XMLWriter.SetInstallCount(Program.InputTestFilePathBAK, seedIndex);
-                }
-
+ 
                 string runCommandinstallArgs = installArgs;
                 Process process = Utilities.RunCommand(installer, runCommandinstallArgs, true);
 
@@ -93,7 +82,8 @@ namespace DriverCapsuleStressTool
 
                 // sets a timeout period to wait so the program doesn't get stuck waiting endlessly
                 bool notTimeOut = process.WaitForExit(TimeOut);
-                if (Program.stopOnError)
+                bool stopOnError = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
+                if (stopOnError)
                 {
                     if (notTimeOut == false)
                     {
@@ -101,8 +91,8 @@ namespace DriverCapsuleStressTool
                         errorCodeMessage = string.Format(line + " Driver installation Timed-Out");
                         Logger.Comment(line + " Driver installation Failed due to  Time-Out::: " + errorCodeMessage, expectedDriverVersion, DateTime.Now.ToString("MM/dd/yyyy H:mm:ss:fff"), beforeDriverStatus, afterDriverStatus, deviceRuning, failureCause);
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
-                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
@@ -113,8 +103,8 @@ namespace DriverCapsuleStressTool
                         Logger.Comment("got exit code 0xB7, No Matching Device : " + line);
                         Console.WriteLine("got exit code 0xB7, No Matching Device : " + line);
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
-                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverSDriverCapsuleStressLogtressLog.txt");
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
@@ -126,8 +116,8 @@ namespace DriverCapsuleStressTool
                         Console.WriteLine("got exit code 49, try to re-install : " + line);
                         Console.WriteLine("Elemnt not found error, trying to uninstall a device that is not currently installed");
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
-                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
@@ -136,8 +126,8 @@ namespace DriverCapsuleStressTool
                         Logger.Comment("CODE 10 : device cannot start error for " + line);
                         Console.WriteLine("CODE 10 : device cannot start error for " + line);
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
-                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
@@ -146,8 +136,8 @@ namespace DriverCapsuleStressTool
                         Logger.Comment("not installed...what is up...");
                         Console.WriteLine("not installed...what is up...");
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
-                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
                         Console.ReadKey();
                         Environment.Exit(13);
                     }
@@ -156,8 +146,8 @@ namespace DriverCapsuleStressTool
                         Logger.Comment("this was not installed because the inf file has been altered");
                         Console.WriteLine("this was not installed because the inf file has been altered");
                         Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.resultsLogDir);
-                        Utilities.CopyFile(Program.dirName + @"\DriverStressLog.txt", Program.desktopPath + @"\RESULTS\DriverStressLog.txt");
+                        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
                         Environment.Exit(13);
                     }
                 }
@@ -167,7 +157,7 @@ namespace DriverCapsuleStressTool
             {
                 GetData.GetExceptionMessage(ex);
             }
-            Thread.Sleep(250);
+            //Thread.Sleep(250);
             Logger.FunctionLeave();
         }
 
@@ -211,11 +201,11 @@ namespace DriverCapsuleStressTool
 
                     Logger.Comment("rebootRequired is showing as : " + rebootRequired);
                     //XMLWriter.SetUnInstallCount(Program.InputTestFilePathBAK, seedIndex);
-                    Thread.Sleep(250);
+                    //Thread.Sleep(250);
                     installArgs = " /C /U " + line + " /Q /D";
                     Install_Inf(line, installer, installArgs, seedIndex);
                     Logger.Comment("Operation should be complete: " + line);
-                    Thread.Sleep(250);
+                    //Thread.Sleep(250);
 
                     string classGUID = GetData.GetClassGUID(line);
                     GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);
@@ -223,7 +213,7 @@ namespace DriverCapsuleStressTool
                     if (RegCheck.IsRebootPending())
                     {
                         Logger.Comment("there is a pending reboot...");
-                        Thread.Sleep(250);
+                        //Thread.Sleep(250);
                         RebootAndContinue.RebootCmd(true);
                     }
                 }
@@ -237,7 +227,8 @@ namespace DriverCapsuleStressTool
                     Console.ForegroundColor = ConsoleColor.White;
 
                     //XMLWriter.SetInstallCount(Program.InputTestFilePathBAK, seedIndex);
-                    Thread.Sleep(250);
+                    //Thread.Sleep(250);
+                    File.WriteAllText(Program.lastInstalled, line);
                     Logger.Comment("rebootRequired is showing as : " + rebootRequired);
                     installArgs = " /C /A /Q /SE /F /PATH " + infPath;
                     Install_Inf(line, installer, installArgs, seedIndex);
@@ -249,7 +240,7 @@ namespace DriverCapsuleStressTool
                     if (RegCheck.IsRebootPending())
                     {
                         Logger.Comment("there is a pending reboot...");
-                        Thread.Sleep(500);
+                        //Thread.Sleep(500);
                         RebootAndContinue.RebootCmd(true);
                     }
                 }
@@ -282,15 +273,9 @@ namespace DriverCapsuleStressTool
             try
             {
                 XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
-                Console.WriteLine(line + " and " + seedIndex);
-                Console.WriteLine("RemoveXMLElement now");
-                XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
-                Console.WriteLine("check the xml please..");
                 RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired.Equals(true));
 
                 fullRollBackDIR = GetData.CheckRollbacksExist(line, infName);
-                Console.WriteLine("this is fullRollBackDIR : " + fullRollBackDIR);
-                Console.WriteLine("...anything wrong with this path?");
 
                 if (string.IsNullOrEmpty(fullRollBackDIR))
                 {
@@ -310,18 +295,13 @@ namespace DriverCapsuleStressTool
                 foreach (string binFileToDelete in binsList)
                 {
                     tmpfileName = Path.GetFileNameWithoutExtension(binFileToDelete);
-
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("binFileToDelete exists : " + tmpfileName);
-                    Console.WriteLine("tmpVersion to compare it  : " + tmpVersion);
-                    Console.ForegroundColor = ConsoleColor.White;
                     tmpVersion = tmpVersion.TrimEnd('0').TrimEnd('0').TrimEnd('.');
                     if (Regex.Match(tmpfileName, tmpVersion).Success)
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("binFileToDelete exists : " + tmpfileName);
                         File.Delete(tmpfileName);
-                        Thread.Sleep(500);
+                        //Thread.Sleep(500);
                         Console.ForegroundColor = ConsoleColor.White;
                         break;
                     }
@@ -332,12 +312,13 @@ namespace DriverCapsuleStressTool
                 }
                 Install_Inf(line, Program.installer, installArgs, seedIndex);
                 Logger.Comment("Uninstall Operation should be complete: " + line);
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
                 installArgs = " /C /A /Q /SE /F /PATH " + fullRollBackDIRdir;
                 Logger.Comment("start rollback...");
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
+                File.WriteAllText(Program.lastInstalled, fullRollBackDIRdir);
                 Install_Inf(line, Program.installer, installArgs, seedIndex);
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
                 string classGUID = GetData.GetClassGUID(line);
                 string expectedDriverVersion = GetData.GetDriverVersion(line);
                 GetDataFromReg.GetOEMinfNameFromReg(infName, hardwareID, classGUID);

@@ -9,15 +9,25 @@ namespace DriverCapsuleStressTool
 {
     internal static class CreateListOrder
     {
-        internal static void RandomizeList(string dirName, string seedFilePath, bool randomize, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath)
+        /// <summary>
+        /// Setting up the tool to execute through the list of INFs randomly or in order
+        /// </summary>
+        /// <param name="randomizeList"></param>
+        /// <param name="loopCount"></param>
+        /// <param name="startChoice"></param>
+        /// <param name="stopOnErrorSTR"></param>
+        /// <param name="groupFirmwareSTR"></param>
+        internal static void RandomizeList(string randomizeList, string loopCount, string startChoice, string stopOnErrorSTR, string groupFirmwareSTR)
         {
+            Console.WriteLine("randomizeList = " + randomizeList);
+            bool randomize = Convert.ToBoolean(randomizeList);
+            int executionCount = Convert.ToInt32(loopCount);
             try
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("RandomizeList starting...");
                 Console.ForegroundColor = ConsoleColor.White;
-                //string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
-                List<string> infsPathList = GetData.GetInfPathsList(dirName);
+                List<string> infsPathList = GetData.GetInfPathsList(Program.dirName);
                 int infListCount = infsPathList.Count;
                 Console.WriteLine("infListCount : " + infListCount);
                 List<int> numbers = new List<int>(Enumerable.Range(1, infListCount));
@@ -27,40 +37,31 @@ namespace DriverCapsuleStressTool
                     case true:
                         numbers.Shuffle(infListCount);
                         string infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                        File.WriteAllText(seedFilePath, infIndexList);
+                        File.WriteAllText(Program.seedFilePath, infIndexList);
                         Array list = infIndexList.Split(',').Select(Int32.Parse).ToArray<int>();
 
-                        foreach (int index in list)
-                        {
-                            Thread.Sleep(100);
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine("index per INF : " + index);
-                            Console.ForegroundColor = ConsoleColor.White;
-                        }
-                        XMLWriter.CreateXML(dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, supportFolderLOC, InputTestFilePath);
-                        Utilities.CopyFile(InputTestFilePath, Program.InputTestFilePathBAK);
-                        Thread.Sleep(500);
+                        XMLWriter.CreateXML(Program.dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, Program.supportFolderLOC, Program.InputTestFilePath, stopOnErrorSTR, groupFirmwareSTR);
+                        Utilities.CopyFile(Program.InputTestFilePath, Program.InputTestFilePathBAK);
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("...going to StartStress from TRUE next...");
                         Console.ForegroundColor = ConsoleColor.White;
 
-                        DriverStressInit.StartStress(InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
+                        DriverStressInit.StartStress(Program.InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
 
                         break;
                     case false:
                         infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                        File.WriteAllText(seedFilePath, infIndexList);
+                        File.WriteAllText(Program.seedFilePath, infIndexList);
                         Console.WriteLine("we'll just continue as normal and NOT randomize the list");
-                        XMLWriter.CreateXML(dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, supportFolderLOC, InputTestFilePath);
-                        Utilities.CopyFile(InputTestFilePath, Program.InputTestFilePathBAK);
-                        Thread.Sleep(500);
+                        XMLWriter.CreateXML(Program.dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, Program.supportFolderLOC, Program.InputTestFilePath, stopOnErrorSTR, groupFirmwareSTR);
+                        Utilities.CopyFile(Program.InputTestFilePath, Program.InputTestFilePathBAK);
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("...going to StartStress from FALSE next...");
                         Console.ForegroundColor = ConsoleColor.White;
-                        DriverStressInit.StartStress(InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
+                        DriverStressInit.StartStress(Program.InputTestFilePath, Program.installer, Program.dirName, startChoice, Program.rollbackLine, infListCount = 0);
                         break;
                 }
-                ExecuteFromList.ExecuteTheList(randomize, executionCount, Program.dirName, InputTestFilePath, supportFolderLOC, seedFilePath, startChoice);
+                ExecuteFromList.ExecuteTheList(randomize, executionCount, startChoice);
             }
 
             catch (Exception ex)
@@ -69,6 +70,14 @@ namespace DriverCapsuleStressTool
             }
         }
 
+        /// <summary>
+        /// this will take the list of index's per INF to install and use a random #
+        /// from that list as the random seed to shuffle the list so it will execute
+        /// in a random order
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="infListCount"></param>
         internal static void Shuffle<T>(this IList<T> list, int infListCount)
         {
             try

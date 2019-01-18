@@ -12,7 +12,7 @@ namespace DriverCapsuleStressTool
     {
         internal static List<string> testInputData = new List<string>();
         internal static List<string> DriverNameList = new List<string>();
-        internal static string InputTestFilePathBAK = @".\StressTestXML.xml.BAK";
+        internal static string InputTestFilePathBAK = @".\DriverCapsuleStress.xml.BAK";
         
         /// <summary>
         /// get the list of driver paths for the app to use for execution
@@ -247,6 +247,32 @@ namespace DriverCapsuleStressTool
                 bool groupFirmware = Convert.ToBoolean(groupFirmwareSTR);
                 Logger.FunctionLeave();
                 result = groupFirmware;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// get the boolean user choice to stop on error or not
+        /// </summary>
+        /// XMLReader.GetStopOnError(InputTestFilePathBAK);
+        /// <param name="InputTestFilePathBAK"></param>
+        /// <returns></returns>
+        internal static bool GetStopOnError(string InputTestFilePathBAK) 
+        {
+            bool result = false;
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(InputTestFilePathBAK);
+                string stopOnErrorSTR = testInputData.XPathSelectElement("/Tests/TestChoices/StopOnError").Value.ToString();
+                Logger.Comment("Should we install all firmware then reboot : " + stopOnErrorSTR);
+                bool stopOnError = Convert.ToBoolean(stopOnErrorSTR); 
+                Logger.FunctionLeave();
+                result = stopOnError;
             }
             catch (Exception ex)
             {
