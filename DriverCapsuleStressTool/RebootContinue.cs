@@ -57,14 +57,14 @@ namespace DriverCapsuleStressTool
                 //Thread.Sleep(3000);
                 Logger.FunctionLeave();
                 //StartShutDown("-f -r -t 5");
-                Thread.Sleep(2000);
+                //Thread.Sleep(2000);
                 Utilities.Reboot(true);
             }
             catch (Exception)
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
                 //SetStartUpRegistry(Program.stressAppPath);
-                Thread.Sleep(2000);
+                //Thread.Sleep(2000);
                 StartShutDown("-f -r -t 5");
             }
         }
@@ -92,10 +92,9 @@ namespace DriverCapsuleStressTool
             Utilities.RunCommand("bcdedit", "/debug on", true);
             File.Create(Program.dirName + @"\debugEnabled.txt");
             Logger.Comment("re-add the reg key to start post reboot...");
-            //string stressAppPath = Program.dirName + @"\DriverStress-2.exe";
             SetStartUpRegistry(Program.reStartBAT);
             Logger.FunctionLeave();
-            Thread.Sleep(2000);
+            //Thread.Sleep(2000);
             RebootCmd(true);
         }
     }

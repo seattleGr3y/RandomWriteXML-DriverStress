@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using System.Threading;
 
 namespace DriverCapsuleStressTool
@@ -30,7 +30,6 @@ namespace DriverCapsuleStressTool
         internal static void StartStress(string InputTestFilePath, string installer, string dirName, string startChoice, string rollbackLine, int infListCount = 0)
         {
             string stressAppPath = dirName + @"\RandomWriteXML.exe";
-            //int? driverPathListCount = 0;
 
             Logger.FunctionEnter();
 
@@ -55,7 +54,7 @@ namespace DriverCapsuleStressTool
 
             CheckWhatInstalled.CheckInstalledCSV();
 
-            string InputTestFilePathBAK = dirName + @"\StressTestXML.xml.BAK";
+            string InputTestFilePathBAK = dirName + @"\DriverCapsuleStress.xml.BAK";
             List<string> DriverPathList = new List<string>();
             
             DriverPathList = GetData.GetInfPathsList(Program.dirName);
@@ -71,17 +70,6 @@ namespace DriverCapsuleStressTool
             string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
             if (string.IsNullOrEmpty(infIndexListString))
             {
-                //executionCount--;
-                RewriteXMLContinue(executionCount, infListCount);
-            }
-            else if (infListCount == 0)
-            {
-                //executionCount--;
-                RewriteXMLContinue(executionCount, infListCount);
-            }
-            else if (DriverPathList.Equals(null))
-            {
-                //executionCount--;
                 RewriteXMLContinue(executionCount, infListCount);
             }
             Logger.FunctionLeave();
@@ -102,7 +90,8 @@ namespace DriverCapsuleStressTool
 
             string infIndexList = string.Empty;
             // remove existing data in startSeed and currentSeed from .BAK file before copy
-            if (Program.randomize.Equals(true))
+            bool randomize = GetData.GetRandomChoice(Program.InputTestFilePathBAK);
+            if (randomize.Equals(true))
             {
                 numbers.Shuffle(infListCount);
                 infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
@@ -110,7 +99,7 @@ namespace DriverCapsuleStressTool
 
                 XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
                 Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
             }
             else
             {
@@ -120,7 +109,7 @@ namespace DriverCapsuleStressTool
                 XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
                 Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
                 Logger.Comment("re-add the reg key to start post reboot...");
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
             }
         }
     }

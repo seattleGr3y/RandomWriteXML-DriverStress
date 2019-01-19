@@ -2,15 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 
 namespace DriverCapsuleStressTool
 {
     class CapsuleOrNotInstallCalls
     {
         /// <summary>
-        /// looking for drivers to install\uninstall that were not the
-        /// user choice to install first
+        /// looking for non firmware drivers to install\uninstall 
         /// </summary>
         /// <param name="line"></param>
         /// <param name="InputTestFilePathBAK"></param>
@@ -32,8 +30,6 @@ namespace DriverCapsuleStressTool
                 driverPathListCount--;
                 Logger.Comment("this will now install infName : " + infName);
                 Logger.Comment("this will now install hardwareID : " + hardwareID);
-                //int infListCount = DriverPathList.Count;
-                //  XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
                 SafeNativeMethods.InstallUninstallCall(seedIndex, rebootRequired, infName, line, installer, InputTestFilePath);
                 Logger.FunctionLeave();
             }
@@ -44,7 +40,7 @@ namespace DriverCapsuleStressTool
         }
 
         /// <summary>
-        /// method looking for firmware specifically
+        /// method to install firmware specifically
         /// </summary>
         /// <param name="line"></param>
         /// <param name="InputTestFilePathBAK"></param>
@@ -72,7 +68,6 @@ namespace DriverCapsuleStressTool
                 int infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
 
                 string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, line);
-                // XMLWriter.RemoveXMLElemnt(Program.InputTestFilePath, line, seedIndex);
                 string hardwareID = GetData.FirmwareInstallGetHID(line);
                 bool isInstalled = CheckWhatInstalled.CheckInstalled(line, hardwareID, friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
                 
@@ -86,13 +81,7 @@ namespace DriverCapsuleStressTool
                     GetData.IfWillNeedRollBack(line, needRollBack, infName);
                     driverPathListCount--;
                     Logger.Comment("this will now begin to ROLLBACK : " + infName);
-                    //infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("seedIndex from IfIsCapsule : " + seedIndex);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    //XMLWriter.SetUnInstallCount(Program.InputTestFilePathBAK, seedIndex);
                     SafeNativeMethods.RollbackInstall(seedIndex, line, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
-                    Thread.Sleep(1000);
                     RebootAndContinue.RebootCmd(true);
                 }
                 else
@@ -110,22 +99,18 @@ namespace DriverCapsuleStressTool
                     Logger.Comment("this will now Install : " + infName);
                     installArgs = " /C /A /Q /SE /F /PATH " + infDir;
                     
-                    // move to install_Inf
-                    //XMLWriter.SetInstallCount(Program.InputTestFilePathBAK, seedIndex);
                     SafeNativeMethods.Install_Inf(line, installer, installArgs, seedIndex);
                     RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
                     Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
-                    Thread.Sleep(1000);
                     bool isInstalledRegCheck = GetDataFromReg.CheckRegCapsuleIsInstalled(infName, hardwareID, expectedDriverVersion, line);
                     if (isInstalledRegCheck.Equals(true))
                     {
-                        Thread.Sleep(1000);
-                        //infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
                         RebootAndContinue.RebootCmd(true);
                     }
                     else
                     {
-                        if (Program.stopOnError)
+                        bool stopOnError = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
+                        if (stopOnError)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine("-------------------------------------------------------------");
@@ -135,8 +120,6 @@ namespace DriverCapsuleStressTool
 
                             Console.ReadKey();
                         }
-                        Thread.Sleep(1000);
-                        //infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
                         RebootAndContinue.RebootCmd(true);
                     }
                 }

@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using System.IO.Compression;
 
 namespace DriverCapsuleStressTool
 {
@@ -26,19 +25,15 @@ namespace DriverCapsuleStressTool
             string friendlyDriverName;
             // get data from CSV file to associate friendly name to inf name 
             // to correctly find if is installed or not
-            var path = Program.dirName + @"\DeviceName-InfName.csv"; // Habeeb, "Dubai Media City, Dubai"
+            var path = Program.dirName + @"\DeviceName-InfName.csv"; 
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
-                //csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
                 csvParser.HasFieldsEnclosedInQuotes = false;
-
-                // Skip the row with the column names
                 csvParser.ReadLine();
 
                 while (!csvParser.EndOfData)
                 {
-                    // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
                     string DeviceName = fields[0];
                     string CsvInfName = fields[1].Split('.')[0];
@@ -126,7 +121,6 @@ namespace DriverCapsuleStressTool
         {
             Logger.FunctionEnter();
             string getVersion = "DriverVer";
-            //string getVersion2 = "DriverVer = ";
             string[] textInput;
             string expectedDriverVersion = string.Empty;
             string result = string.Empty;
@@ -206,7 +200,6 @@ namespace DriverCapsuleStressTool
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
                     Console.ForegroundColor = ConsoleColor.White;
-                    //Console.ReadKey();
                     return expectedDriverDate;
                 }
             }
@@ -250,7 +243,6 @@ namespace DriverCapsuleStressTool
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("CheckDriverIsFirmware method : " + line);
             Console.ForegroundColor = ConsoleColor.White;
-            Thread.Sleep(500);
             Logger.FunctionEnter();
             string getIsFirmware = "Class";
             bool result = false;
@@ -275,6 +267,9 @@ namespace DriverCapsuleStressTool
                     continue;
                 }
             }
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("CheckDriverIsFirmware result : " + result);
+            Console.ForegroundColor = ConsoleColor.White;
             Logger.FunctionLeave();
             return result;
         }
@@ -336,6 +331,10 @@ namespace DriverCapsuleStressTool
         {
             try
             {
+                if (!Directory.Exists(Program.rollBackDir))
+                {
+                    Directory.CreateDirectory(Program.rollBackDir);
+                }
                 Logger.FunctionEnter();
                 infName = infName.Replace("Surface", "").ToLower();
                 string rbInfName = Path.GetFileNameWithoutExtension(line).ToLower();
@@ -350,12 +349,10 @@ namespace DriverCapsuleStressTool
                 if(rollbackExists.Equals(null))
                 {
                     Console.WriteLine("No Rollbacks exist...create-copy now...");
-                    //Console.ReadKey();
                     Directory.CreateDirectory(fullRollBackDir);
                     string dirToCopy = @"C:\Windows\System32\DriverStore\FileRepository\";
                     foreach (string dirToTest in Directory.EnumerateDirectories(dirToCopy))
                     {
-                        //if (Directory.Exists(fullRollBackDir)) { break; }
                         if (Regex.Match(dirToTest, infName, RegexOptions.IgnoreCase).Success)
                         {
                             // Get the subdirectories for the specified directory.
@@ -377,10 +374,8 @@ namespace DriverCapsuleStressTool
                                     Console.ForegroundColor = ConsoleColor.White;
                                     file.CopyTo(temppath, false);
                                     Console.WriteLine("should be copying backups next...");
-                                    //Console.ReadKey();
                                 }
                             }
-                            //Utilities.DirectoryCopy(dirToTest, fullRollBackDir, true);
                             Logger.Comment("copied stuff to Rollbacks folder...");
                         }
                         else
@@ -405,6 +400,11 @@ namespace DriverCapsuleStressTool
 
         internal static string CheckRollbacksExist(string line, string infName)
         {
+            if (!Directory.Exists(Program.rollBackDir))
+            {
+                Directory.CreateDirectory(Program.rollBackDir);
+            }
+
             string result = string.Empty;
            // string infName = "surfaceuefi1010";
             infName = infName.Split('.')[0].ToLower();
@@ -651,6 +651,68 @@ namespace DriverCapsuleStressTool
                 }
             }
             return driversPathListCount;
+        }
+
+        /// <summary>
+        /// just another check to be sure driver is installed
+        /// this will run after there is a reboot so is mostly for validation of firmware installs
+        /// GetData.IsInstalledAfterReboot();
+        /// </summary>
+        internal static void IsInstalledAfterReboot(string line)
+        {
+            bool pnpDidInstall = false;
+            string lastInstalledINFPath = File.ReadAllText(Program.lastInstalled);
+            // get the file attributes for file or directory
+            FileAttributes attr = File.GetAttributes(lastInstalledINFPath);
+            //detect whether its a directory or file
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                foreach (string tmpPath in Directory.EnumerateFiles(lastInstalledINFPath))
+                {
+                    if (tmpPath.EndsWith(".inf"))
+                    {
+                        lastInstalledINFPath = tmpPath;
+                    }
+                    else { continue; }
+                }
+            }
+            
+            string TMPexpectedVersion = GetDriverVersion(lastInstalledINFPath);
+            string TMPinfName = Path.GetFileNameWithoutExtension(lastInstalledINFPath);
+            string TMPhardwareID = FirmwareInstallGetHID(lastInstalledINFPath);
+            string classGUID = GetClassGUID(lastInstalledINFPath);
+            int TMPinfListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
+            int executionCount = XMLReader.GetExecutionCount(Program.InputTestFilePath);
+            bool TMPisCapsule = CheckDriverIsFirmware(lastInstalledINFPath, executionCount, TMPinfListCount);
+            bool stopOnError = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
+            if (TMPisCapsule)
+            {
+                bool CapsuleDidInstall = GetDataFromReg.CheckRegCapsuleIsInstalled(TMPinfName, TMPhardwareID, TMPexpectedVersion, lastInstalledINFPath);
+                if (CapsuleDidInstall.Equals(false) & stopOnError.Equals(true))
+                {
+                    Logger.Comment("checked the registry after reboot but this firmware seems to have not installed : " + lastInstalledINFPath);
+                    Console.WriteLine("checked the registry after reboot but this firmware seems to have not installed : " + lastInstalledINFPath);
+                    Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                    Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                    Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
+                    Console.ReadKey();
+                    Environment.Exit(13);
+                }
+            }
+            else
+            {
+                pnpDidInstall = GetDataFromReg.CheckRegDriverIsInstalled(classGUID, TMPinfName, TMPhardwareID, TMPexpectedVersion, lastInstalledINFPath);
+                if (pnpDidInstall.Equals(false) & stopOnError.Equals(true))
+                {
+                    Logger.Comment("checked the registry after reboot but this driver seems to have not installed : " + lastInstalledINFPath);
+                    Console.WriteLine("checked the registry after reboot but this driver seems to have not installed : " + lastInstalledINFPath);
+                    Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+                    Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+                    Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
+                    Console.ReadKey();
+                    Environment.Exit(13);
+                }
+            }
         }
     }
 }

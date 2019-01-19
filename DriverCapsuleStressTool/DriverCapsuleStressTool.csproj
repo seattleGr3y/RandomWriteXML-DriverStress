@@ -87,19 +87,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Utilities">
-      <HintPath>Uilities\Utilities.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CapsuleOrNotInstallCalls.cs" />
     <Compile Include="CheckWhatInstalled.cs" />
-    <Compile Include="CmdLineOptions.cs" />
     <Compile Include="CreateListOrder.cs" />
     <Compile Include="DriverStressInit.cs" />
     <Compile Include="ExecuteFromList.cs" />
     <Compile Include="GetData.cs" />
     <Compile Include="GetDataFromReg.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="ParseForResults.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -116,6 +113,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Microsoft\VisualBasic\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\SD\wds\shared_test\main\private\PLE_Automation\Libraries\Utilities\Utilities.csproj">
+      <Project>{849239FC-DE01-4DE4-9DC1-21A2C49D38D5}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
