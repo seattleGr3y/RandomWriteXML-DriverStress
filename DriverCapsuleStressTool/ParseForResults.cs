@@ -15,7 +15,6 @@ namespace DriverCapsuleStressTool
         internal static int successInstallCount = 0; 
         internal static int successUninstallCount = 0; 
         internal static int failedCount = 0;
-        internal static string dumpExist = "False";
         
         /// <summary>
         /// logPath will be the location or the DPINST.LOG
@@ -24,6 +23,7 @@ namespace DriverCapsuleStressTool
         /// <param name="logPath"></param>
         internal static void ParseFromdpinstLog(string logPath)
         {
+            string dumpExist = "False";
             using (FileStream fs = File.Open(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (BufferedStream bs = new BufferedStream(fs))
             using (StreamReader sr = new StreamReader(bs))
