@@ -1,2 +1,3 @@
 # RandomWriteXML-DriverStress
-Stress driver installation
+This simple console application written in C# will stress the install and uninstall of PnP drivers as well as the install and 'roll-back' of firmware. When the .EXE is placed in the parent folder with subfolders containing unique INF packages and\or firmware capsule packages it will take the user arguements, then iterate through the subfolders to gather what drivers are to be installed and then write an XML file which the EXE then will use to actually perform the stress test. Installing and uninstalling and in the case of firmware will roll-back to an older version and verify that the process has completed successfully. 
+It will also create logs and simple logging of results within the XML.
