@@ -84,11 +84,7 @@ namespace DriverCapsuleStressTool
                 {
                     Logger.AddLogFile(stressLog);
                 }
-
-
-                // is the WTT service started.
-                StartStopServices.StopService("wttsvc");
-
+                
                 //Logger.Verbose();
 
                 if (!File.Exists(InputTestFilePath))
@@ -118,6 +114,8 @@ namespace DriverCapsuleStressTool
                     extra = p.Parse(args);
                     if (extra.Count > 0)
                     {
+                        // is the WTT service started.
+                        StartStopServices.StopService("wttsvc");
                         // start testing here if starting fresh
                         CreateListOrder.RandomizeList(args[1], args[3], args[5], args[7], args[9]);
                     }
@@ -130,6 +128,8 @@ namespace DriverCapsuleStressTool
 
                 else
                 {
+                    // is the WTT service started.
+                    StartStopServices.StopService("wttsvc");
                     // starts here if there is already an XML file written to run from
                     XDocument xdoc = XDocument.Load(InputTestFilePath);
                     string infIndexListString = XMLReader.GetSeed(InputTestFilePathBAK);
