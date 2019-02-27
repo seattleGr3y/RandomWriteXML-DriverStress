@@ -19,16 +19,16 @@ namespace DriverCapsuleStressTool
         internal static string InputTestFilePathBAK = dirName + @"\DriverCapsuleStress.xml.BAK";
         internal static string seedFilePath = dirName + @"\SEED.txt";
         internal static string stringList = "";
-        internal static string startChoice = "uefi";
+        internal static string startChoice = string.Empty;
         internal static string supportFolderLOC = dirName;
         internal static string randomizeList;
         internal static string groupFirmwareSTR = "false";
         internal static string stopOnErrorSTR = "false";
         internal static string installer = dirName + @"\dpinst.exe";
-        internal static string resultsLogDir = desktopPath + @"\Results";
+        internal static string resultsLogDir = dirName + @"\Results";
         internal static string dpinstLog = resultsLogDir + @"\DPINST.LOG";
         internal static string lastInstalled = dirName + @"\LastInstalled.txt";
-        internal static string rollBackDir = @"\Rollbacks";
+        internal static string rollBackDir = @"\rollbacks";
         internal static string rollbackLine = (dirName + rollBackDir).ToLower();
         internal static string stressAppPath = dirName + @"\DriverCapsuleStressTool.exe";
         internal static string reStartBAT = dirName + @"\reStart.bat";
@@ -69,8 +69,7 @@ namespace DriverCapsuleStressTool
 
             try
             {
-
-                Console.WriteLine("this is the dirName now : " + dirName);
+                // create the .bat file used by the runonce registry entry to start testing again post-reboot
                 if (!File.Exists(reStartBAT))
                 {
                     File.WriteAllText(reStartBAT, "cd " + dirName + Environment.NewLine + stressAppPath);
@@ -86,11 +85,15 @@ namespace DriverCapsuleStressTool
                     Logger.AddLogFile(stressLog);
                 }
 
-                //Logger.LogAll();
+
+                // is the WTT service started.
+                StartStopServices.StopService("wttsvc");
+
+                //Logger.Verbose();
 
                 if (!File.Exists(InputTestFilePath))
                 {
-
+                    // get user input parameters if there is not already an XML file to run from
                     var p = new OptionSet() {
                         { "r|randomizeList", "True or False - randomize the execution of the INFs",
                           v => randomizeList = v },
@@ -115,6 +118,7 @@ namespace DriverCapsuleStressTool
                     extra = p.Parse(args);
                     if (extra.Count > 0)
                     {
+                        // start testing here if starting fresh
                         CreateListOrder.RandomizeList(args[1], args[3], args[5], args[7], args[9]);
                     }
                     else
@@ -126,6 +130,7 @@ namespace DriverCapsuleStressTool
 
                 else
                 {
+                    // starts here if there is already an XML file written to run from
                     XDocument xdoc = XDocument.Load(InputTestFilePath);
                     string infIndexListString = XMLReader.GetSeed(InputTestFilePathBAK);
                     int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);

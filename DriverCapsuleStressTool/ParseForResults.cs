@@ -31,97 +31,135 @@ namespace DriverCapsuleStressTool
             string line = string.Empty;
             string dumpExist = string.Empty;
             string logString = string.Empty;
-            using (FileStream fs = File.Open(logPath, FileMode.Open, FileAccess.Read, FileShare.Inheritable))
+            string lineContains = string.Empty;
+            try
+            {
+                using (FileStream fs = File.Open(logPath, FileMode.Open, FileAccess.Read, FileShare.Inheritable))
+                using (BufferedStream bs = new BufferedStream(fs))
+                using (StreamReader sr = new StreamReader(bs))
+                {
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        foreach (string infPathTMP in infsPathsList)
+                        {
+                            string inNameTMP = Path.GetFileNameWithoutExtension(infPathTMP).ToLower();
+                            if (line.Contains(inNameTMP.ToLower()))
+                            {
+                                switch (lineContains)
+                                {
+                                    case string errorResult when line.Contains(errorCode):
+                                        errorCount++;
+                                        break;
+                                    case string successUninstallResult when line.Contains(successUninstallResults):
+                                        successUninstallCount++;
+                                        break;
+                                    case string failedResult when line.Contains(failedResults):
+                                        failedCount++;
+                                        break;
+                                    case string successinstallResult when line.Contains(successinstallResults):
+                                        successInstallCount++;
+                                        break;
+                                }
+                            }
+                        }
+
+                        if (line.Contains(rollbackCheck))
+                        {
+                            switch (lineContains)
+                            {
+                                case string errorResult when line.Contains(errorCode):
+                                    rollBackErrorCount++;
+                                    break;
+                                case string successinstallResult when line.Contains(successinstallResults):
+                                    rollBackSuccessCount++;
+                                    break;
+                                case string failedResult when line.Contains(failedResults):
+                                    rollBackFailedCount++;
+                                    break;
+                            }
+                        }
+                    }
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("failedCount : " + failedCount);
+                    Console.WriteLine("successInstallCount : " + successInstallCount);
+                    Console.WriteLine("successUninstallCount : " + successUninstallCount);
+                    Console.WriteLine("errorCount  : " + errorCount);
+                    Console.WriteLine("rollBackFailedCount : " + rollBackFailedCount);
+                    Console.WriteLine("rollBackSuccessInstallCount : " + rollBackSuccessCount);
+                    Console.WriteLine("rollBackErrorCount  : " + rollBackErrorCount);
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+
+                foreach (string dmpFileTest in Directory.EnumerateDirectories(Program.dirName))
+                {
+                    if (File.Exists(dmpFileTest.Contains(".dmp").ToString()))
+                    {
+                        dumpExist = "True";
+                    }
+                    else { continue; }
+                }
+                XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), successInstallCount.ToString(), successUninstallCount.ToString(),
+                    rollBackErrorCount.ToString(), rollBackFailedCount.ToString(), rollBackSuccessCount.ToString(), dumpExist, logString);
+            }
+
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+        }
+
+        /// <summary>
+        /// might be writing this to the XML for logging
+        /// </summary>
+        /// <param name="capsuleReturnCode"></param>
+        internal static void GetErrorsFromMyLog(int capsuleReturnCode)
+        {
+            string line = string.Empty;
+            using (FileStream fs = File.Open(Program.resultsLogDir, FileMode.Open, FileAccess.Read, FileShare.Inheritable))
             using (BufferedStream bs = new BufferedStream(fs))
             using (StreamReader sr = new StreamReader(bs))
             {
-                while ((line = sr.ReadLine()) != null)  
+                while ((line = sr.ReadLine()) != null)
                 {
-                    foreach (string infPathTMP in infsPathsList)
+                    if (line.Contains("failed to install due to "))
                     {
-                        string inNameTMP = Path.GetFileNameWithoutExtension(infPathTMP).ToLower();
-                        if (line.Contains(inNameTMP.ToLower()))
+                        switch (capsuleReturnCode)
                         {
-                            if (line.Contains(errorCode)) // & line.Contains(infName))
-                            {
-                                errorCount++;
-                                //Logger.Comment("error here : " + line);
-                                //Console.WriteLine("error here : " + line);
-                            }
-                            
-                            if (line.Contains(successUninstallResults)) // & line.Contains(infName))
-                            {
-                                successUninstallCount++;
-                                //Logger.Comment("successUninstallCount here : " + line);
-                                //Console.WriteLine("successUninstallCount here : " + line);
-                            }
+                            case 1:
+                                Console.WriteLine("this failed straight-up registry code = 1");
+                                break;
 
-                            if (line.Contains(successinstallResults)) // & line.Contains(infName))
-                            {
-                                successInstallCount++;
-                                //Logger.Comment("successInstallCount here : " + line);
-                                //Console.WriteLine("successInstallCount here : " + line);
-                            }
+                            case 2:
+                                Console.WriteLine("this failed straight-up registry code = 2");
+                                break;
 
-                            if (line.Contains(failedResults)) // & line.Contains(infName))
-                            {
-                                failedCount++;
-                                //Logger.Comment("failedResults here : " + line);
-                                //Console.WriteLine("failedResults here : " + line);
-                            }
-                        }
-                        XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), successInstallCount.ToString(), successUninstallCount.ToString(),
-                            rollBackErrorCount.ToString(), rollBackFailedCount.ToString(), rollBackSuccessCount.ToString(), dumpExist, logString);
-                    }
+                            case 3:
+                                Console.WriteLine("this failed straight-up registry code = 3");
+                                break;
 
-                    if (line.Contains(rollbackCheck))
-                    {
-                        if (line.Contains(errorCode)) // & line.Contains(infName))
-                        {
-                            rollBackErrorCount++;
-                            //Logger.Comment("rollback error here : " + line);
-                            //Console.WriteLine("rollback error here : " + line);
-                        }
+                            case 4:
+                                Console.WriteLine("this failed straight-up registry code = 4");
+                                break;
 
-                        if (line.Contains(successinstallResults)) // & line.Contains(infName))
-                        {
-                            rollBackSuccessCount++;
-                            //Logger.Comment("rollback successInstallCount here : " + line);
-                            //Console.WriteLine("rollback successInstallCount here : " + line);
-                        }
+                            case 5:
+                                Console.WriteLine("this failed straight-up registry code = 5");
+                                break;
 
-                        if (line.Contains(failedResults)) // & line.Contains(infName))
-                        {
-                            rollBackFailedCount++;
-                            //Logger.Comment("rollback failedResults here : " + line);
-                            //Console.WriteLine("rollback failedResults here : " + line);
+                            case 6:
+                                Console.WriteLine("this failed straight-up registry code = 6");
+                                break;
+
+                            case 7:
+                                Console.WriteLine("this failed straight-up registry code = 7");
+                                break;
+
+                            default:
+                                break;
                         }
                     }
-                    XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), successInstallCount.ToString(), successUninstallCount.ToString(),
-                        rollBackErrorCount.ToString(), rollBackFailedCount.ToString(), rollBackSuccessCount.ToString(), dumpExist, logString);
                 }
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("failedCount : " + failedCount);
-                Console.WriteLine("successInstallCount : " + successInstallCount);
-                Console.WriteLine("successUninstallCount : " + successUninstallCount);
-                Console.WriteLine("errorCount  : " + errorCount);
-                Console.WriteLine("rollBackFailedCount : " + rollBackFailedCount);
-                Console.WriteLine("rollBackSuccessInstallCount : " + rollBackSuccessCount);
-                Console.WriteLine("rollBackErrorCount  : " + rollBackErrorCount);
-                Console.ForegroundColor = ConsoleColor.White;
             }
-
-            foreach (string dmpFileTest in Directory.EnumerateDirectories(Program.dirName))
-            {
-                if (File.Exists(dmpFileTest.Contains(".dmp").ToString()))
-                {
-                    dumpExist = "True";
-                }
-                else { continue; }
-            }
-            XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), successInstallCount.ToString(), successUninstallCount.ToString(),
-                rollBackErrorCount.ToString(), rollBackFailedCount.ToString(), rollBackSuccessCount.ToString(), dumpExist, logString);
         }
     }
 }

@@ -29,50 +29,51 @@ namespace DriverCapsuleStressTool
         /// <param name="startChoice"></param>
         internal static void StartStress(string InputTestFilePath, string installer, string dirName, string startChoice, string rollbackLine, int infListCount = 0)
         {
-            string stressAppPath = dirName + @"\RandomWriteXML.exe";
-
-            Logger.FunctionEnter();
-
-            if (!File.Exists(dirName + @"\debugEnabled.txt"))
+            try
             {
-                Logger.Comment("enabled WinDebugMode we must reboot...");
-                Thread.Sleep(1000);
-                RebootAndContinue.EnableWinDebugMode();
-            }
-            if (RegCheck.IsRebootPending())
-            {
-                Logger.Comment("there is a pending reboot...");
-                Thread.Sleep(1000);
-                RebootAndContinue.RebootCmd(true);
-            }
-            if (GetData.CheckCrashDumpOccurred())
-            {
-                Logger.Comment("Looks like we found a crashdump check it out after reboot...");
-                Thread.Sleep(1000);
-                RebootAndContinue.RebootCmd(true);
-            }
+                Logger.FunctionEnter();
 
-            CheckWhatInstalled.CheckInstalledCSV();
+                if (!File.Exists(dirName + @"\debugEnabled.txt"))
+                {
+                    Logger.Comment("enabled WinDebugMode we must reboot...");
+                    Thread.Sleep(1000);
+                    RebootAndContinue.EnableWinDebugMode();
+                }
+                if (RegCheck.IsRebootPending())
+                {
+                    Logger.Comment("there is a pending reboot...");
+                    Thread.Sleep(3000);
+                    RebootAndContinue.RebootCmd(true);
+                }
+                if (GetData.CheckCrashDumpOccurred())
+                {
+                    Logger.Comment("Looks like we found a crashdump check it out after reboot...");
+                    Thread.Sleep(1000);
+                    RebootAndContinue.RebootCmd(true);
+                }
 
-            string InputTestFilePathBAK = dirName + @"\DriverCapsuleStress.xml.BAK";
-            List<string> DriverPathList = new List<string>();
-            
-            DriverPathList = GetData.GetInfPathsList(Program.dirName);
-            infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
-            Directory.CreateDirectory(Program.resultsLogDir);
-            int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
+                GetData.CreateIfMissing(Program.resultsLogDir);
+                int executionCount = XMLReader.GetExecutionCount(InputTestFilePath);
 
-            if (!File.Exists(InputTestFilePathBAK))
-            {
-                Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
+                string InputTestFilePathBAK = dirName + @"\DriverCapsuleStress.xml.BAK";
+                if (!File.Exists(InputTestFilePathBAK))
+                {
+                    Utilities.CopyFile(InputTestFilePath, InputTestFilePathBAK);
+                }
+
+                infListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
+
+                string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
+                if (string.IsNullOrEmpty(infIndexListString))
+                {
+                    RewriteXMLContinue(executionCount, infListCount);
+                }
+                Logger.FunctionLeave();
             }
-
-            string infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
-            if (string.IsNullOrEmpty(infIndexListString))
+            catch (Exception ex)
             {
-                RewriteXMLContinue(executionCount, infListCount);
+                GetData.GetExceptionMessage(ex);
             }
-            Logger.FunctionLeave();
         }
 
         /// <summary>
@@ -83,33 +84,40 @@ namespace DriverCapsuleStressTool
         /// <param name="infListCount"></param>
         internal static void RewriteXMLContinue(int executionCount, int infListCount)
         {
-            XMLWriter.DecrementExecutionCount(Program.InputTestFilePathBAK, executionCount);
-            Logger.Comment("executionCount after going thru all the loops : " + executionCount);
-            File.Delete(Program.InputTestFilePath);
-            var numbers = new List<int>(Enumerable.Range(1, infListCount));
-
-            string infIndexList = string.Empty;
-            // remove existing data in startSeed and currentSeed from .BAK file before copy
-            bool randomize = GetData.GetRandomChoice(Program.InputTestFilePathBAK);
-            if (randomize.Equals(true))
+            try
             {
-                numbers.Shuffle(infListCount);
-                infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                File.WriteAllText(Program.seedFilePath, infIndexList);
+                XMLWriter.DecrementExecutionCount(Program.InputTestFilePathBAK, executionCount);
+                Logger.Comment("executionCount after going thru all the loops : " + executionCount);
+                File.Delete(Program.InputTestFilePath);
+                var numbers = new List<int>(Enumerable.Range(1, infListCount));
 
-                XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
-                Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
-                //Thread.Sleep(1000);
+                string infIndexList = string.Empty;
+                // remove existing data in startSeed and currentSeed from .BAK file before copy
+                bool randomize = GetData.GetRandomChoice(Program.InputTestFilePathBAK);
+                if (randomize.Equals(true))
+                {
+                    numbers.Shuffle(infListCount);
+                    infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
+                    File.WriteAllText(Program.seedFilePath, infIndexList);
+
+                    XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
+                    Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
+                    //Thread.Sleep(1000);
+                }
+                else
+                {
+                    infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
+                    File.WriteAllText(Program.seedFilePath, infIndexList);
+
+                    XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
+                    Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
+                    Logger.Comment("re-add the reg key to start post reboot...");
+                    //Thread.Sleep(1000);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                File.WriteAllText(Program.seedFilePath, infIndexList);
-
-                XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
-                Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
-                Logger.Comment("re-add the reg key to start post reboot...");
-                //Thread.Sleep(1000);
+                GetData.GetExceptionMessage(ex);
             }
         }
     }

@@ -1,11 +1,10 @@
 ﻿using Microsoft.HWSW.Test.Utilities;
-using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -13,73 +12,6 @@ namespace DriverCapsuleStressTool
 {
     class GetData
     {
-        /// <summary>
-        /// uses a list of known good driver names to use as friendly name to put in the XML
-        /// which is later used to check if the driver is installed or not
-        /// </summary>
-        /// <param name="infName"></param>
-        /// <returns></returns>
-        internal static string FindFriendlyNameInCSV(string infName)
-        {
-            string result = string.Empty;
-            string friendlyDriverName;
-            // get data from CSV file to associate friendly name to inf name 
-            // to correctly find if is installed or not
-            var path = Program.dirName + @"\DeviceName-InfName.csv"; 
-            using (TextFieldParser csvParser = new TextFieldParser(path))
-            {
-                csvParser.SetDelimiters(new string[] { "," });
-                csvParser.HasFieldsEnclosedInQuotes = false;
-                csvParser.ReadLine();
-
-                while (!csvParser.EndOfData)
-                {
-                    string[] fields = csvParser.ReadFields();
-                    string DeviceName = fields[0];
-                    string CsvInfName = fields[1].Split('.')[0];
-
-                    if (CsvInfName.Equals(infName))
-                    {
-                        friendlyDriverName = DeviceName;
-                        result = friendlyDriverName;
-                        Logger.Comment("this is the matching friendlyName from the CSV file : " + result);
-                    }
-                }
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// get list of INFs that we might expect so we don't try installing each INF from a
-        /// package that could have many but only require one to be installed
-        /// List<string> infsList = GetInfNameFromCSV(dirName);
-        /// </summary>
-        /// <param name="dirName"></param>
-        /// <returns></returns>
-        internal static List<string> GetInfNameFromCSV(string dirName)
-        {
-            List<string> infsList = new List<string>();
-
-            var path = dirName + @"\DeviceName-InfName.csv";
-            using (TextFieldParser csvParser = new TextFieldParser(path))
-            {
-                csvParser.SetDelimiters(new string[] { "," });
-                csvParser.HasFieldsEnclosedInQuotes = false;
-
-                csvParser.ReadLine();
-
-                while (!csvParser.EndOfData)
-                {
-                    // Read current line fields, pointer moves to the next line.
-                    string[] fields = csvParser.ReadFields();
-                    string DeviceName = fields[0];
-                    string CsvInfName = fields[1].Split('.')[0];
-                    infsList.Add(CsvInfName);
-                }
-                return infsList;
-            }
-        }
-        
         private static string hardwareID;
         /// <summary>
         /// just getting the hardware ID for firmware install to pass it to create\update a regkey
@@ -92,19 +24,28 @@ namespace DriverCapsuleStressTool
             string getHardwareID = "FirmwareId";
             string[] textInput;
             textInput = File.ReadAllLines(line);
-
-            foreach (string textLine in textInput)
+            try
             {
-                if (Regex.IsMatch(textLine, getHardwareID, RegexOptions.IgnoreCase).Equals(true))
+                foreach (string textLine in textInput)
                 {
-                    int begingIndex = textLine.IndexOf('{');
-                    int endingIndex = textLine.IndexOf('}');
+                    if (Regex.IsMatch(textLine, getHardwareID, RegexOptions.IgnoreCase).Equals(true))
+                    {
+                        int begingIndex = textLine.IndexOf('{');
+                        int endingIndex = textLine.IndexOf('}');
 
-                    if ((begingIndex >= 0) && (endingIndex >= 0))
-                        hardwareID = textLine.Substring(begingIndex, (endingIndex + 1) - begingIndex).TrimStart('{').TrimEnd('}');
+                        if ((begingIndex >= 0) && (endingIndex >= 0))
+                        {
+                            hardwareID = textLine.Substring(begingIndex, (endingIndex + 1) - begingIndex).TrimStart('{').TrimEnd('}');
+                        }
+                    }
                 }
             }
-            
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
+            }
+
             Logger.FunctionLeave();
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("hardwareID in the GetHID method : " + hardwareID);
@@ -119,22 +60,30 @@ namespace DriverCapsuleStressTool
         /// <returns></returns>
         internal static string GetDriverVersion(string line)
         {
-            Logger.FunctionEnter();
-            string getVersion = "DriverVer";
-            string[] textInput;
-            string expectedDriverVersion = string.Empty;
             string result = string.Empty;
-            textInput = File.ReadAllLines(line);
-
-            foreach (string textLine in textInput)
+            try
             {
-                if (Regex.IsMatch(textLine, getVersion).Equals(true))
+                Logger.FunctionEnter();
+                string getVersion = "DriverVer";
+                string[] textInput;
+                string expectedDriverVersion = string.Empty;
+                textInput = File.ReadAllLines(line);
+
+                foreach (string textLine in textInput)
                 {
-                    expectedDriverVersion = textLine.Split(',')[1];
-                    Logger.Comment("the following should be the driver version");
-                    Logger.Comment(expectedDriverVersion);
-                    result = expectedDriverVersion;
+                    if (Regex.IsMatch(textLine, getVersion).Equals(true))
+                    {
+                        expectedDriverVersion = textLine.Split(',')[1];
+                        Logger.Comment("the following should be the driver version");
+                        Logger.Comment(expectedDriverVersion);
+                        result = expectedDriverVersion;
+                    }
                 }
+            }
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
             }
             Logger.FunctionLeave();
             return result;
@@ -148,31 +97,39 @@ namespace DriverCapsuleStressTool
         /// <returns></returns>
         internal static string GetClassGUID(string line)
         {
-            Logger.FunctionEnter();
-            string getClassGuid = "ClassGUID=";
-            string getClassGuid2 = "ClassGuid=";
-            string classGUID = string.Empty;
-            string[] textInput;
             string result = string.Empty;
-            textInput = File.ReadAllLines(line);
-
-            foreach (string textLine in textInput)
+            try
             {
-                if (Regex.Match(textLine, getClassGuid).Success)
+                Logger.FunctionEnter();
+                string getClassGuid = "ClassGUID=";
+                string getClassGuid2 = "ClassGuid=";
+                string classGUID = string.Empty;
+                string[] textInput;
+                textInput = File.ReadAllLines(line);
+
+                foreach (string textLine in textInput)
                 {
-                    classGUID = textLine.Split('=')[1];
-                    Logger.Comment("the following should be the classGUID");
-                    Logger.Comment(classGUID);
-                    result = classGUID;
-                }
-                else if (Regex.Match(textLine, getClassGuid2).Success)
-                {
-                    classGUID = textLine.Split('=')[1];
-                    Logger.Comment("the following should be the classGUID");
-                    Logger.Comment(classGUID);
-                    result = classGUID;
+                    if (Regex.Match(textLine, getClassGuid).Success)
+                    {
+                        classGUID = textLine.Split('=')[1];
+                        Logger.Comment("the following should be the classGUID");
+                        Logger.Comment(classGUID);
+                        result = classGUID;
+                    }
+                    else if (Regex.Match(textLine, getClassGuid2).Success)
+                    {
+                        classGUID = textLine.Split('=')[1];
+                        Logger.Comment("the following should be the classGUID");
+                        Logger.Comment(classGUID);
+                        result = classGUID;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
+            }
+
             Logger.FunctionLeave();
             return result;
         }
@@ -184,26 +141,34 @@ namespace DriverCapsuleStressTool
         /// <returns></returns>
         internal static string GetDriverDate(string line)
         {
-            //
-            string getVersion = "DriverVer";
-            string[] textInput;
-            string expectedDriverDate = string.Empty;
-            textInput = File.ReadAllLines(line);
-
-            foreach (string textLine in textInput)
+            string result = string.Empty;
+            try
             {
-                if (Regex.Match(textLine, getVersion).Success)
+                string expectedDriverDate;
+                string getVersion = "DriverVer";
+                string[] textInput;
+                textInput = File.ReadAllLines(line);
+
+                foreach (string textLine in textInput)
                 {
-                    expectedDriverDate = textLine.Split(',')[0].Split('=')[1];
-                    Logger.Comment("the following should be the driver date");
-                    Logger.Comment(expectedDriverDate);
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    return expectedDriverDate;
+                    if (Regex.Match(textLine, getVersion).Success)
+                    {
+                        expectedDriverDate = textLine.Split(',')[0].Split('=')[1];
+                        Logger.Comment("the following should be the driver date");
+                        Logger.Comment(expectedDriverDate);
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        result =  expectedDriverDate;
+                    }
                 }
             }
-            return expectedDriverDate;
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
+            }
+            return result;
         }
 
         /// <summary>
@@ -213,7 +178,7 @@ namespace DriverCapsuleStressTool
         internal static void GetExceptionMessage(Exception ex)
         {
             Logger.Error(ex.ToString());
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         /// <summary>
@@ -224,13 +189,22 @@ namespace DriverCapsuleStressTool
         /// <param name="stdOutput"></param>
         internal static string GetExitCode(string installExitCode, string stdOutput, string errorMessage)
         {
-            Logger.FunctionEnter();
-            Logger.Comment("Install_Uninstall exit code values should print out here: ");
-            Logger.Comment("installationExitCode" + installExitCode);
-            Logger.Debug("install stdOutput : " + stdOutput);
-            Logger.Debug("install errorMessage : " + errorMessage);
-            Logger.FunctionLeave();
-            return installExitCode;
+            string result = string.Empty;
+            try
+            {
+                Logger.FunctionEnter();
+                Logger.Comment("Install_Uninstall exit code values should print out here: ");
+                Logger.Comment("installationExitCode" + installExitCode);
+                Logger.Debug("install stdOutput : " + stdOutput);
+                Logger.Debug("install errorMessage : " + errorMessage);
+                Logger.FunctionLeave();
+                result = installExitCode;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+            return result;
         }
 
         /// <summary>
@@ -246,27 +220,37 @@ namespace DriverCapsuleStressTool
             Logger.FunctionEnter();
             string getIsFirmware = "Class";
             bool result = false;
+            
             string[] infFileContent = File.ReadAllLines(line);
 
-            foreach (string infLine in infFileContent)
+            try
             {
-                if (infLine.Contains(getIsFirmware).Equals(true))
+                foreach (string infLine in infFileContent)
                 {
-                    if (infLine.Contains("Firmware").Equals(true))
+                    if (infLine.Contains(getIsFirmware).Equals(true))
                     {
-                        Logger.Comment(infLine);
-                        return true;
+                        if (infLine.Contains("Firmware").Equals(true))
+                        {
+                            Logger.Comment(infLine);
+                            return true;
+                        }
+                    }
+                    else if (infLine.Contains(getIsFirmware).Equals(false))
+                    {
+                        result = false;
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
-                else if (infLine.Contains(getIsFirmware).Equals(false))
-                {
-                    result = false;
-                }
-                else
-                {
-                    continue;
-                }
             }
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
+            }
+
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("CheckDriverIsFirmware result : " + result);
             Console.ForegroundColor = ConsoleColor.White;
@@ -317,6 +301,20 @@ namespace DriverCapsuleStressTool
         }
 
         /// <summary>
+        /// Check if directory exists if not create it
+        /// GetData.CreateIfMissing(path);
+        /// </summary>
+        /// <param name="path"></param>
+        internal static void CreateIfMissing(string path)
+        {
+            bool folderExists = Directory.Exists(path);
+            if (!folderExists)
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="line"></param>
@@ -327,33 +325,25 @@ namespace DriverCapsuleStressTool
         /// that now needs to be 'installed' via the rollback folder so the old version is 
         /// now installed again (rollback)
         /// <returns></returns>
-        internal static void IfWillNeedRollBack(string line, bool needRollBack, string infName)
+        internal static void IfWillNeedRollBack(string line)
         {
             try
             {
-                if (!Directory.Exists(Program.rollBackDir))
-                {
-                    Directory.CreateDirectory(Program.rollBackDir);
-                }
+                CreateIfMissing(Program.rollbackLine);
                 Logger.FunctionEnter();
-                infName = infName.Replace("Surface", "").ToLower();
-                string rbInfName = Path.GetFileNameWithoutExtension(line).ToLower();
-                string rollbackINFnameDIR = @"\" + rbInfName;
-                string fullRollBackDir = (Program.rollbackLine + rollbackINFnameDIR).ToLower();
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Does the Rollbacks directory exist?");
-                Console.ForegroundColor = ConsoleColor.White;
-                //Console.ReadKey();
+                string infName = Path.GetFileNameWithoutExtension(line);
+                infName = Regex.Replace(infName, @"[\d-]", string.Empty);
+                string rollbackINFnameDIR = @"\" + infName;
+                string fullRollBackDir = Program.rollbackLine + rollbackINFnameDIR.ToLower();
                 string rollbackExists = CheckRollbacksExist(line, infName);
 
-                if(rollbackExists.Equals(null))
+                if (string.IsNullOrEmpty(rollbackExists))
                 {
                     Console.WriteLine("No Rollbacks exist...create-copy now...");
-                    Directory.CreateDirectory(fullRollBackDir);
                     string dirToCopy = @"C:\Windows\System32\DriverStore\FileRepository\";
                     foreach (string dirToTest in Directory.EnumerateDirectories(dirToCopy))
                     {
-                        if (Regex.Match(dirToTest, infName, RegexOptions.IgnoreCase).Success)
+                        if (dirToTest.Contains(infName))
                         {
                             // Get the subdirectories for the specified directory.
                             DirectoryInfo dir = new DirectoryInfo(dirToTest);
@@ -362,19 +352,18 @@ namespace DriverCapsuleStressTool
                             foreach (FileInfo file in files)
                             {
                                 string temppath = Path.Combine(fullRollBackDir, file.Name);
-
-                                if (file.Exists)
+                                if (File.Exists(temppath))
                                 {
                                     continue;
                                 }
                                 else
                                 {
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine("copying files : " + file);
-                                    Console.ForegroundColor = ConsoleColor.White;
-                                    file.CopyTo(temppath, false);
+                                    CreateIfMissing(fullRollBackDir);
+                                    string itemToCopy = dir + @"\" + file;
+                                    Utilities.CopyFile(itemToCopy, temppath);
                                     Console.WriteLine("should be copying backups next...");
                                 }
+                                { continue; }
                             }
                             Logger.Comment("copied stuff to Rollbacks folder...");
                         }
@@ -400,41 +389,34 @@ namespace DriverCapsuleStressTool
 
         internal static string CheckRollbacksExist(string line, string infName)
         {
-            if (!Directory.Exists(Program.rollBackDir))
-            {
-                Directory.CreateDirectory(Program.rollBackDir);
-            }
-
+            CreateIfMissing(Program.rollbackLine);
             string result = string.Empty;
-           // string infName = "surfaceuefi1010";
+            infName = Path.GetFileNameWithoutExtension(infName);
             infName = infName.Split('.')[0].ToLower();
             infName = infName.Replace("surface", "");
             infName = Regex.Replace(infName, @"[\d-]", string.Empty);
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("infName check if rollbackexists : " + infName);
-            Console.WriteLine("line : " + line);
-            Console.WriteLine("Program.rollbackLine : " + Program.rollbackLine);
-            Console.ForegroundColor = ConsoleColor.White;
-            
-            var infFiles = Directory.EnumerateFiles(Program.rollbackLine, "*.inf", System.IO.SearchOption.AllDirectories);
-            foreach (string file in infFiles)
+            try
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("file check if rollback exists : " + file);
-                Console.WriteLine("infName check if rollback exists : " + infName);
-                Console.ForegroundColor = ConsoleColor.White;
+                var infFiles = Directory.EnumerateFiles(Program.rollbackLine, "*.inf", System.IO.SearchOption.AllDirectories);
+                foreach (string file in infFiles)
+                {
+                    if (Regex.Match(file, infName, RegexOptions.IgnoreCase).Success)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(file + " rollback file already exists somewhere so...move on and don't copy anything");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        result = file;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
 
-                if (Regex.Match(file, infName, RegexOptions.IgnoreCase).Success)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine(file + " rollback file already exists somewhere so...move on and don't copy anything");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    result = file;
-                }
-                else
-                {
-                    continue;
-                }
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
             }
             return result;
         }
@@ -496,6 +478,7 @@ namespace DriverCapsuleStressTool
         /// </summary>
         /// <param name="InputTestFilePath"></param>
         /// <param name="infName"></param>
+        /// GetData.SetTestFirst(InputTestFilePathBAK, InputTestFilePath, infName);
         /// <returns></returns>
         internal static void SetTestFirst(string InputTestFilePathBAK, string InputTestFilePath, string infName)
         {
@@ -524,57 +507,62 @@ namespace DriverCapsuleStressTool
         {
             Logger.FunctionEnter();
             bool crashDumpOccurred = false;
-            string crashDumpPath = Program.dirName + @"\CrashDumps\";
-            string timeStamp = string.Empty;
-            string newMemoryDumpFIle = string.Empty;
-            string[] miniDumpFiles = null;
-
-            string SystemRoot = Environment.ExpandEnvironmentVariables("%systemroot%");
-            string memoryDumpFile = SystemRoot + "\\MEMORY.DMP";
-            string miniDumpPath = SystemRoot + "\\MINIDUMP";
-            string miniDumpArchiveDir = @"\MiniDumpArchive";
-            string miniDumpArchive = Program.dirName + miniDumpArchiveDir;
-
-            if (File.Exists(memoryDumpFile))
+            try
             {
-                crashDumpOccurred = true;
+                string crashDumpPath = Program.dirName + @"\CrashDumps\";
+                string timeStamp = string.Empty;
+                string newMemoryDumpFIle = string.Empty;
+                string[] miniDumpFiles = null;
 
-                //Rename crash dump file
-                memoryDumpFile = memoryDumpFile.Split('.')[0];
-                timeStamp = DateTime.Now.ToLocalTime().ToString();
-                newMemoryDumpFIle = memoryDumpFile.Replace(".DMP", memoryDumpFile + "_" + timeStamp + ".DMP");
-                string newMemDumpFileDIR = crashDumpPath + newMemoryDumpFIle;
-                if (!Directory.Exists(crashDumpPath)) { Directory.CreateDirectory(crashDumpPath); }
-                Utilities.CopyFile(memoryDumpFile, newMemDumpFileDIR);
-            }
-            else if (Directory.Exists(miniDumpPath)) 
-            {
-                miniDumpFiles = Directory.GetFiles(miniDumpPath, "*.DMP");
+                string SystemRoot = Environment.ExpandEnvironmentVariables("%systemroot%");
+                string memoryDumpFile = SystemRoot + "\\MEMORY.DMP";
+                string miniDumpPath = SystemRoot + "\\MINIDUMP";
+                string miniDumpArchiveDir = @"\MiniDumpArchive";
+                string miniDumpArchive = Program.dirName + miniDumpArchiveDir;
 
-                if (Directory.Exists(miniDumpPath))
-                {
-                    Directory.CreateDirectory(miniDumpArchive);
-                }
-
-                if (miniDumpFiles.Count() > 0)
+                if (File.Exists(memoryDumpFile))
                 {
                     crashDumpOccurred = true;
-                    foreach (string fileName in Directory.EnumerateFiles(miniDumpPath))
+
+                    //Rename crash dump file
+                    memoryDumpFile = memoryDumpFile.Split('.')[0];
+                    timeStamp = DateTime.Now.ToLocalTime().ToString();
+                    newMemoryDumpFIle = memoryDumpFile.Replace(".DMP", memoryDumpFile + "_" + timeStamp + ".DMP");
+                    string newMemDumpFileDIR = crashDumpPath + newMemoryDumpFIle;
+                    CreateIfMissing(crashDumpPath);
+                    Utilities.CopyFile(memoryDumpFile, newMemDumpFileDIR);
+                }
+                else if (Directory.Exists(miniDumpPath))
+                {
+                    miniDumpFiles = Directory.GetFiles(miniDumpPath, "*.DMP");
+                    CreateIfMissing(miniDumpPath);
+
+                    if (miniDumpFiles.Count() > 0)
                     {
-                        timeStamp = DateTime.Now.ToLocalTime().ToString();
-                        string archivedMinidumpFile = fileName.ToUpper().Replace(".DMP", String.Empty) + "_" + timeStamp + ".DMP";
-                        newMemoryDumpFIle = miniDumpArchive + "\\" + archivedMinidumpFile;
-                        string copyMiniDumpPath = miniDumpPath + fileName;
-                        Utilities.CopyFile(copyMiniDumpPath, newMemoryDumpFIle);
+                        crashDumpOccurred = true;
+                        foreach (string fileName in Directory.EnumerateFiles(miniDumpPath))
+                        {
+                            timeStamp = DateTime.Now.ToLocalTime().ToString();
+                            string archivedMinidumpFile = fileName.ToUpper().Replace(".DMP", String.Empty) + "_" + timeStamp + ".DMP";
+                            newMemoryDumpFIle = miniDumpArchive + "\\" + archivedMinidumpFile;
+                            string copyMiniDumpPath = miniDumpPath + fileName;
+                            Utilities.CopyFile(copyMiniDumpPath, newMemoryDumpFIle);
+                        }
                     }
                 }
             }
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
+            }
+
             Logger.FunctionLeave();
             return crashDumpOccurred;
         }
 
         /// <summary>
-        /// get the list of infs from the folders present in the 'support folder' where the executable
+        /// get the list of infs from the ZIPs present in the 'support folder' where the executable
         /// will be running from these are used to add to the XML
         /// </summary>
         /// <param name="supportFolderLocation"></param>
@@ -582,37 +570,33 @@ namespace DriverCapsuleStressTool
         internal static List<string> GetInfPathsList(string supportFolderLocation)
         {
             List<string> infPathList = new List<string>();
-            List<string> infsList = GetInfNameFromCSV(Program.dirName);
-            #region TRIED TO IMPLEMENT ENUMERATE ZIP FILES...NOT WORKING FOR SOME REASON 
-            //var checkForZIP = Directory.EnumerateFileSystemEntries(Program.dirName);
-            //foreach (string checkedEntry in checkForZIP)
-            //{
-            //    if (checkedEntry.EndsWith(".zip"))
-            //    {
-            //        ZipFile.ExtractToDirectory(checkedEntry, Program.dirName);
-            //    }
-            //}
-            #endregion
-            var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);
-            foreach (string infFile in infFiles)
+            
+            try
             {
-                string infDir = Path.GetDirectoryName(infFile);
-                string infRealName = Path.GetFileNameWithoutExtension(infFile);
-                string infPathTMP = Path.GetFullPath(infFile);
+                var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);
+                foreach (string infFile in infFiles)
+                {
+                    string infDir = Path.GetDirectoryName(infFile);
+                    string infRealName = Path.GetFileNameWithoutExtension(infFile);
+                    string infPathTMP = Path.GetFullPath(infFile);
 
-                if (infPathTMP.Contains("Rollbacks"))
-                {
-                    continue;
-                }
-                if (infsList.Contains(infRealName))
-                {
-                    infPathList.Add(infFile);
-                }
-                else if (infFile.Contains("Surface"))
-                {
-                    infPathList.Add(infFile);
+                    if (Regex.Match(infPathTMP, "rollbacks", RegexOptions.IgnoreCase).Success)
+                    {
+                        continue;
+                    }
+
+                    else if (infFile.Contains("Surface"))
+                    {
+                        infPathList.Add(infFile);
+                    }
                 }
             }
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
+            }
+
             return infPathList;
         }
 
@@ -627,28 +611,36 @@ namespace DriverCapsuleStressTool
             List<string> infPathList = new List<string>();
             int driversPathListCount = 0;
 
-            var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);
-            foreach (string infFile in infFiles)
+            try
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine(driversPathListCount);
-                Console.ForegroundColor = ConsoleColor.White;
-
-                string infDir = Path.GetDirectoryName(infFile);
-                string infRealName = Path.GetFileNameWithoutExtension(infFile);
-                string infPathTMP = Path.GetFullPath(infFile);
-
-                if (infPathTMP.Contains("Rollbacks"))
+                var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);
+                foreach (string infFile in infFiles)
                 {
-                    continue;
-                }
-                if (infPathList.Contains(infRealName))
-                {
-                    driversPathListCount++;
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine(driversPathListCount);
                     Console.ForegroundColor = ConsoleColor.White;
+
+                    string infDir = Path.GetDirectoryName(infFile);
+                    string infRealName = Path.GetFileNameWithoutExtension(infFile);
+                    string infPathTMP = Path.GetFullPath(infFile);
+
+                    if (infPathTMP.Contains("rollbacks"))
+                    {
+                        continue;
+                    }
+                    if (infPathList.Contains(infRealName))
+                    {
+                        driversPathListCount++;
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(driversPathListCount);
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
                 }
+            }
+
+            catch (Exception ex)
+            {
+                GetExceptionMessage(ex);
             }
             return driversPathListCount;
         }
@@ -658,61 +650,113 @@ namespace DriverCapsuleStressTool
         /// this will run after there is a reboot so is mostly for validation of firmware installs
         /// GetData.IsInstalledAfterReboot();
         /// </summary>
-        internal static void IsInstalledAfterReboot(string line)
+        internal static string IsInstalledAfterReboot(string line)
         {
-            bool pnpDidInstall = false;
-            string lastInstalledINFPath = File.ReadAllText(Program.lastInstalled);
-            // get the file attributes for file or directory
-            FileAttributes attr = File.GetAttributes(lastInstalledINFPath);
-            //detect whether its a directory or file
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            string result = "pass";
+            string returnCode = "pass";
+            try
             {
-                foreach (string tmpPath in Directory.EnumerateFiles(lastInstalledINFPath))
+                // get the file attributes for file or directory
+                FileAttributes attr = File.GetAttributes(line);
+                // detect whether its a directory or file
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                 {
-                    if (tmpPath.EndsWith(".inf"))
+                    foreach (string tmpPath in Directory.EnumerateFiles(line))
                     {
-                        lastInstalledINFPath = tmpPath;
+                        if (tmpPath.EndsWith(".inf"))
+                        {
+                            line = tmpPath;
+                        }
+                        else { continue; }
                     }
-                    else { continue; }
                 }
-            }
-            
-            string TMPexpectedVersion = GetDriverVersion(lastInstalledINFPath);
-            string TMPinfName = Path.GetFileNameWithoutExtension(lastInstalledINFPath);
-            string TMPhardwareID = FirmwareInstallGetHID(lastInstalledINFPath);
-            string classGUID = GetClassGUID(lastInstalledINFPath);
-            int TMPinfListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
-            int executionCount = XMLReader.GetExecutionCount(Program.InputTestFilePath);
-            bool TMPisCapsule = CheckDriverIsFirmware(lastInstalledINFPath, executionCount, TMPinfListCount);
-            bool stopOnError = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
-            if (TMPisCapsule)
-            {
-                bool CapsuleDidInstall = GetDataFromReg.CheckRegCapsuleIsInstalled(TMPinfName, TMPhardwareID, TMPexpectedVersion, lastInstalledINFPath);
-                if (CapsuleDidInstall.Equals(false) & stopOnError.Equals(true))
+
+                string TMPexpectedVersion = GetDriverVersion(line);
+                string TMPinfName = Path.GetFileNameWithoutExtension(line);
+                string TMPhardwareID = FirmwareInstallGetHID(line);
+                string classGUID = GetClassGUID(line);
+                int TMPinfListCount = XMLReader.GetInfsPathListCount(Program.InputTestFilePathBAK);
+                int executionCount = XMLReader.GetExecutionCount(Program.InputTestFilePath);
+                bool TMPisCapsule = CheckDriverIsFirmware(line, executionCount, TMPinfListCount);
+                bool stopOnError = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
+
+                if (TMPisCapsule)
                 {
-                    Logger.Comment("checked the registry after reboot but this firmware seems to have not installed : " + lastInstalledINFPath);
-                    Console.WriteLine("checked the registry after reboot but this firmware seems to have not installed : " + lastInstalledINFPath);
-                    Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                    Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
-                    Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
-                    Console.ReadKey();
-                    Environment.Exit(13);
+                    string CapsuleDidInstall = GetDataFromReg.CheckRegCapsuleIsInstalled(TMPinfName, TMPhardwareID, TMPexpectedVersion, line);
+                    if (stopOnError.Equals(true))
+                    {
+                        switch (returnCode)
+                        {
+                            case string failed when CapsuleDidInstall.Equals("unsuccessful"):
+                                returnCode = "unsuccessful registry code is 1 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            case string InsufficientResources when CapsuleDidInstall.Equals("InsufficientResources"):
+                                returnCode = "InsufficientResources registry code is 2 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            case string IncorrectVersion when CapsuleDidInstall.Equals("IncorrectVersion"):
+                                returnCode = "IncorrectVersion registry code is 3 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            case string invalidImage when CapsuleDidInstall.Equals("invalidImage"):
+                                returnCode = "invalidImage registry code is 4 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            case string authenticationERR when CapsuleDidInstall.Equals("authenticationERR"):
+                                returnCode = "authenticationERR registry code is 5 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            case string ACnotConnected when CapsuleDidInstall.Equals("ACnotConnected"):
+                                returnCode = "ACnotConnected registry code is 6 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            case string insufficientPower when CapsuleDidInstall.Equals("insufficientPower"):
+                                returnCode = "insufficientBatteryPower registry code is 7 ";
+                                XMLErrorMessage(returnCode, line);
+                                break;
+
+                            default:
+                                returnCode = "pass";
+                                result = returnCode;
+                                Logger.Comment("checked the registry after reboot but this firmware installed correctly " + returnCode + " " + line);
+                                Console.WriteLine("checked the registry after reboot but this firmware installed correctly " + returnCode + " " + line);
+                                break;
+                        }
+                    }
                 }
+                return result;
             }
-            else
+            catch (Exception ex)
             {
-                pnpDidInstall = GetDataFromReg.CheckRegDriverIsInstalled(classGUID, TMPinfName, TMPhardwareID, TMPexpectedVersion, lastInstalledINFPath);
-                if (pnpDidInstall.Equals(false) & stopOnError.Equals(true))
-                {
-                    Logger.Comment("checked the registry after reboot but this driver seems to have not installed : " + lastInstalledINFPath);
-                    Console.WriteLine("checked the registry after reboot but this driver seems to have not installed : " + lastInstalledINFPath);
-                    Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                    Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
-                    Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
-                    Console.ReadKey();
-                    Environment.Exit(13);
-                }
+                GetExceptionMessage(ex);
+                return result;
             }
+        }
+
+        /// <summary>
+        /// just to not repeat myself 7 times i am putting this here
+        /// GetData.XMLErrorMessage(returnCode, line);
+        /// </summary>
+        /// <param name="returnCode"></param>
+        /// <param name="line"></param>
+        internal static void XMLErrorMessage(string returnCode, string line)
+        {
+            string result;
+            Logger.Comment("checked the registry after reboot but this firmware seems to have failed to install due to " + returnCode + line);
+            Console.WriteLine("checked the registry after reboot but this firmware seems to have failed to install due to " + returnCode + line);
+            Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
+            Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
+            Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
+            XMLWriter.SetRegErrCode(returnCode, line);
+            Utilities.CopyFile(Program.InputTestFilePathBAK, Program.resultsLogDir + @"\DriverCapsuleStress.xml");
+            result = returnCode;
         }
     }
 }

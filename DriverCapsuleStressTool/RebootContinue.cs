@@ -51,20 +51,17 @@ namespace DriverCapsuleStressTool
             try
             {
                 Logger.FunctionEnter();
-                Logger.Comment("re-add the reg key to start post reboot...");;
+                Logger.Comment("re-add the reg key to start post reboot...");
                 SetStartUpRegistry(Program.reStartBAT);
                 Logger.Comment("I should reboot next...");
-                //Thread.Sleep(3000);
+                Thread.Sleep(3000);
                 Logger.FunctionLeave();
-                //StartShutDown("-f -r -t 5");
-                //Thread.Sleep(2000);
                 Utilities.Reboot(true);
             }
             catch (Exception)
             {
                 Logger.Comment("re-add the reg key to start post reboot...");
-                //SetStartUpRegistry(Program.stressAppPath);
-                //Thread.Sleep(2000);
+                SetStartUpRegistry(Program.reStartBAT);
                 StartShutDown("-f -r -t 5");
             }
         }

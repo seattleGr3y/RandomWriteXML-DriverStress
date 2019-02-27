@@ -1,14 +1,9 @@
 ﻿using Microsoft.HWSW.Test.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using Microsoft.VisualBasic.FileIO;
 using System.IO;
 using System.Management;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Linq;
 
 namespace DriverCapsuleStressTool
 {
@@ -108,9 +103,6 @@ namespace DriverCapsuleStressTool
             string infNameFromReg = string.Empty;
             string installedDriverVersion = string.Empty;
             string installedDeviceName = string.Empty;
-            //DateTime installedDriverDate;
-            //DateTime expDriverDate;
-            //string driverDate = string.Empty;
             bool result = false;
             string classGUID = GetData.GetClassGUID(line);
             if (string.IsNullOrEmpty(hardwareID))
@@ -124,24 +116,22 @@ namespace DriverCapsuleStressTool
             {
                 infNameFromReg = GetDataFromReg.GetOEMinfNameFromRegSTR(infName, hardwareID, classGUID);
             }
-            using (ManagementObjectSearcher s2 =
+            try
+            {
+                using (ManagementObjectSearcher s2 =
                     new ManagementObjectSearcher(
                     "root\\CIMV2",
                     "SELECT * FROM Win32_PnPSignedDriver"))
 
-            foreach (ManagementObject WmiObject in s2.Get())
-                {
-                    if (WmiObject["InfName"] == null) { continue; }
-                        else { infName = WmiObject["InfName"].ToString(); }
-                    if (WmiObject["DriverVersion"] == null) { continue; }
-                        else { installedDriverVersion = WmiObject["DriverVersion"].ToString(); }
-                    if (WmiObject["DeviceName"] == null) { continue; }
-                        else { installedDeviceName = WmiObject["DeviceName"].ToString(); }
-                   // if (WmiObject["DriverDate"] == null) { continue; }
-                   //     else { driverDate = WmiObject["DriverDate"].ToString(); }
-
-                    try
+                    foreach (ManagementObject WmiObject in s2.Get())
                     {
+                        if (WmiObject["InfName"] == null) { continue; }
+                        else { infName = WmiObject["InfName"].ToString(); }
+                        if (WmiObject["DriverVersion"] == null) { continue; }
+                        else { installedDriverVersion = WmiObject["DriverVersion"].ToString(); }
+                        if (WmiObject["DeviceName"] == null) { continue; }
+                        else { installedDeviceName = WmiObject["DeviceName"].ToString(); }
+
                         // there are zeros in driver versions in inf files that are not in the devMgr
                         // and viceVersa will have to remove\replace all zeros with ""
                         if (expectedDriverVersion.EndsWith("0"))
@@ -164,134 +154,65 @@ namespace DriverCapsuleStressTool
                         if (friendlyDriverName.Contains(" ")) { friendlyDriverName = friendlyDriverName.Replace(" ", ""); }
                         infNameToTest = infNameToTest.Split('.')[0];
                         if (infNameToTest.Equals("SurfaceEC")) { infNameToTest = "SurfaceEmbeddedControllerFirmware"; }
-                        
-                        //string currentDriverDate = driverDate.Split('.')[0].Insert(4, "/").Insert(7, "/").TrimEnd('0');
-                        
-                        //installedDriverDate = Convert.ToDateTime(currentDriverDate);
-                        //expDriverDate = Convert.ToDateTime(expectedDriverDate);
 
-                        if (infName.Equals(infNameFromReg))
+                        string lineContains = string.Empty;
+
+                        switch (lineContains)
                         {
-                            Console.WriteLine(expectedDriverVersion);
-                            Console.WriteLine(installedDriverVersion);
+                            case string infNameFromR when infName.Equals(infNameFromReg):
+                                if (expectedDriverVersion.Equals(installedDriverVersion))
+                                {
+                                    Logger.Comment(infNameToTest);
+                                    result = true;
+                                    Logger.Comment("result from checkInstalled TRUE infName/version : ");
+                                }
+                                break;
 
-                            if (expectedDriverVersion.Equals(installedDriverVersion))
-                            {
-                                Logger.Comment(infNameToTest);
-                                result = true;
-                                Logger.Comment("result from checkInstalled TRUE infName/version : ");
-                            }
-                            else { continue; }
+                            case string installedDeviceNam when friendlyDriverName.Equals(installedDeviceName):
+                                if (expectedDriverVersion.Equals(installedDriverVersion))
+                                {
+                                    Logger.Comment(infNameToTest);
+                                    result = true;
+                                    Logger.Comment("result from checkInstalled TRUE infName/version : ");
+                                }
+                                break;
+
+                            case string failedResult when Regex.Match(infName, friendlyDriverName).Success:
+                                if (expectedDriverVersion.Equals(installedDriverVersion))
+                                {
+                                    Logger.Comment(infNameToTest);
+                                    result = true;
+                                    Logger.Comment("result from checkInstalled TRUE infName/version : ");
+                                }
+                                break;
+
+                            case string successinstallResult when infName.Equals(infNameFromReg):
+                                if (expectedDriverVersion.Equals(installedDriverVersion))
+                                {
+                                    Logger.Comment(infNameToTest);
+                                    result = true;
+                                    Logger.Comment("result from checkInstalled TRUE infName/version : ");
+                                }
+                                break;
+
+                            case string last when installedDeviceName.Contains(infNameToTest):
+                                if (expectedDriverVersion.Equals(installedDriverVersion))
+                                {
+                                    Logger.Comment(infNameToTest);
+                                    result = true;
+                                    Logger.Comment("result from checkInstalled TRUE infName/version : ");
+                                }
+                                break;
+
+                            default:
+                                continue;
                         }
-
-                        if (friendlyDriverName.Equals(installedDeviceName))
-                        {
-                            if (expectedDriverVersion.Equals(installedDriverVersion))
-                            {
-                                Logger.Comment(infNameToTest);
-                                result = true;
-                                Logger.Comment("result from checkInstalled TRUE friendlyDriverName/version : " + result);
-                            }
-                            //else if (installedDriverDate == expDriverDate)
-                            //{
-                            //    Logger.Comment(infNameToTest);
-                            //    result = true;
-                            //    Logger.Comment("result from checkInstalled TRUE name/date : " + result);
-                            //}
-                            else { continue; }
-                        }
-                        
-                        else if (Regex.Match(infName, friendlyDriverName).Success)
-                        {
-                            if (expectedDriverVersion.Equals(installedDriverVersion))
-                            {
-                                Logger.Comment(infNameToTest);
-                                result = true;
-                                Logger.Comment("result from checkInstalled TRUE friendlyName/version : " + result);
-                            }
-                            //else if (installedDriverDate == expDriverDate)
-                            //{
-                            //    Logger.Comment(infNameToTest);
-                            //    result = true;
-                            //    Logger.Comment("result from checkInstalled TRUE friendlyName/date : " + result);
-                            //}
-                            else { continue; }
-                        }
-
-                        else if (infName.Equals(infNameFromReg))
-                        {
-                            Console.WriteLine(expectedDriverVersion);
-                            Console.WriteLine(installedDriverVersion);
-
-                            if (expectedDriverVersion.Equals(installedDriverVersion))
-                            {
-                                Logger.Comment(infNameToTest);
-                                result = true;
-                                Logger.Comment("result from checkInstalled TRUE name/version : " + result);
-                            }
-                            //else if (installedDriverDate == expDriverDate)
-                            //{
-                            //    Logger.Comment(infNameToTest);
-                            //    result = true;
-                            //    Logger.Comment("result from checkInstalled TRUE name/date : " + result);
-                            //}
-                            else { continue; }
-                        }
-
-                        //else if (installedDriverDate == expDriverDate)
-                        //{
-                        //    if (infName.ToLower().Equals(infNameToTest.ToLower()))
-                        //    {
-                        //        Logger.Comment(infNameToTest);
-                        //        result = true;
-                        //        Logger.Comment("result from checkInstalled TRUE by date/name" + result);
-                        //    }
-                        //    else if (Regex.Match(installedDeviceName, infNameToTest, RegexOptions.IgnoreCase).Success)
-                        //    {
-                        //        Logger.Comment(infNameToTest);
-                        //        result = true;
-                        //        Logger.Comment("result from checkInstalled TRUE by date/name" + result);
-                        //    }
-                        //}
-
-                        else if (installedDeviceName.Contains(infNameToTest))
-                        {
-                            if (expectedDriverVersion.Equals(installedDriverVersion))
-                            {
-                                Logger.Comment(infNameToTest);
-                                result = true;
-                                Logger.Comment("result from checkInstalled TRUE deviceName/version : " + result);
-                            }
-                            //else if (installedDriverDate == expDriverDate)
-                            //{
-                            //    Logger.Comment(infNameToTest);
-                            //    result = true;
-                            //    Logger.Comment("result from checkInstalled TRUE deviceName/date : " + result);
-                            //}
-                            else { continue; }
-                        }
-
-                        //else if (expectedDriverVersion.Equals(installedDriverVersion))
-                        //{
-                        //    if (installedDeviceName.Equals(infNameToTest))
-                        //    {
-                        //        Logger.Comment(infNameToTest);
-                        //        result = true;
-                        //        Logger.Comment("result from checkInstalled TRUE version/name : " + result);
-                        //    }
-                        //    else if (installedDeviceName == infNameToTest)
-                        //    {
-                        //        Logger.Comment(infNameToTest);
-                        //        result = true;
-                        //        Logger.Comment("result from checkInstalled TRUE version/name : " + result);
-                        //    }
-                        //}
-                        else { continue; }
                     }
-                    catch (Exception ex)
-                    {
-                        GetData.GetExceptionMessage(ex);
-                    }
+            }
+
+                catch (Exception ex)
+                {
+                    GetData.GetExceptionMessage(ex);
                 }
             Logger.Comment("result actually being returned from checkInstalled : " + result);
             Console.ForegroundColor = ConsoleColor.Green;

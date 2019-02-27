@@ -61,76 +61,84 @@ namespace DriverCapsuleStressTool
             Logger.FunctionEnter();
             const string psFile = @".\CheckRebootState.ps1";
             bool rc = false;
-
-            // next requires wu service to be running
-            //WUApiLib.UpdateInstaller inst = new UpdateInstaller();
-            //rc = inst.RebootRequiredBeforeInstallation;
-
-            if (!rc && File.Exists(psFile) && !CloudUtilities.IsCloudOS())
+            try
             {
-                if (PS.RunPSCommand(@"-File " + psFile, out string outstr, true))
+                // next requires wu service to be running
+                //WUApiLib.UpdateInstaller inst = new UpdateInstaller();
+                //rc = inst.RebootRequiredBeforeInstallation;
+
+                if (!rc && File.Exists(psFile) && !CloudUtilities.IsCloudOS())
                 {
-                    Logger.Debug("output string from PS: " + outstr);
-                    rc = outstr.ToLower().Contains("true");
-                }
-            }
-
-            if (!rc)
-            {
-                Logger.Debug("Com lookup returned false, checking registry to confirm");
-
-                // check registry keys for potential pending updates
-                const string _rebootKey1 = @"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\";
-                const string _rebootKey2 = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\";
-                const string _rebootValue = "RebootRequired";
-                const string _sessionMgrKey = @"SYSTEM\CurrentControlSet\Control\Session Manager\";
-                const string _pendingRenameValue = "PendingFileRenameOperations";
-
-                Logger.Debug("Checking for {0}", _sessionMgrKey);
-                RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default);
-                RegistryKey subKey = baseKey.OpenSubKey(_sessionMgrKey);
-                if (subKey != null)
-                {
-                    Logger.Debug("Getting Subkey {0}", _pendingRenameValue);
-                    var value = subKey.GetValue(_pendingRenameValue);
-                    if (value != null)
+                    if (PS.RunPSCommand(@"-File " + psFile, out string outstr, true))
                     {
-                        var stringList = new List<string>(value as string[]);
-                        if (stringList.Count > 0)
+                        Logger.Debug("output string from PS: " + outstr);
+                        rc = outstr.ToLower().Contains("true");
+                    }
+                }
+
+                if (!rc)
+                {
+                    Logger.Debug("Com lookup returned false, checking registry to confirm");
+
+                    // check registry keys for potential pending updates
+                    const string _rebootKey1 = @"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\";
+                    const string _rebootKey2 = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\";
+                    const string _rebootValue = "RebootRequired";
+                    const string _sessionMgrKey = @"SYSTEM\CurrentControlSet\Control\Session Manager\";
+                    const string _pendingRenameValue = "PendingFileRenameOperations";
+
+                    Logger.Debug("Checking for {0}", _sessionMgrKey);
+                    RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default);
+                    RegistryKey subKey = baseKey.OpenSubKey(_sessionMgrKey);
+                    if (subKey != null)
+                    {
+                        Logger.Debug("Getting Subkey {0}", _pendingRenameValue);
+                        var value = subKey.GetValue(_pendingRenameValue);
+                        if (value != null)
                         {
-                            Logger.Comment("Pending Reboot Detected: Pending rename registry key setting found");
+                            var stringList = new List<string>(value as string[]);
+                            if (stringList.Count > 0)
+                            {
+                                Logger.Comment("Pending Reboot Detected: Pending rename registry key setting found");
+                                rc = true;
+                            }
+                        }
+                    }
+
+                    // NOTE: the next may fail on domain-joined machines due to MS domain admin policies.
+                    //       this should run ok for WTT machines which is the intended target.
+                    Logger.Debug("Checking {0}", _rebootKey1);
+                    subKey = baseKey.OpenSubKey(_rebootKey1);
+
+                    if (subKey != null)
+                    {
+                        string[] subKeys = subKey.GetSubKeyNames();
+                        if (subKeys.Contains(_rebootValue))
+                        {
+                            Logger.Comment("Pending Reboot Detected: Pending reboot required registry key found");
+                            rc = true;
+                        }
+                    }
+
+                    Logger.Debug("Checking {0}", _rebootKey2);
+                    subKey = baseKey.OpenSubKey(_rebootKey2);
+                    if (subKey != null)
+                    {
+                        string[] subKeys = subKey.GetSubKeyNames();
+                        if (subKeys.Contains(_rebootValue))
+                        {
+                            Logger.Comment("Pending Reboot Detected: Pending reboot required registry key found");
                             rc = true;
                         }
                     }
                 }
-
-                // NOTE: the next may fail on domain-joined machines due to MS domain admin policies.
-                //       this should run ok for WTT machines which is the intended target.
-                Logger.Debug("Checking {0}", _rebootKey1);
-                subKey = baseKey.OpenSubKey(_rebootKey1);
-
-                if (subKey != null)
-                {
-                    string[] subKeys = subKey.GetSubKeyNames();
-                    if (subKeys.Contains(_rebootValue))
-                    {
-                        Logger.Comment("Pending Reboot Detected: Pending reboot required registry key found");
-                        rc = true;
-                    }
-                }
-
-                Logger.Debug("Checking {0}", _rebootKey2);
-                subKey = baseKey.OpenSubKey(_rebootKey2);
-                if (subKey != null)
-                {
-                    string[] subKeys = subKey.GetSubKeyNames();
-                    if (subKeys.Contains(_rebootValue))
-                    {
-                        Logger.Comment("Pending Reboot Detected: Pending reboot required registry key found");
-                        rc = true;
-                    }
-                }
             }
+
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+
 
             Logger.Debug("Reboot Pending Query Returning {0}", rc);
             Logger.FunctionLeave();

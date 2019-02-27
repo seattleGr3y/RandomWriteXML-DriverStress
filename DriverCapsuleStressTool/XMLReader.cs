@@ -213,6 +213,29 @@ namespace DriverCapsuleStressTool
 
         /// <summary>
         /// read the XML to find the number of times it will need to loop through the list
+        /// XMLReader.GetLastInstalled();
+        /// </summary>
+        /// <param name="InputTestFilePath"></param>
+        /// <returns></returns>
+        internal static string GetLastInstalled()
+        {
+            string result = string.Empty;
+            try
+            {
+                Logger.FunctionEnter();
+                var testInputData = XDocument.Load(Program.InputTestFilePathBAK);
+                string lastInstalled = testInputData.XPathSelectElement("/Tests/TestChoices/LastInstalled").Value.ToString();
+                result = lastInstalled;
+            }
+            catch (Exception ex)
+            {
+                GetData.GetExceptionMessage(ex);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// read the XML to find the number of times it will need to loop through the list
         /// </summary>
         /// <param name="InputTestFilePath"></param>
         /// <returns></returns>

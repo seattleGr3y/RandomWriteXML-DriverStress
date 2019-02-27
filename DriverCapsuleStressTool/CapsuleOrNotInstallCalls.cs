@@ -54,7 +54,7 @@ namespace DriverCapsuleStressTool
         {
             try
             {
-                bool needRollBack = true;
+                //bool needRollBack = true;
                 bool rebootRequired = true;
                 Logger.FunctionEnter();
                 string infFileContent = File.ReadAllText(line).ToUpper();
@@ -78,7 +78,7 @@ namespace DriverCapsuleStressTool
                     Console.WriteLine("THIS FIRMWARE VERSION IS CURRENTLY INSTALLED ROLLBACK NOW....");
                     Console.WriteLine("-------------------------------------------------------------");
                     Console.ForegroundColor = ConsoleColor.White;
-                    GetData.IfWillNeedRollBack(line, needRollBack, infName);
+                    GetData.IfWillNeedRollBack(line);
                     driverPathListCount--;
                     Logger.Comment("this will now begin to ROLLBACK : " + infName);
                     SafeNativeMethods.RollbackInstall(seedIndex, line, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
@@ -91,37 +91,16 @@ namespace DriverCapsuleStressTool
                     Console.WriteLine("THIS FIRMWARE VERSION WAS NOT INSTALLED YET INSTALLING NOW...");
                     Console.WriteLine("-------------------------------------------------------------");
                     Console.ForegroundColor = ConsoleColor.White;
-
                     hardwareID = GetData.FirmwareInstallGetHID(line);
                     string installArgs = " /C /A /Q /SE /F /PATH " + infDir;
                     Logger.Comment("IfIsCapsule installArgsChoice  is FALSE installArgs " + installArgs);
                     driverPathListCount--;
                     Logger.Comment("this will now Install : " + infName);
                     installArgs = " /C /A /Q /SE /F /PATH " + infDir;
-                    
-                    SafeNativeMethods.Install_Inf(line, installer, installArgs, seedIndex);
                     RegCheck.CreatePolicyRegKeyAndSetValue(hardwareID, rebootRequired);
+                    RebootAndContinue.SetStartUpRegistry(Program.reStartBAT);
                     Logger.Comment("installArgs from FirmwareInstall : " + installArgs);
-                    bool isInstalledRegCheck = GetDataFromReg.CheckRegCapsuleIsInstalled(infName, hardwareID, expectedDriverVersion, line);
-                    if (isInstalledRegCheck.Equals(true))
-                    {
-                        RebootAndContinue.RebootCmd(true);
-                    }
-                    else
-                    {
-                        bool stopOnError = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
-                        if (stopOnError)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine("-------------------------------------------------------------");
-                            Console.WriteLine("THIS FAILED TO INSTALL ACCORDING TO THE REGISTRY...");
-                            Console.WriteLine("-------------------------------------------------------------");
-                            Console.ForegroundColor = ConsoleColor.White;
-
-                            Console.ReadKey();
-                        }
-                        RebootAndContinue.RebootCmd(true);
-                    }
+                    SafeNativeMethods.Install_Inf(line, installer, installArgs, seedIndex);
                 }
             }
             catch (Exception ex)
