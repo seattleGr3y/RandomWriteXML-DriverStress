@@ -184,6 +184,7 @@ namespace DriverCapsuleStressTool
         /// read the XML to find the number of times it will need to loop through the list
         /// </summary>
         /// <param name="InputTestFilePath"></param>
+        /// GetData.GetSeed(InputTestFilePathBAK);
         /// <returns></returns>
         internal static string GetSeed(string InputTestFilePathBAK)
         {

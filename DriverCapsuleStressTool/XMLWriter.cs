@@ -22,7 +22,7 @@ namespace DriverCapsuleStressTool
         /// <param name="executionCount"></param>
         /// <param name="supportFolderLOC"></param>
         /// <param name="InputTestFilePath"></param>
-        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath, string stopOnErrorSTR, string groupFirmwareSTR)
+        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath, string stopOnErrorSTR, string groupFirmwareSTR, string dumpFilePath)
         {
             string lastInstalled = string.Empty;
             string dumpExist = "False";
@@ -114,6 +114,11 @@ namespace DriverCapsuleStressTool
 
             xmlWriter.WriteStartElement("DumpExists");
             xmlWriter.WriteString(dumpExist);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\n");
+
+            xmlWriter.WriteStartElement("DumpFilePath");
+            xmlWriter.WriteString(dumpFilePath);
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\n");
 
@@ -236,7 +241,7 @@ namespace DriverCapsuleStressTool
         /// XMLWriter.LogResults(InputTestFilePathBAK, errorCount, failedCount, passedCount, dumpExist);
         /// <returns></returns>
         internal static void LogResults(string InputTestFilePathBAK, string errorCount, string failedCount, string successInstallResults, string successUninstallResults,
-            string rollBackErrorCount, string rollBackFailedCount, string rollBackSuccessCount, string dumpExist, string logString)
+            string rollBackErrorCount, string rollBackFailedCount, string rollBackSuccessCount, string dumpExist, string logString, string dumpFilePath)
         {
             try 
             {
@@ -256,6 +261,7 @@ namespace DriverCapsuleStressTool
                     testInputData.Save(InputTestFilePathBAK);
                 }
                 testInputData.XPathSelectElement("/Tests/TestChoices/DumpExists").Value = dumpExist;
+                testInputData.XPathSelectElement("/Tests/TestChoices/DumpFilePath").Value = dumpFilePath;
                 testInputData.XPathSelectElement("/Tests/TestChoices/FailedErroredINFs").Value = logString;
                 testInputData.Save(InputTestFilePathBAK);
                 Thread.Sleep(500);
@@ -391,7 +397,7 @@ namespace DriverCapsuleStressTool
                 //Thread.Sleep(500);
                 testInputData.Save(Program.InputTestFilePathBAK);
 
-                File.WriteAllText(Program.seedFilePath, currentSeed);
+                //File.WriteAllText(Program.seedFilePath, currentSeed);
             }
             catch (Exception ex)
             {

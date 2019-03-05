@@ -98,7 +98,10 @@ namespace DriverCapsuleStressTool
                 {
                     numbers.Shuffle(infListCount);
                     infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                    File.WriteAllText(Program.seedFilePath, infIndexList);
+                    if (!File.Exists(Program.seedFilePath + executionCount + ".txt"))
+                    {
+                        File.WriteAllText(Program.seedFilePath + executionCount + ".txt", infIndexList);
+                    }
 
                     XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
                     Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);
@@ -107,7 +110,10 @@ namespace DriverCapsuleStressTool
                 else
                 {
                     infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
-                    File.WriteAllText(Program.seedFilePath, infIndexList);
+                    if (!File.Exists(Program.seedFilePath + executionCount + ".txt"))
+                    {
+                        File.WriteAllText(Program.seedFilePath + executionCount + ".txt", infIndexList);
+                    }
 
                     XMLWriter.SaveSeed(Program.InputTestFilePathBAK, infIndexList, infIndexList);
                     Utilities.CopyFile(Program.InputTestFilePathBAK, Program.InputTestFilePath);

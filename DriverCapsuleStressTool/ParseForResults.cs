@@ -32,6 +32,7 @@ namespace DriverCapsuleStressTool
             string dumpExist = string.Empty;
             string logString = string.Empty;
             string lineContains = string.Empty;
+            string dumpFilePath = string.Empty;
             try
             {
                 using (FileStream fs = File.Open(logPath, FileMode.Open, FileAccess.Read, FileShare.Inheritable))
@@ -86,21 +87,18 @@ namespace DriverCapsuleStressTool
                     Console.WriteLine("successUninstallCount : " + successUninstallCount);
                     Console.WriteLine("errorCount  : " + errorCount);
                     Console.WriteLine("rollBackFailedCount : " + rollBackFailedCount);
-                    Console.WriteLine("rollBackSuccessInstallCount : " + rollBackSuccessCount);
+                    Console.WriteLine("rollBackSuccessInstallCount : " + (rollBackSuccessCount - successInstallCount));
                     Console.WriteLine("rollBackErrorCount  : " + rollBackErrorCount);
                     Console.ForegroundColor = ConsoleColor.White;
                 }
 
-                foreach (string dmpFileTest in Directory.EnumerateDirectories(Program.dirName))
+                foreach (var dmpFileTest in Directory.EnumerateDirectories(Program.dirName, ".dmp", SearchOption.AllDirectories))
                 {
-                    if (File.Exists(dmpFileTest.Contains(".dmp").ToString()))
-                    {
-                        dumpExist = "True";
-                    }
-                    else { continue; }
+                    dumpExist = "True";
+                    dumpFilePath = dmpFileTest;
                 }
                 XMLWriter.LogResults(Program.InputTestFilePathBAK, errorCount.ToString(), failedCount.ToString(), successInstallCount.ToString(), successUninstallCount.ToString(),
-                    rollBackErrorCount.ToString(), rollBackFailedCount.ToString(), rollBackSuccessCount.ToString(), dumpExist, logString);
+                    rollBackErrorCount.ToString(), rollBackFailedCount.ToString(), rollBackSuccessCount.ToString(), dumpExist, logString, dumpFilePath);
             }
 
             catch (Exception ex)
@@ -109,6 +107,7 @@ namespace DriverCapsuleStressTool
             }
         }
 
+        #region  - NOT YET IMPLEMENTED - PREPARING FOR MORE IN DEPTH LOGGING
         /// <summary>
         /// might be writing this to the XML for logging
         /// </summary>
@@ -127,31 +126,31 @@ namespace DriverCapsuleStressTool
                         switch (capsuleReturnCode)
                         {
                             case 1:
-                                Console.WriteLine("this failed straight-up registry code = 1");
+                                Console.WriteLine("unsuccessful - registry code = 1");
                                 break;
 
                             case 2:
-                                Console.WriteLine("this failed straight-up registry code = 2");
+                                Console.WriteLine("InsufficientResources - registry code = 2");
                                 break;
 
                             case 3:
-                                Console.WriteLine("this failed straight-up registry code = 3");
+                                Console.WriteLine("IncorrectVersion - registry code = 3");
                                 break;
 
                             case 4:
-                                Console.WriteLine("this failed straight-up registry code = 4");
+                                Console.WriteLine("invalidImage - registry code = 4");
                                 break;
 
                             case 5:
-                                Console.WriteLine("this failed straight-up registry code = 5");
+                                Console.WriteLine("authenticationERR - registry code = 5");
                                 break;
 
                             case 6:
-                                Console.WriteLine("this failed straight-up registry code = 6");
+                                Console.WriteLine("ACnotConnected - registry code = 6");
                                 break;
 
                             case 7:
-                                Console.WriteLine("this failed straight-up registry code = 7");
+                                Console.WriteLine("insufficientPower - registry code = 7");
                                 break;
 
                             default:
@@ -161,5 +160,6 @@ namespace DriverCapsuleStressTool
                 }
             }
         }
+        #endregion
     }
 }

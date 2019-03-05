@@ -585,7 +585,7 @@ namespace DriverCapsuleStressTool
                         continue;
                     }
 
-                    else if (infFile.Contains("Surface"))
+                    else //if (infFile.Contains("Surface"))
                     {
                         infPathList.Add(infFile);
                     }

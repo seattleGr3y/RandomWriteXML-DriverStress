@@ -17,7 +17,7 @@ namespace DriverCapsuleStressTool
         internal static string InputTestFile = @"\DriverCapsuleStress.xml";
         internal static string InputTestFilePath = dirName + InputTestFile;
         internal static string InputTestFilePathBAK = dirName + @"\DriverCapsuleStress.xml.BAK";
-        internal static string seedFilePath = dirName + @"\SEED.txt";
+        internal static string seedFilePath = dirName + @"\SEED.";
         internal static string stringList = "";
         internal static string startChoice = string.Empty;
         internal static string supportFolderLOC = dirName;

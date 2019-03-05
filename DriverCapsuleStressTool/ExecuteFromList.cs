@@ -178,11 +178,11 @@ namespace DriverCapsuleStressTool
                                     infListCount--;
                                     CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
                                     break;
-                                case bool surfaceInName when infName.Contains("Surface").Equals(true):
-                                    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
-                                    infListCount--;
-                                    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
-                                    break;
+                                //case bool surfaceInName when infName.Contains("Surface").Equals(true):
+                                //    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
+                                //    infListCount--;
+                                //    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
+                                //    break;
                                 default:
                                     Logger.Comment("this is NOT firmware check for reboot afer installed");
                                     infListCount--;
@@ -285,7 +285,8 @@ namespace DriverCapsuleStressTool
                             string infName = Path.GetFileNameWithoutExtension(line);
                             testIsStartChoice = GetData.GetTestFirst(Program.InputTestFilePath);
                             string testInfName = infName.ToLower();
-                            infIndexListString = File.ReadAllText(Program.seedFilePath);
+                            infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
+                            //infIndexListString = File.ReadAllText(Program.seedFilePath);
 
                             // the tool will skip to here if none of the other above are met
                             // then looking for a choice set to install first from the list
@@ -303,11 +304,11 @@ namespace DriverCapsuleStressTool
                                         CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
                                         break;
 
-                                    case bool surfaceInName when infName.Contains("Surface").Equals(true):
-                                        Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
-                                        infListCount--;
-                                        CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
-                                        break;
+                                    //case bool surfaceInName when infName.Contains("Surface").Equals(true):
+                                    //    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
+                                    //    infListCount--;
+                                    //    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
+                                    //    break;
 
                                     default:
                                         Console.ForegroundColor = ConsoleColor.Green;
@@ -341,11 +342,11 @@ namespace DriverCapsuleStressTool
                                     CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
                                     break;
 
-                                case bool surfaceInName when infName.Contains("Surface").Equals(true):
-                                    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
-                                    infListCount--;
-                                    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
-                                    break;
+                                //case bool surfaceInName when infName.Contains("Surface").Equals(true):
+                                //    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
+                                //    infListCount--;
+                                //    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
+                                //    break;
 
                                 default:
                                     Logger.Comment("THIS IS NOT FIRMWARE...");
