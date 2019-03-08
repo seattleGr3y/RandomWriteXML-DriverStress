@@ -157,6 +157,7 @@ namespace DriverCapsuleStressTool
                         executionCount = XMLReader.GetExecutionCount(Program.InputTestFilePath);
                         foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                         {
+                            if (seedIndex == 0) { break; }
                             if (RegCheck.IsRebootPending())
                             {
                                 Logger.Comment("there is a pending reboot...");
@@ -277,6 +278,7 @@ namespace DriverCapsuleStressTool
                         executionCount = XMLReader.GetExecutionCount(Program.InputTestFilePath);
                         foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                         {
+                            if (seedIndex == 0) { break; }
                             string index = Convert.ToString(seedIndex);
                             if (index.Equals(null)) { continue; }
                             GetData.CreateIfMissing(Program.resultsLogDir);
@@ -324,6 +326,7 @@ namespace DriverCapsuleStressTool
                         infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                         foreach (int seedIndex in infIndexListString.Split(',').Select(Int32.Parse).ToList<int>())
                         {
+                            if (seedIndex == 0) { break; }
                             string index = Convert.ToString(seedIndex);
 
                             string indexString = Convert.ToString(index);

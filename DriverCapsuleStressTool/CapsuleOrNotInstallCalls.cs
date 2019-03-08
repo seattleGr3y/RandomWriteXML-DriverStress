@@ -22,11 +22,33 @@ namespace DriverCapsuleStressTool
         {
             try
             {
-                bool rebootRequired = false;
                 Logger.FunctionEnter();
+                bool rebootRequired = false;
                 string infFileContent = File.ReadAllText(line).ToUpper();
                 string infDir = Path.GetDirectoryName(line);
                 string hardwareID = GetData.FirmwareInstallGetHID(line);
+                Logger.Comment("IfIsCapsule isCapsule infName " + infName);
+                string expectedDriverVersion = GetData.GetDriverVersion(line);
+                Logger.Comment("IfIsCapsule From RegCheck before IF : " + expectedDriverVersion);
+                string infNameToTest = Path.GetFileNameWithoutExtension(line);
+                string expectedDriverDate = GetData.GetDriverDate(line);
+                string infPath = Path.GetDirectoryName(line);
+                string friendlyDriverName = XMLReader.GetFriendlyDriverName(InputTestFilePath, line);
+                bool isInstalled = CheckWhatInstalled.CheckInstalled(line, hardwareID, friendlyDriverName, infNameToTest, expectedDriverVersion, expectedDriverDate);
+                
+                if (isInstalled)
+                {
+                    foreach (var testDir in Directory.EnumerateFiles(Program.rollBackDir))       //(Program.rollBackDir.Contains(infName))
+                    {
+                        if (testDir.Contains(infName))
+                        {
+                            driverPathListCount--;
+                            Logger.Comment("this will now begin to ROLLBACK : " + infName);
+                            SafeNativeMethods.RollbackInstall(seedIndex, line, infName, infFileContent, hardwareID, rebootRequired = true, InputTestFilePath);
+                        }
+                    }
+                }
+
                 driverPathListCount--;
                 Logger.Comment("this will now install infName : " + infName);
                 Logger.Comment("this will now install hardwareID : " + hardwareID);

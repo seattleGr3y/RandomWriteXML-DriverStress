@@ -580,7 +580,7 @@ namespace DriverCapsuleStressTool
                     string infRealName = Path.GetFileNameWithoutExtension(infFile);
                     string infPathTMP = Path.GetFullPath(infFile);
 
-                    if (Regex.Match(infPathTMP, "rollbacks", RegexOptions.IgnoreCase).Success)
+                    if (Regex.Match(infFile, "rollbacks", RegexOptions.IgnoreCase).Success)
                     {
                         continue;
                     }
