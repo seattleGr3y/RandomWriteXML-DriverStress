@@ -22,7 +22,7 @@ namespace DriverCapsuleStressTool
         /// <param name="executionCount"></param>
         /// <param name="supportFolderLOC"></param>
         /// <param name="InputTestFilePath"></param>
-        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath, string stopOnErrorSTR, string groupFirmwareSTR, string dumpFilePath)
+        internal static void CreateXML(string dirName, bool randomize, string seedFileText, string stringList, string startChoice, int executionCount, string supportFolderLOC, string InputTestFilePath, string stopOnErrorSTR, string groupFirmwareSTR, string dumpFilePath, string custom)
         {
             string lastInstalled = string.Empty;
             string dumpExist = "False";
@@ -31,6 +31,8 @@ namespace DriverCapsuleStressTool
             string infName = string.Empty;
             XmlWriter xmlWriter = XmlWriter.Create(InputTestFilePath);
             int infIndex = 0;
+            int infsPathListCount = 0;
+            List<string> infsPathList = new List<string>();
 
             xmlWriter.WriteStartDocument();
             xmlWriter.WriteWhitespace("\n");
@@ -40,30 +42,62 @@ namespace DriverCapsuleStressTool
             xmlWriter.WriteStartElement("InfDirectories");
             xmlWriter.WriteWhitespace("\n");
 
-            List<string> infsPathList = GetData.GetInfPathsList(dirName);
-            int infsPathListCount = infsPathList.Count;
-
-            foreach (string infDir in infsPathList)
+            if (custom.Equals("none"))
             {
-                infName = Path.GetFileNameWithoutExtension(infDir);
-                //string friendlyInfName = GetData.FindFriendlyNameInCSV(infName);
-                // TRIED TO USE THE DICTIONARY BUT I CAN HAVE DUP VALUES FOR INF NAMES
-                // IN CSV FILE WITHOUT ISSUE BUT DICTIONARY FAILS WITH DUP VALUES
-                string friendlyInfName = Names_Dictionary.GetNamesMatch(infName);
-                infIndex++;
-                xmlWriter.WriteStartElement("InfDir");
-                xmlWriter.WriteAttributeString("InfName", friendlyInfName);
-                xmlWriter.WriteAttributeString("InfPath", infDir);
-                xmlWriter.WriteAttributeString("InfIndex", infIndex.ToString());
-                xmlWriter.WriteAttributeString("ErrorCount", "0");
-                xmlWriter.WriteAttributeString("FailedCount", "0");
-                xmlWriter.WriteAttributeString("SuccessfullInstalls", "0");
-                xmlWriter.WriteAttributeString("SuccessfullUninstalls", "0");
-                xmlWriter.WriteAttributeString("RollbacksErrorCount", "0");
-                xmlWriter.WriteAttributeString("RollbacksFailedCount", "0");
-                xmlWriter.WriteAttributeString("SuccessfullRollbacks", "0");
-                xmlWriter.WriteEndElement();
-                xmlWriter.WriteWhitespace("\n");
+                infsPathList = GetData.GetInfPathsList(dirName);
+                infsPathListCount = infsPathList.Count;
+
+                foreach (string infDir in infsPathList)
+                {
+                    infName = Path.GetFileNameWithoutExtension(infDir);
+                    // string friendlyInfName = GetData.FindFriendlyNameInCSV(infName);
+                    // TRIED TO USE THE DICTIONARY BUT I CAN HAVE DUP VALUES FOR INF NAMES
+                    // IN CSV FILE WITHOUT ISSUE BUT DICTIONARY FAILS WITH DUP VALUES
+                    string friendlyInfName = Names_Dictionary.GetNamesMatch(infName);
+                    infIndex++;
+                    xmlWriter.WriteStartElement("InfDir");
+                    xmlWriter.WriteAttributeString("InfName", friendlyInfName);
+                    xmlWriter.WriteAttributeString("InfPath", infDir);
+                    xmlWriter.WriteAttributeString("InfIndex", infIndex.ToString());
+                    xmlWriter.WriteAttributeString("ErrorCount", "0");
+                    xmlWriter.WriteAttributeString("FailedCount", "0");
+                    xmlWriter.WriteAttributeString("SuccessfullInstalls", "0");
+                    xmlWriter.WriteAttributeString("SuccessfullUninstalls", "0");
+                    xmlWriter.WriteAttributeString("RollbacksErrorCount", "0");
+                    xmlWriter.WriteAttributeString("RollbacksFailedCount", "0");
+                    xmlWriter.WriteAttributeString("SuccessfullRollbacks", "0");
+                    xmlWriter.WriteEndElement();
+                    xmlWriter.WriteWhitespace("\n");
+                }
+            }
+
+            else
+            {
+                infsPathList = CustomExecutionOrder.CustomOrder(custom);
+                infsPathListCount = infsPathList.Count;
+                foreach (string infDir in infsPathList)
+                {
+                    infName = Path.GetFileNameWithoutExtension(infDir);
+                    // string friendlyInfName = GetData.FindFriendlyNameInCSV(infName);
+                    // TRIED TO USE THE DICTIONARY BUT I CAN HAVE DUP VALUES FOR INF NAMES
+                    // IN CSV FILE WITHOUT ISSUE BUT DICTIONARY FAILS WITH DUP VALUES
+                    string friendlyInfName = Names_Dictionary.GetNamesMatch(infName);
+                    infIndex++;
+                    xmlWriter.WriteStartElement("InfDir");
+                    xmlWriter.WriteAttributeString("InfName", friendlyInfName);
+                    xmlWriter.WriteAttributeString("InfPath", infDir);
+                    xmlWriter.WriteAttributeString("InfIndex", infIndex.ToString());
+                    xmlWriter.WriteAttributeString("ErrorCount", "0");
+                    xmlWriter.WriteAttributeString("FailedCount", "0");
+                    xmlWriter.WriteAttributeString("SuccessfullInstalls", "0");
+                    xmlWriter.WriteAttributeString("SuccessfullUninstalls", "0");
+                    xmlWriter.WriteAttributeString("RollbacksErrorCount", "0");
+                    xmlWriter.WriteAttributeString("RollbacksFailedCount", "0");
+                    xmlWriter.WriteAttributeString("SuccessfullRollbacks", "0");
+                    xmlWriter.WriteEndElement();
+                    xmlWriter.WriteWhitespace("\n");
+                }
+
             }
 
             xmlWriter.WriteEndElement();
@@ -379,16 +413,30 @@ namespace DriverCapsuleStressTool
         /// update the 'seed' in the XML to track execution progress and keep running in the correct order
         /// </summary>
         /// <param name="seedIndex"></param>
+        /// XMLWriter.UpdateSeedXML(seedIndex);
+        /// looks like this needs work again...when there is a large list of drivers it is removing things like the
+        /// 2 from 12 and 20 leaving multiple 1 and 0 in the list and when the EXE gets to those there is no matching inf
+        /// so it just dies
         internal static void UpdateSeedXML(int seedIndex)
         {
             try
             {
                 string currentSeed = XMLReader.GetSeed(Program.InputTestFilePathBAK);
                 string seedIndexSTR = Convert.ToString(seedIndex);
+                int seedCharCnt = seedIndexSTR.Length;
                 int seedLocIndex = currentSeed.IndexOf(seedIndexSTR);
-                currentSeed = currentSeed.Replace(seedIndexSTR, "");
-                currentSeed = currentSeed.Replace(",,", ",");
+                int seedIndexEnd = seedLocIndex + seedCharCnt;
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("seedIndexSTR : " + seedIndexSTR);
+                Console.WriteLine("seedCharCnt : " + seedCharCnt);
+                Console.WriteLine("seedLocIndex : " + seedLocIndex);
+                Console.WriteLine("seedIndexEnd : " + seedIndexEnd);
+                currentSeed = currentSeed.Remove(seedLocIndex, seedCharCnt);   // Replace(seedIndexSTR, "");
                 currentSeed = currentSeed.TrimEnd(',').TrimStart(',');
+                currentSeed = currentSeed.Replace(",,", ",");
+                Console.WriteLine("currentSeed : " + currentSeed);
+                Console.ForegroundColor = ConsoleColor.White;
+                //Console.ReadKey();
 
                 string StartSeed = XMLReader.GetStartSeed(Program.InputTestFilePathBAK);
 

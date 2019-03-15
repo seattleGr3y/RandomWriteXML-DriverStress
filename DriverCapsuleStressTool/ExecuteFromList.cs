@@ -57,42 +57,50 @@ namespace DriverCapsuleStressTool
 
                 // check if lastInstalled in the XML was successfully installed post-reboot
                 string tmpLine = XMLReader.GetLastInstalled();
-                string installCheck = GetData.IsInstalledAfterReboot(tmpLine);
-
-                switch (installCheck)
+                if (string.IsNullOrEmpty(tmpLine))
                 {
-                    case string unsuccessful when installCheck.Equals("unsuccessful"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    case string InsufficientResources when installCheck.Equals("InsufficientResources"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    case string IncorrectVersion when installCheck.Equals("IncorrectVersion"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    case string invalidImage when installCheck.Equals("invalidImage"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    case string authenticationERR when installCheck.Equals("authenticationERR"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    case string ACnotConnected when installCheck.Equals("ACnotConnected"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    case string insufficientPower when installCheck.Equals("insufficientPower"):
-                        DoThisIfFailedPostReboot();
-                        break;
-
-                    default:
-                        installCheck.Equals("pass");
-                        break;
+                    Console.WriteLine("no previous driver installed to check just yet...");
                 }
+
+                else
+                {
+                    string installCheck = GetData.IsInstalledAfterReboot(tmpLine);
+                    switch (installCheck)
+                    {
+                        case string unsuccessful when installCheck.Equals("unsuccessful"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        case string InsufficientResources when installCheck.Equals("InsufficientResources"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        case string IncorrectVersion when installCheck.Equals("IncorrectVersion"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        case string invalidImage when installCheck.Equals("invalidImage"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        case string authenticationERR when installCheck.Equals("authenticationERR"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        case string ACnotConnected when installCheck.Equals("ACnotConnected"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        case string insufficientPower when installCheck.Equals("insufficientPower"):
+                            DoThisIfFailedPostReboot();
+                            break;
+
+                        default:
+                            installCheck.Equals("pass");
+                            break;
+                    }
+                }
+
                 
                 // making sure there is a driver path to test in the XML file
                 // if they have all been removed they are all done and we need to rewrite the XML
@@ -165,9 +173,17 @@ namespace DriverCapsuleStressTool
                                 RebootAndContinue.RebootCmd(true);
                             }
                             string index = Convert.ToString(seedIndex);
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Current infIndex to be tested : " + index);
+                            Console.ForegroundColor = ConsoleColor.White;
                             DriverPathList = GetData.GetInfPathsList(Program.dirName);
 
                             string line = XMLReader.FromINFIndex(infListCount, Program.InputTestFilePath, seedIndex, executionCount).ToLower();
+                            if (string.IsNullOrEmpty(line))
+                            {
+                                XMLWriter.UpdateSeedXML(seedIndex);
+                                break;
+                            }
                             string infName = Path.GetFileName(line);
                             GetData.CreateIfMissing(Program.resultsLogDir);
 
@@ -179,11 +195,7 @@ namespace DriverCapsuleStressTool
                                     infListCount--;
                                     CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
                                     break;
-                                //case bool surfaceInName when infName.Contains("Surface").Equals(true):
-                                //    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
-                                //    infListCount--;
-                                //    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
-                                //    break;
+
                                 default:
                                     Logger.Comment("this is NOT firmware check for reboot afer installed");
                                     infListCount--;
@@ -221,6 +233,11 @@ namespace DriverCapsuleStressTool
                             {
                                 Console.WriteLine("if (groupFirmware) - seedIndex : " + seedIndex);
                                 string line = XMLReader.FromINFIndex(infListCount, Program.InputTestFilePath, seedIndex, executionCount).ToLower();
+                                if (string.IsNullOrEmpty(line))
+                                {
+                                    XMLWriter.UpdateSeedXML(seedIndex);
+                                    break;
+                                }
                                 Console.WriteLine("if (groupFirmware) - line : " + line);
                                 bool isCapsule = GetData.CheckDriverIsFirmware(line, executionCount, infListCount);
 
@@ -280,15 +297,22 @@ namespace DriverCapsuleStressTool
                         {
                             if (seedIndex == 0) { break; }
                             string index = Convert.ToString(seedIndex);
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Current infIndex to be tested : " + index);
+                            Console.ForegroundColor = ConsoleColor.White;
                             if (index.Equals(null)) { continue; }
                             GetData.CreateIfMissing(Program.resultsLogDir);
 
                             string line = XMLReader.FromINFIndex(infListCount, Program.InputTestFilePath, seedIndex, executionCount).ToLower();
+                            if (string.IsNullOrEmpty(line))
+                            {
+                                XMLWriter.UpdateSeedXML(seedIndex);
+                                break;
+                            }
                             string infName = Path.GetFileNameWithoutExtension(line);
                             testIsStartChoice = GetData.GetTestFirst(Program.InputTestFilePath);
                             string testInfName = infName.ToLower();
                             infIndexListString = XMLReader.GetSeed(Program.InputTestFilePathBAK);
-                            //infIndexListString = File.ReadAllText(Program.seedFilePath);
 
                             // the tool will skip to here if none of the other above are met
                             // then looking for a choice set to install first from the list
@@ -306,12 +330,6 @@ namespace DriverCapsuleStressTool
                                         CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
                                         break;
 
-                                    //case bool surfaceInName when infName.Contains("Surface").Equals(true):
-                                    //    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
-                                    //    infListCount--;
-                                    //    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
-                                    //    break;
-
                                     default:
                                         Console.ForegroundColor = ConsoleColor.Green;
                                         Console.WriteLine("NOT MATCHING to the startChoice");
@@ -328,11 +346,19 @@ namespace DriverCapsuleStressTool
                         {
                             if (seedIndex == 0) { break; }
                             string index = Convert.ToString(seedIndex);
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Current infIndex to be tested : " + index);
+                            Console.ForegroundColor = ConsoleColor.White;
 
                             string indexString = Convert.ToString(index);
                             if (index.Equals(null)) { continue; }
 
                             string line = XMLReader.FromINFIndex(infListCount, Program.InputTestFilePath, seedIndex, executionCount).ToLower();
+                            if (string.IsNullOrEmpty(line))
+                            {
+                                XMLWriter.UpdateSeedXML(seedIndex);
+                                break;
+                            }
                             bool isCapsule = GetData.CheckDriverIsFirmware(line, executionCount, infListCount);
                             string infName = Path.GetFileName(line);
                             testIsStartChoice = GetData.GetTestFirst(Program.InputTestFilePath);
@@ -344,12 +370,6 @@ namespace DriverCapsuleStressTool
                                     infListCount--;
                                     CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
                                     break;
-
-                                //case bool surfaceInName when infName.Contains("Surface").Equals(true):
-                                //    Logger.Comment("'Surface' in the name of this driver so to be safe reboot or rollback\reboot...");
-                                //    infListCount--;
-                                //    CapsuleOrNotInstallCalls.IfIsCapsule(seedIndex, infIndexListString, infListCount, infName, DriverPathList, line, Program.InputTestFilePathBAK, Program.installer, executionCount, Program.dirName, Program.startChoice, Program.rollbackLine, Program.InputTestFilePath);
-                                //    break;
 
                                 default:
                                     Logger.Comment("THIS IS NOT FIRMWARE...");

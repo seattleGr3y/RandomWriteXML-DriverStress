@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -73,10 +72,13 @@ namespace DriverCapsuleStressTool
                 {
                     if (Regex.IsMatch(textLine, getVersion).Equals(true))
                     {
-                        expectedDriverVersion = textLine.Split(',')[1];
-                        Logger.Comment("the following should be the driver version");
-                        Logger.Comment(expectedDriverVersion);
-                        result = expectedDriverVersion;
+                        if (textLine.Contains("="))
+                        {
+                            expectedDriverVersion = textLine.Split(',')[1];
+                            Logger.Comment("the following should be the driver version");
+                            Logger.Comment(expectedDriverVersion);
+                            result = expectedDriverVersion;
+                        }
                     }
                 }
             }
@@ -153,13 +155,16 @@ namespace DriverCapsuleStressTool
                 {
                     if (Regex.Match(textLine, getVersion).Success)
                     {
-                        expectedDriverDate = textLine.Split(',')[0].Split('=')[1];
-                        Logger.Comment("the following should be the driver date");
-                        Logger.Comment(expectedDriverDate);
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
-                        Console.ForegroundColor = ConsoleColor.White;
-                        result =  expectedDriverDate;
+                        if (textLine.Contains("="))
+                        {
+                            expectedDriverDate = textLine.Split(',')[0].Split('=')[1];
+                            Logger.Comment("the following should be the driver date");
+                            Logger.Comment(expectedDriverDate);
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Expected Driver Date : " + expectedDriverDate);
+                            Console.ForegroundColor = ConsoleColor.White;
+                            result = expectedDriverDate;
+                        }
                     }
                 }
             }
@@ -178,7 +183,7 @@ namespace DriverCapsuleStressTool
         internal static void GetExceptionMessage(Exception ex)
         {
             Logger.Error(ex.ToString());
-            //Console.ReadKey();
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -220,7 +225,7 @@ namespace DriverCapsuleStressTool
             Logger.FunctionEnter();
             string getIsFirmware = "Class";
             bool result = false;
-            
+
             string[] infFileContent = File.ReadAllLines(line);
 
             try
@@ -570,7 +575,7 @@ namespace DriverCapsuleStressTool
         internal static List<string> GetInfPathsList(string supportFolderLocation)
         {
             List<string> infPathList = new List<string>();
-            
+
             try
             {
                 var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);

@@ -229,19 +229,6 @@ namespace DriverCapsuleStressTool
                     installArgs = " /C /A /Q /SE /F /PATH " + infPath;
                     Install_Inf(line, installer, installArgs, seedIndex);
                     string classGUID = GetData.GetClassGUID(line);
-                    //bool isItInstalled = GetDataFromReg.CheckRegDriverIsInstalled(classGUID, infName, hardwareID, expectedDriverVersion, line);
-                    //if (isItInstalled.Equals(false))
-                    //{
-                    //    bool xmlBool = XMLReader.GetStopOnError(Program.InputTestFilePathBAK);
-                    //    if (xmlBool.Equals(true))
-                    //    {
-                    //        Logger.Comment("checked the registry after reboot but this PnP driver seems to have failed to install : " + line);
-                    //        Console.WriteLine("checked the registry after reboot but this PnP driver seems to have failed to install : " + line);
-                    //        Logger.Comment("Copy the the driverstress log and DPINST.LOG to our folder...");
-                    //        Utilities.CopyFile(@"C:\Windows\DPINST.LOG", Program.dpinstLog);
-                    //        Utilities.CopyFile(Program.dirName + @"\DriverCapsuleStressLog.txt", Program.resultsLogDir + @"\DriverCapsuleStressLog.txt");
-                    //    }
-                    //}
                     XMLWriter.SetLastInstalled(line);
 
                     //can we check registry simiarly to firmware for PnP drivers?

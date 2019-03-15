@@ -38,7 +38,7 @@ namespace DriverCapsuleStressTool
                 
                 if (isInstalled)
                 {
-                    foreach (var testDir in Directory.EnumerateFiles(Program.rollBackDir))       //(Program.rollBackDir.Contains(infName))
+                    foreach (var testDir in Directory.EnumerateFiles(Program.rollbackLine))       //(Program.rollBackDir.Contains(infName))
                     {
                         if (testDir.Contains(infName))
                         {

@@ -24,10 +24,12 @@ namespace DriverCapsuleStressTool
         internal static string randomizeList;
         internal static string groupFirmwareSTR = "false";
         internal static string stopOnErrorSTR = "false";
+        internal static string custom = string.Empty;
         internal static string installer = dirName + @"\dpinst.exe";
         internal static string resultsLogDir = dirName + @"\Results";
         internal static string dpinstLog = resultsLogDir + @"\DPINST.LOG";
         internal static string lastInstalled = dirName + @"\LastInstalled.txt";
+        internal static string customListFile = dirName + @"\CustomList.txt";
         internal static string rollBackDir = @"\rollbacks";
         internal static string rollbackLine = (dirName + rollBackDir).ToLower();
         internal static string stressAppPath = dirName + @"\DriverCapsuleStressTool.exe";
@@ -101,6 +103,8 @@ namespace DriverCapsuleStressTool
                           v => stopOnErrorSTR = v },
                         { "g|groupFirmwareSTR", "Install all firmware then reboot rather than install\reboot for each",
                           v => groupFirmwareSTR = v },
+                        { "c|custom", "Install all drivers in a custom order using comma seperated list of INF names (e.g. SurfaceUEFI.inf,IntcAudioBus.inf,IntcOED.inf) or enter 'none'",
+                          v => custom = v },
                         { "h|help",  "show this message and exit",
                           v => show_help = v != null },
                         };
@@ -117,7 +121,7 @@ namespace DriverCapsuleStressTool
                         // is the WTT service started.
                         StartStopServices.StopService("wttsvc");
                         // start testing here if starting fresh
-                        CreateListOrder.RandomizeList(args[1], args[3], args[5], args[7], args[9]);
+                        CreateListOrder.RandomizeList(args[1], args[3], args[5], args[7], args[9], args[11]);
                     }
                     else
                     {

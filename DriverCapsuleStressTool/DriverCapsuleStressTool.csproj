@@ -89,6 +89,7 @@
     <Compile Include="CapsuleOrNotInstallCalls.cs" />
     <Compile Include="CheckWhatInstalled.cs" />
     <Compile Include="CreateListOrder.cs" />
+    <Compile Include="CustomExecutionOrder.cs" />
     <Compile Include="DriverStressInit.cs" />
     <Compile Include="ExecuteFromList.cs" />
     <Compile Include="GetData.cs" />

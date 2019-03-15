@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace DriverCapsuleStressTool
 {
@@ -17,7 +16,7 @@ namespace DriverCapsuleStressTool
         /// <param name="startChoice"></param>
         /// <param name="stopOnErrorSTR"></param>
         /// <param name="groupFirmwareSTR"></param>
-        internal static void RandomizeList(string randomizeList, string loopCount, string startChoice, string stopOnErrorSTR, string groupFirmwareSTR)
+        internal static void RandomizeList(string randomizeList, string loopCount, string startChoice, string stopOnErrorSTR, string groupFirmwareSTR, string custom)
         {
             Console.WriteLine("randomizeList = " + randomizeList);
             bool randomize = Convert.ToBoolean(randomizeList);
@@ -41,7 +40,7 @@ namespace DriverCapsuleStressTool
                         File.WriteAllText(Program.seedFilePath + executionCount + ".txt", infIndexList);
                         Array list = infIndexList.Split(',').Select(Int32.Parse).ToArray<int>();
 
-                        XMLWriter.CreateXML(Program.dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, Program.supportFolderLOC, Program.InputTestFilePath, stopOnErrorSTR, groupFirmwareSTR, dumpFilePath);
+                        XMLWriter.CreateXML(Program.dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, Program.supportFolderLOC, Program.InputTestFilePath, stopOnErrorSTR, groupFirmwareSTR, dumpFilePath, custom);
                         Utilities.CopyFile(Program.InputTestFilePath, Program.InputTestFilePathBAK);
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("...going to StartStress from TRUE next...");
@@ -54,7 +53,7 @@ namespace DriverCapsuleStressTool
                         infIndexList = string.Join(",", numbers.GetRange(0, infListCount));
                         File.WriteAllText(Program.seedFilePath + executionCount + ".txt", infIndexList);
                         Console.WriteLine("we'll just continue as normal and NOT randomize the list");
-                        XMLWriter.CreateXML(Program.dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, Program.supportFolderLOC, Program.InputTestFilePath, stopOnErrorSTR, groupFirmwareSTR, dumpFilePath);
+                        XMLWriter.CreateXML(Program.dirName, randomize, infIndexList, infIndexList, startChoice, executionCount, Program.supportFolderLOC, Program.InputTestFilePath, stopOnErrorSTR, groupFirmwareSTR, dumpFilePath, custom);
                         Utilities.CopyFile(Program.InputTestFilePath, Program.InputTestFilePathBAK);
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("...going to StartStress from FALSE next...");
