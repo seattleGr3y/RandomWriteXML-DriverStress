@@ -31,7 +31,6 @@ namespace DriverCapsuleStressTool
                     infsPathList.Add(customInfPath);
                 }
             }
-            Console.ReadKey();
             return infsPathList;
         }
     }

@@ -28,7 +28,7 @@ namespace DriverCapsuleStressTool
                 Console.WriteLine("RandomizeList starting...");
                 Console.ForegroundColor = ConsoleColor.White;
                 List<string> infsPathList = GetData.GetInfPathsList(Program.dirName);
-                int infListCount = infsPathList.Count;
+                int infListCount = GetData.GetPathListCount(Program.dirName);
                 Console.WriteLine("infListCount : " + infListCount);
                 List<int> numbers = new List<int>(Enumerable.Range(1, infListCount));
 

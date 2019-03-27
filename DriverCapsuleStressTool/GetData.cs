@@ -605,9 +605,10 @@ namespace DriverCapsuleStressTool
             return infPathList;
         }
 
+
         /// <summary>
         /// get count of drivers to be installed
-        /// int driversPathListCount = GetPathListCount(supportFolderLocation);
+        /// int infsPathListCount = GetPathListCount(supportFolderLocation);
         /// </summary>
         /// <param name="supportFolderLocation"></param>
         /// <returns></returns>
@@ -618,28 +619,37 @@ namespace DriverCapsuleStressTool
 
             try
             {
-                var infFiles = Directory.EnumerateFiles(supportFolderLocation, "*.inf", System.IO.SearchOption.AllDirectories);
-                foreach (string infFile in infFiles)
+                if (Program.custom.Equals("none"))
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(driversPathListCount);
-                    Console.ForegroundColor = ConsoleColor.White;
-
-                    string infDir = Path.GetDirectoryName(infFile);
-                    string infRealName = Path.GetFileNameWithoutExtension(infFile);
-                    string infPathTMP = Path.GetFullPath(infFile);
-
-                    if (infPathTMP.Contains("rollbacks"))
+                    var infFiles = Directory.EnumerateFiles(Program.dirName, "*.inf", System.IO.SearchOption.AllDirectories);
+                    foreach (string infFile in infFiles)
                     {
-                        continue;
-                    }
-                    if (infPathList.Contains(infRealName))
-                    {
-                        driversPathListCount++;
-                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine(driversPathListCount);
                         Console.ForegroundColor = ConsoleColor.White;
+
+                        string infDir = Path.GetDirectoryName(infFile);
+                        string infRealName = Path.GetFileNameWithoutExtension(infFile);
+                        string infPathTMP = Path.GetFullPath(infFile);
+
+                        if (infPathTMP.Contains("rollbacks"))
+                        {
+                            continue;
+                        }
+                        if (infPathList.Contains(infRealName))
+                        {
+                            driversPathListCount++;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine(driversPathListCount);
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
                     }
+                }
+
+                else
+                {
+                    List<string> orderToRun = Program.custom.Split(',').ToList();
+                    driversPathListCount = orderToRun.Count;
                 }
             }
 

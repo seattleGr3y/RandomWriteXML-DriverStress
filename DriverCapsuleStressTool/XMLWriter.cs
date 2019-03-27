@@ -74,7 +74,7 @@ namespace DriverCapsuleStressTool
             else
             {
                 infsPathList = CustomExecutionOrder.CustomOrder(custom);
-                infsPathListCount = infsPathList.Count;
+                infsPathListCount = GetData.GetPathListCount(Program.dirName);
                 foreach (string infDir in infsPathList)
                 {
                     infName = Path.GetFileNameWithoutExtension(infDir);
@@ -96,8 +96,9 @@ namespace DriverCapsuleStressTool
                     xmlWriter.WriteAttributeString("SuccessfullRollbacks", "0");
                     xmlWriter.WriteEndElement();
                     xmlWriter.WriteWhitespace("\n");
-                }
 
+                    infsPathListCount = infIndex;
+                }
             }
 
             xmlWriter.WriteEndElement();
